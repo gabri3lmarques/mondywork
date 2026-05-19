@@ -1,5 +1,5 @@
 <?php
 
 return [
-    // Exemplo: "slug-empresa" => "Nome da Empresa",
+    // Exemplo: "slug-empresa" => "Nome da Empresa"
 ];
