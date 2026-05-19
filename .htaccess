@@ -1,0 +1,16 @@
+RewriteEngine On
+
+# Redirecionar api.php sem precisar da extensão
+RewriteRule ^api$ api.php [L,QSA]
+
+# Cache de assets estáticos
+<FilesMatch "\.(css|js|jpe?g|png|gif|ico|svg|woff2?)$">
+    Header set Cache-Control "public, max-age=604800, immutable"
+</FilesMatch>
+
+# Segurança básica
+<FilesMatch "^\.|config\.php$">
+    Deny from all
+</FilesMatch>
+
+DirectoryIndex index.html
