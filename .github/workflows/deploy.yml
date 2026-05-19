@@ -1,0 +1,50 @@
+name: 🚀 Deploy Mondywork via FTP
+
+# O deploy será disparado automaticamente a cada 'push' na branch main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  web-deploy:
+    name: Sincronizar Arquivos
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Passo 1: Baixar o código mais recente do repositório para a máquina virtual do GitHub
+    - name: 🚚 Obter código mais recente
+      uses: actions/checkout@v4
+
+    # Passo 2: Sincronizar os arquivos com o servidor usando FTP inteligente
+    - name: 📂 Sincronizar via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        # Dados de conexão obtidos de forma segura dos Secrets do GitHub
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        
+        # Opcional: Porta padrão é 21. Altere se o seu servidor exigir uma porta diferente (ex: SFTP usa 22)
+        port: 21 
+        
+        # Pasta local que será enviada. "./" significa a raiz inteira do projeto
+        local-dir: ./
+        
+        # Pasta de destino no seu servidor FTP (ex: public_html/ ou public_html/mondywork/)
+        # Garanta que a barra "/" esteja no final
+        server-dir: public_html/
+        
+        # ⚠️ CRUCIAL: Lista de arquivos e pastas para IGNORAR no deploy.
+        # Isso impede que arquivos locais de desenvolvimento ou confidenciais sejam enviados/sobrescrevam o servidor.
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/.github*/**
+          **/node_modules/**
+          .env
+          composer.json
+          composer.lock
+          README.md
+          env.txt
+          config.local.php
