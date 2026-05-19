@@ -10,6 +10,8 @@ jobs:
   web-deploy:
     name: Sincronizar Arquivos
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
     # Passo 1: Baixar o código mais recente do repositório para a máquina virtual do GitHub
