@@ -35,7 +35,7 @@ jobs:
         
         # Pasta de destino no seu servidor FTP (ex: public_html/ ou public_html/mondywork/)
         # Garanta que a barra "/" esteja no final
-        server-dir: public_html/
+        server-dir: ./
         
         # ⚠️ CRUCIAL: Lista de arquivos e pastas para IGNORAR no deploy.
         # Isso impede que arquivos locais de desenvolvimento ou confidenciais sejam enviados/sobrescrevam o servidor.
