@@ -7,7 +7,7 @@
     const resultsInfo  = document.getElementById('results-info');
     const vagasTotal  = document.getElementById('vagas-total');
     const backToTop   = document.getElementById('back-to-top');
-    const topMenu     = document.querySelector('.top-menu');
+    const newsletterForm = document.getElementById('newsletter-form');
 
     const modalOverlay = document.getElementById('modal-overlay');
     const modalTitle = document.getElementById('modal-title');
@@ -15,7 +15,9 @@
     const modalBody = document.getElementById('modal-body');
     const modalApply = document.getElementById('modal-apply');
     const modalClose = document.getElementById('modal-close');
+    const modalFooter = document.getElementById('modal-footer');
     const linkSobre  = document.getElementById('link-sobre');
+    const linkSobreFooter = document.getElementById('link-sobre-footer');
 
     const LIMIT = 10;
     const DEBOUNCE_MS = 1000;
@@ -51,20 +53,20 @@
         modalSubtitle.textContent = v.empresa + ' • ' + (v.localizacao || 'Remoto');
         modalBody.innerHTML = v.descricao || '<p>Descrição não fornecida.</p>';
         modalApply.href = v.url_vaga;
-        modalApply.parentElement.classList.remove('hidden');
+        modalFooter.classList.remove('hidden');
         modalOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         location.hash = v.vaga_id_externo;
     }
 
     function openAboutModal() {
-        modalTitle.textContent = 'Sobre o Ta Trampando';
+        modalTitle.textContent = 'Sobre o Mondywork';
         modalSubtitle.textContent = '';
         modalBody.innerHTML =
-            '<p>O tatrampando.com.br nasceu do esforço voluntário para conectar quem busca uma oportunidade ao seu próximo passo profissional. Acreditamos que um novo emprego transforma não apenas uma carreira, mas a vida de toda uma família.</p>' +
-            '<p>Este portal é mantido por uma única pessoa e, para continuarmos unindo talentos e oportunidades, precisamos de você. Se você acredita em uma sociedade com melhor distribuição de renda através do trabalho, considere apoiar com qualquer valor ou compartilhando nosso link para que possamos alcançar cada vez mais quem precisa.</p>' +
+            '<p>O mondywork nasceu do esforço voluntário para conectar quem busca uma oportunidade ao seu próximo passo profissional. Acreditamos que um novo emprego transforma não apenas uma carreira, mas a vida de toda uma família.</p>' +
+            '<p>Este portal é mantido por uma única pessoa e, para continuarmos unindo talentos e oportunidades, precisamos de você. Se você acredita em uma sociedade com melhor distribuição de renda através do trabalho, considere apoiar seguindo essa página e compartilhando nosso link para que possamos alcançar cada vez mais que precisam de um emprego.</p>' +
             '<p>Juntos, podemos transformar nossa realidade. Muito obrigado!</p>';
-        modalApply.parentElement.classList.add('hidden');
+        modalFooter.classList.add('hidden');
         modalOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -75,10 +77,18 @@
         history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
-    linkSobre.addEventListener('click', function(e) {
-        e.preventDefault();
-        openAboutModal();
-    });
+    if (linkSobre) {
+        linkSobre.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAboutModal();
+        });
+    }
+    if (linkSobreFooter) {
+        linkSobreFooter.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAboutModal();
+        });
+    }
 
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', function(e) {
@@ -88,59 +98,113 @@
         if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) closeModal();
     });
 
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var nomeInput = newsletterForm.querySelector('input[type="text"]');
+            var emailInput = newsletterForm.querySelector('input[type="email"]');
+            var areaSelect = document.getElementById('newsletter-area');
+            var btn = newsletterForm.querySelector('button');
+            var nome = nomeInput.value.trim();
+            var email = emailInput.value.trim();
+            var area = areaSelect ? areaSelect.value : '';
+
+            if (!nome || !email || !area) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            var params = 'nome=' + encodeURIComponent(nome) + '&email=' + encodeURIComponent(email) + '&area=' + encodeURIComponent(area) + '&origem=brasil';
+
+            var msgs = {
+                success: 'Cadastro realizado com sucesso!',
+                duplicate_email: 'Este email já está cadastrado',
+                missing_fields: 'Nome e email são obrigatórios',
+                invalid_email: 'Email inválido',
+                invalid_area: 'Selecione uma área de interesse',
+                _default: 'Erro ao cadastrar',
+                _network: 'Erro de conexão. Tente novamente.'
+            };
+
+            function showFormError(msg) {
+                var oldErr = newsletterForm.querySelector('.form-error');
+                if (oldErr) oldErr.remove();
+                var errEl = document.createElement('p');
+                errEl.className = 'form-error';
+                errEl.style.cssText = 'color:#ba1a1a;font-weight:500;text-align:center;padding:12px 0;margin:0';
+                errEl.textContent = msg;
+                newsletterForm.insertBefore(errEl, newsletterForm.firstChild);
+                btn.disabled = false;
+                btn.textContent = 'Cadastrar Agora';
+            }
+
+            fetch('/subscribe.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            })
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+                var json;
+                try { json = JSON.parse(text); } catch(e) { json = null; }
+                if (json && json.success) {
+                    newsletterForm.innerHTML = '<p style="color:#4b41e1;font-weight:600;text-align:center;padding:12px 0;">' + msgs.success + '</p>';
+                } else {
+                    showFormError(json && msgs[json.code] ? msgs[json.code] : msgs._default);
+                }
+            })
+            .catch(function() {
+                showFormError(msgs._network);
+            });
+        });
+    }
+
     function normalizarModelo(raw) {
         if (!raw) return null;
         var map = { 'Remote': 'Remote', 'Hybrid': 'Hybrid', 'OnSite': 'On-site', 'On-site': 'On-site' };
         return map[raw] || raw;
     }
 
-    function renderCard(v) {
-        const resumo = v.resumo || 'Descrição não fornecida.';
-        const rawModelo = normalizarModelo(v.modelo_trabalho);
-        const modelo = rawModelo ? formatModelo(rawModelo) : '';
-        const local = v.localizacao || 'Remoto';
+    function getBadgeClass(modelo) {
+        if (!modelo) return '';
+        var m = modelo.toLowerCase();
+        if (m === 'remoto' || m === 'remote') return 'badge badge-remote';
+        if (m === 'híbrido' || m === 'hibrido' || m === 'hybrid') return 'badge badge-hybrid';
+        return 'badge badge-onsite';
+    }
 
-        var card = document.createElement('div');
-        card.className = 'card';
+    function renderCard(v) {
+        const rawModelo = normalizarModelo(v.modelo_trabalho);
+        const modelo = rawModelo ? formatModelo(rawModelo) : null;
+        const local = v.localizacao || 'Remoto';
+        const resumo = v.resumo || 'Oportunidade como ' + v.titulo + (modelo ? ' em modelo ' + modelo.toLowerCase() : '') + '.';
+
+        var card = document.createElement('article');
+        card.className = 'job-card';
 
         var modeloHtml = modelo
-            ? '<span class="badge badge-' + rawModelo.toLowerCase() + '">' + escapeHtml(modelo) + '</span>'
+            ? '<span class="' + getBadgeClass(modelo) + '">' + escapeHtml(modelo) + '</span>'
             : '';
 
-        var locationHtml = '<div class="card-info-block">' +
-            '<svg class="card-info-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-            '<span class="card-info-text">' + escapeHtml(local) + '</span>' +
-        '</div>';
+        var locSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+        var calSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
 
-        var dateHtml = v.publicado_em ? '<div class="card-info-block">' +
-            '<svg class="card-info-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-            '<span class="card-info-text">' + escapeHtml(v.publicado_em) + '</span>' +
-        '</div>' : '';
+        var dateHtml = v.publicado_em
+            ? '<span class="job-card-info-text job-card-date">' + calSvg + escapeHtml(v.publicado_em) + '</span>'
+            : '';
 
         card.innerHTML =
-            '<div class="card-inner">' +
-                '<div class="card-accent"></div>' +
-                '<div class="card-body">' +
-                    '<div class="card-header">' +
-                        '<div class="card-header-info">' +
-                            '<h3 class="card-title">' + escapeHtml(v.titulo) + '</h3>' +
-                            '<p class="card-company">' + escapeHtml(v.empresa) + '</p>' +
-                        '</div>' +
-                        modeloHtml +
-                    '</div>' +
-                    '<div class="card-info-row">' +
-                        locationHtml +
-                        dateHtml +
-                    '</div>' +
-                    '<p class="card-resumo">' + 'Essa é uma oportunidade para ' + escapeHtml(v.titulo) +  ' em  modelo ' + escapeHtml(modelo).toLowerCase()  + '. Clique no botão abaixo para ver o perfil completo da vaga e aplicar nessa oportunidade.' +  '</p>' +
-                    '<div class="card-footer">' +
-                        '<button class="btn btn-ghost btn-open-desc">' +
-                            '<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' +
-                            'Ver detalhes da vaga' +
-                        '</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
+            '<div>' +
+                '<h3 class="job-card-title">' + escapeHtml(v.titulo) + '</h3>' +
+                '<p class="job-card-company">' + escapeHtml(v.empresa) + '</p>' +
+            '</div>' +
+            '<div class="job-card-info">' +
+                modeloHtml +
+                '<span class="job-card-info-text">' + locSvg + escapeHtml(local) + '</span>' +
+                dateHtml +
+            '</div>' +
+            '<p class="job-card-resumo line-clamp-2">' + escapeHtml(resumo) + '</p>' +
+            '<div class="job-card-footer"><button class="job-card-btn btn-open-desc">Ver Detalhes</button></div>';
 
         var openBtn = card.querySelector('.btn-open-desc');
         openBtn.addEventListener('click', function() { openModal(v); });
@@ -252,12 +316,6 @@
     fetchVagas();
 
     window.addEventListener('scroll', function() {
-        if (window.scrollY > 80) {
-            topMenu.classList.add('scrolled');
-        } else {
-            topMenu.classList.remove('scrolled');
-        }
-
         if (window.scrollY > 400) {
             backToTop.classList.remove('hidden');
         } else {
@@ -269,36 +327,31 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ===== Mosaic Image Rotation =====
-    (function() {
-        var imgs = document.querySelectorAll('.mosaic-item img');
-        if (imgs.length < 2) return;
+    /* ==== MOBILE MENU ==== */
+    var navToggle = document.getElementById('nav-toggle');
+    var mobileMenu = document.getElementById('mobile-menu');
 
-        var pool = [];
-        for (var i = 1; i <= 17; i++) pool.push('/img/' + i + '.jpeg');
+    function closeMenu() {
+        navToggle.classList.remove('active');
+        mobileMenu.classList.remove('open');
+    }
 
-        function pickSrc(img) {
-            var inUse = {};
-            [].forEach.call(imgs, function(other) {
-                if (other !== img) inUse[other.getAttribute('src')] = true;
-            });
-            var available = pool.filter(function(s) { return !inUse[s]; });
-            if (available.length > 0) {
-                img.src = available[Math.floor(Math.random() * available.length)];
-            }
-        }
-
-        [].forEach.call(imgs, function(img) {
-            var item = img.parentNode;
-            var delayStr = window.getComputedStyle(item).animationDelay || '0s';
-            var delayMs = parseFloat(delayStr) * 1000 || 0;
-            var firstZero = Math.max(0, 2000 + delayMs);
-
-            setTimeout(function() { pickSrc(img); }, firstZero);
-
-            item.addEventListener('animationiteration', function() {
-                setTimeout(function() { pickSrc(img); }, 2000);
-            });
+    if (navToggle && mobileMenu) {
+        navToggle.addEventListener('click', function() {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('open');
         });
-    })();
+
+        mobileMenu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', closeMenu);
+        });
+    }
+
+    document.querySelectorAll('.mobile-about-link').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeMenu();
+            openAboutModal();
+        });
+    });
 })();

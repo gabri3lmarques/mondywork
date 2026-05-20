@@ -54,4 +54,22 @@ function setupSchema(PDO $pdo): void
     if (empty($indexExists)) {
         $pdo->exec("ALTER TABLE vagas ADD FULLTEXT INDEX idx_busca (titulo, empresa, localizacao, descricao, resumo)");
     }
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS newsletters (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        area VARCHAR(20) DEFAULT NULL,
+        origem VARCHAR(20) NOT NULL DEFAULT 'brasil',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $colNews = $pdo->query("SHOW COLUMNS FROM newsletters")->fetchAll(PDO::FETCH_ASSOC);
+    $nomesColNews = array_column($colNews, 'Field');
+    if (!in_array('area', $nomesColNews)) {
+        $pdo->exec("ALTER TABLE newsletters ADD COLUMN area VARCHAR(20) DEFAULT NULL AFTER email");
+    }
+    if (!in_array('origem', $nomesColNews)) {
+        $pdo->exec("ALTER TABLE newsletters ADD COLUMN origem VARCHAR(20) NOT NULL DEFAULT 'brasil' AFTER area");
+    }
 }
