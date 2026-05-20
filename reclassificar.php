@@ -1,8 +1,7 @@
 <?php
 /**
  * Reclassificador de vagas existentes.
- * Processa apenas vagas sem area definida ou com status 'inativa'.
- * Vagas já aprovadas com area são ignoradas.
+ * Processa todas as vagas ativas e inativas, reclassificando com o algoritmo atual.
  */
 require __DIR__ . '/lib/Database.php';
 require __DIR__ . '/lib/VagaRepository.php';
@@ -15,24 +14,24 @@ try {
     $pdo = conectarBanco($dbConfig);
     setupSchema($pdo);
 
-    echo "[" . date('Y-m-d H:i:s') . "] Reclassificando vagas...\n\n";
+    echo "[" . date('Y-m-d H:i:s') . "] Reclassificando todas as vagas...\n\n";
 
-    // Vagas ativas sem area (nunca classificadas ou backfill pendente)
-    $stmt = $pdo->query("SELECT id, vaga_id_externo, titulo, empresa, descricao, status, area FROM vagas WHERE area IS NULL OR status = 'inativa' ORDER BY id");
+    $stmt = $pdo->query("SELECT id, vaga_id_externo, titulo, empresa, descricao, status, area FROM vagas ORDER BY id");
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $total = count($vagas);
 
-    if (empty($vagas)) {
-        echo "Nenhuma vaga pendente de reclassificacao.\n";
+    if ($total === 0) {
+        echo "Nenhuma vaga encontrada.\n";
         exit;
     }
 
-    echo "Total de vagas para processar: " . count($vagas) . "\n\n";
+    echo "Total de vagas: $total\n\n";
 
     $stats = [
         'aprovadas' => 0,
         'rejeitadas' => 0,
-        'reaplicadas' => 0,  // estava inativa, agora aprovada
-        'erro' => 0,
+        'reaplicadas' => 0,
+        'inalteradas' => 0,
     ];
 
     $stmtUpdate = $pdo->prepare("UPDATE vagas SET status = :status, area = :area WHERE id = :id");
@@ -45,8 +44,9 @@ try {
 
         $mudou = ($vaga['status'] !== $novoStatus) || ($vaga['area'] !== $novaArea);
 
-        if (!$mudou && $classif['aprovada']) {
-            continue; // já estava aprovada com area, pula
+        if (!$mudou) {
+            $stats['inalteradas']++;
+            continue;
         }
 
         $stmtUpdate->execute([':status' => $novoStatus, ':area' => $novaArea, ':id' => $vaga['id']]);
@@ -66,6 +66,7 @@ try {
     }
 
     echo "\n[" . date('Y-m-d H:i:s') . "] Reclassificacao concluida.\n";
+    echo "  Inalteradas: {$stats['inalteradas']}\n";
     echo "  Aprovadas: {$stats['aprovadas']}\n";
     echo "  Reaplicadas (estavam inativas): {$stats['reaplicadas']}\n";
     echo "  Rejeitadas: {$stats['rejeitadas']}\n";
@@ -73,4 +74,3 @@ try {
 } catch (Exception $e) {
     echo "\n[ERRO FATAL] " . $e->getMessage() . "\n";
 }
-//nova tentativa
