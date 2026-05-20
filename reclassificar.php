@@ -73,3 +73,4 @@ try {
 } catch (Exception $e) {
     echo "\n[ERRO FATAL] " . $e->getMessage() . "\n";
 }
+//teste
