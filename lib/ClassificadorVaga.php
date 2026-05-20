@@ -139,7 +139,8 @@ function removerAcentos(string $str): string
 function matcharTermo(string $texto, string $termo): bool
 {
     $delim = '[\s,.\/;:!?()\[\]{}"\'\-]';
-    $pattern = '/(?:^|' . $delim . ')' . preg_quote(removerAcentos(mb_strtolower($termo)), '/') . '(?=' . $delim . '|$)/iu';
+    $termo = preg_quote(removerAcentos(mb_strtolower($termo)), '/');
+    $pattern = '/\b' . $termo . '(?=' . $delim . '|$)/iu';
     return (bool) preg_match($pattern, removerAcentos(mb_strtolower($texto)));
 }
 
@@ -179,6 +180,17 @@ function classificarVaga(string $titulo, string $descricao = ''): array
         if ($area === '_todas' || $area === '_genericos') continue;
         foreach ($termosArea as $termo) {
             if (matcharTermo($textoCompleto, $termo)) {
+                return ['aprovada' => true, 'area' => $area, 'motivo' => 'match_' . $area];
+            }
+        }
+    }
+
+    // Fallback: se o título individualmente tem match de inclusão, aprova
+    // (rede de segurança contra edge cases na descrição que possam interferir)
+    foreach ($termos['inclusao'] as $area => $termosArea) {
+        if ($area === '_todas' || $area === '_genericos') continue;
+        foreach ($termosArea as $termo) {
+            if (matcharTermo($textoTitulo, $termo)) {
                 return ['aprovada' => true, 'area' => $area, 'motivo' => 'match_' . $area];
             }
         }

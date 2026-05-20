@@ -23,8 +23,8 @@ cyber cybersecurity pentest "analista de segurança" "analista de seguranca" dba
 architect "solutions architect" "software architect" "technical architect" "estágio em ti"  
 "estagio em ti" "estagiário de ti" "estagiario de ti" internship "tech intern"  
 trainee tech "líder técnico" "lider tecnico" "tech lead" "lead developer" "lead engineer"  
-engenheiro engenharia "engenheiro de software" "engenheiro de dados" embedded iot  
-"internet das coisas" "game dev" "game developer" "game designer" blockchain web3  
+engenheiro engenharia "engenheiro de software" "engenheiro de dados" embedded firmware iot
+"internet das coisas" "game dev" "game developer" "game designer" blockchain web3
 solidity "smart contract" erp sap oracle salesforce dynamics "crm analyst"  
 "crm developer" "product owner" po "scrum master" "agile master" "agile coach" pleno pl senior  
 sr junior jr especialista "pessoa desenvolvedora" "pessoa engenheira" "pessoa de tecnologia"  
@@ -32,7 +32,8 @@ kubernetes "cloud engineer" "cloud architect" finops "platform engineer" "platfo
 llm "prompt engineer" "engenheiro de prompt" nlp "computer vision" mlops "data ops"  
 "analytics engineer" "engineering manager" em "chapter lead" "vibe tech" "tech partner"  
 "staff engineer" "principal engineer" lead "entry-level" "mid-level" "rust developer"  
-"smart contracts" defi nft
+"smart contracts" defi nft supercomputing "high performance computing" hpc
+"site reliability" "systems engineer" "network engineer" "network administrator" "solutions engineer" "software development engineer" sde "applied scientist" "systems administrator" "system administrator" "automation engineer" "build engineer" "release engineer" "implementation engineer" "integration engineer" devsecops "cloud native" "it support specialist" "analista de infraestrutura" "analista de redes" "técnico de informática" "tecnico de informatica" "auxiliar de ti" "estágio em tecnologia" "estagio em tecnologia" "residência em tecnologia" "residencia em tecnologia" "residente tech"
 
 ## **Linguagens, frameworks e ferramentas (match \= certeza de vaga tech)**
 
@@ -60,6 +61,7 @@ tipografia typography "ux research" "ux researcher" "pesquisa com usuário"
 cx "customer experience designer" "ux writer" "ux writing" "product ops" "growth designer"  
 "head of design" "design manager" "design lead" "vp of product" cpo framer webflow  
 midjourney "brand designer" "motion graphics"
+"interactive designer" "content designer" "conversational designer" "voice designer" "design technologist" "creative technologist" "ux engineer" "design system" "design ops" "vr designer" "ar designer" "xr designer" "strategic designer" "design researcher" "design intern" "estágio em design" "estagio em design" "estagiário de design" "estagiario de design"
 
 ## **Marketing & Comunicação**
 
@@ -87,6 +89,7 @@ pax "tiktok ads" "pinterest ads" "linkedin ads" "growth marketing manager" "cont
 ghostwriter videomaker "video editor" "editor de videos" "brand publisher" comms  
 "conversion rate optimization" dropshipping d2c "direct-to-consumer" "b2b marketing"  
 "b2c marketing" "inside sales" "account executive" ae martech "growth ops"
+"ppc specialist" "digital pr" "marketing coordinator" "brand strategist" "marketing intern" "influencer marketing" "social media coordinator" "estágio em marketing" "estagio em marketing" "estagiário de marketing" "estagiario de marketing" "marketing trainee" mautic
 
 ## **Digital / Produto / Dados / Gestão**
 
@@ -103,6 +106,7 @@ analytics "business intelligence" bi "power bi" tableau looker "analista de dado
 "chief of" "consultor digital" "consultor de marketing" "estrategista digital" "digital strategist"  
 inovação inovacao innovation "open innovation" omnichannel omnichannel multicanal startup  
 "digital native" tecnologia tech
+"program manager" "program management" "gerente de programa" "gestão de programa" "gestao de programa" "coordenador de programa" "coordenadora de programa" "delivery manager" "delivery lead" "portfolio manager" "technical writer" "instructional designer" "program analyst" "analista de programa"
 
 # **\================================================================================**
 
