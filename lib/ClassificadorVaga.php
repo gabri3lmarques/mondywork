@@ -170,6 +170,10 @@ function classificarVaga(string $titulo, string $descricao = ''): array
 
     foreach ($termos['exclusao'] as $termo) {
         if (matcharTermo($textoTitulo, $termo)) {
+            // Exclusão multi-word é mais específica → rejeita sempre
+            if (str_contains($termo, ' ')) {
+                return ['aprovada' => false, 'area' => null, 'motivo' => 'exclusao'];
+            }
             if (!temMatchInclusao($textoCompleto, $termos)) {
                 return ['aprovada' => false, 'area' => null, 'motivo' => 'exclusao'];
             }

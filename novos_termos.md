@@ -17,7 +17,7 @@ backend "back-end" "back end" fullstack "full-stack" "full stack" "web developer
 "deep learning" "inteligência artificial" "inteligencia artificial" ia ai "artificial intelligence"  
 devops sre infraestrutura infrastructure cloud sysadmin "administrador de sistemas" suporte support "desk support" "analista de suporte" "support analyst" "support engineer" "suporte técnico"  
 "suporte tecnico" "technical support" "help desk" helpdesk "it support" noc qa "quality assurance"  
-testador "test engineer" "test automation" sdet testes segurança seguranca security  
+testador "test engineer" "test automation" sdet testes security "segurança cibernética" "seguranca cibernetica" "segurança da informação" "seguranca da informacao" "segurança digital" "seguranca digital" "segurança de dados" "seguranca de dados" "segurança de redes" "seguranca de redes"  
 cyber cybersecurity pentest "analista de segurança" "analista de seguranca" dba  
 "database admin" "banco de dados" database "administrador de banco" arquiteto  
 architect "solutions architect" "software architect" "technical architect" "estágio em ti"  
@@ -147,7 +147,7 @@ pedicure "personal trainer" fisioterapeuta nutricionista
 nurse doctor physician surgeon pharmacist dentist veterinarian vet therapist  
 caregiver "nursing assistant" "medical assistant" "dental hygienist" psychologist  
 nutritionist "fitness coach" "personal trainer" "physical therapist" "massage therapist"  
-"hair stylist" barber manicurist
+"hair stylist" barber manicurist "técnico de segurança" "tecnico de segurança" "técnica de segurança" "tecnica de segurança" "segurança do trabalho" "seguranca do trabalho" "engenheiro de segurança" "engenheiro de seguranca" "engenheira de segurança" "engenheira de seguranca" "segurança patrimonial"
 
 ## **5\. Educação e Setor Acadêmico**
 
