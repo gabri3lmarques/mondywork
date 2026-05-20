@@ -103,12 +103,24 @@ function carregarTermos(): array
             if ($termo === '' || !preg_match('/^[a-zà-ü0-9][a-zà-ü0-9\s.\/-]*$/u', $termo)) {
                 continue;
             }
-            $genericos = ['pleno', 'senior', 'junior', 'jr', 'sr', 'pl', 'especialista', 'entry-level', 'mid-level', 'trainee', 'estágio', 'estagio', 'internship', 'intern', 'estagiário', 'estagiario', 'go', 'po', 'vp', 'pr'];
-            if (mb_strlen($termo) < 3 && !in_array($termo, $genericos)) {
-                $genericos[] = $termo;
-            } // termos de 2-3 letras com muitos fp
+
+            // Termos que indicam apenas nível de senioridade ou são genéricos demais
+            // e NÃO devem aprovar uma vaga sozinhos.
+            $genericos = [
+                'pleno', 'senior', 'junior', 'jr', 'sr', 'pl', 'especialista',
+                'trainee', 'estágio', 'estagio', 'estagiário', 'estagiario',
+                'internship', 'intern', 'entry-level', 'mid-level',
+                'pessoa', 'vibe', 'partner', 'talent', 'consultor', 'consultora'
+            ];
+
+            // Se for um termo curto (< 3 letras) e não estiver explicitamente no novos_termos.md
+            // como algo importante, ele tende a ser ruído (ex: "de", "em", "da").
+            // Mas se o usuário colocou no MD, nós respeitamos.
+            $ehCurto = mb_strlen($termo) < 3;
+            $ehSenioridade = in_array($termo, $genericos);
+
             if ($secaoAtual === 'inclusao' && $areaAtual) {
-                if (in_array($termo, $genericos)) {
+                if ($ehSenioridade) {
                     $termos['inclusao']['_genericos'][] = $termo;
                     continue;
                 }

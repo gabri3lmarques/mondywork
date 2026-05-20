@@ -17,7 +17,7 @@ backend "back-end" "back end" fullstack "full-stack" "full stack" "web developer
 "deep learning" "inteligência artificial" "inteligencia artificial" ia ai "artificial intelligence"  
 devops sre infraestrutura infrastructure cloud sysadmin "administrador de sistemas" suporte support "desk support" "analista de suporte" "support analyst" "support engineer" "suporte técnico"  
 "suporte tecnico" "technical support" "help desk" helpdesk "it support" noc qa "quality assurance"  
-testador "test engineer" "test automation" sdet testes security "segurança cibernética" "seguranca cibernetica" "segurança da informação" "seguranca da informacao" "segurança digital" "seguranca digital" "segurança de dados" "seguranca de dados" "segurança de redes" "seguranca de redes"  
+testador "test engineer" "test automation" sdet testes "qualidade de software" "analista de qualidade" robot playwright security "segurança cibernética" "seguranca cibernetica" "segurança da informação" "seguranca da informacao" "segurança digital" "seguranca digital" "segurança de dados" "seguranca de dados" "segurança de redes" "seguranca de redes"  
 cyber cybersecurity pentest "analista de segurança" "analista de seguranca" dba  
 "database admin" "banco de dados" database "administrador de banco" arquiteto  
 architect "solutions architect" "software architect" "technical architect" "estágio em ti"  
@@ -26,14 +26,14 @@ trainee tech "líder técnico" "lider tecnico" "tech lead" "lead developer" "lea
 engenheiro engenharia "engenheiro de software" "engenheiro de dados" embedded firmware iot
 "internet das coisas" "game dev" "game developer" "game designer" blockchain web3
 solidity "smart contract" erp sap oracle salesforce dynamics "crm analyst"  
-"crm developer" "product owner" po "scrum master" "agile master" "agile coach" pleno pl senior  
+"crm developer" "product owner" po "scrum master" "agile master" "agile coach" ágil agilidade agilista "consultor ágil" "consultora ágil" pleno pl senior  
 sr junior jr especialista "pessoa desenvolvedora" "pessoa engenheira" "pessoa de tecnologia"  
 kubernetes "cloud engineer" "cloud architect" finops "platform engineer" "platform engineering"  
-llm "prompt engineer" "engenheiro de prompt" nlp "computer vision" mlops "data ops"  
+llm "prompt engineer" "engenheiro de prompt" nlp "computer vision" mlops "data ops" "ml engineer" "machine learning engineer"  
 "analytics engineer" "engineering manager" em "chapter lead" "vibe tech" "tech partner"  
 "staff engineer" "principal engineer" lead "entry-level" "mid-level" "rust developer"  
 "smart contracts" defi nft supercomputing "high performance computing" hpc
-"site reliability" "systems engineer" "network engineer" "network administrator" "solutions engineer" "software development engineer" sde "applied scientist" "systems administrator" "system administrator" "automation engineer" "build engineer" "release engineer" "implementation engineer" "integration engineer" devsecops "cloud native" "it support specialist" "analista de infraestrutura" "analista de redes" "técnico de informática" "tecnico de informatica" "auxiliar de ti" "estágio em tecnologia" "estagio em tecnologia" "residência em tecnologia" "residencia em tecnologia" "residente tech"
+"site reliability" "systems engineer" "network engineer" "network administrator" "solutions engineer" "software development engineer" sde "applied scientist" "systems administrator" "system administrator" "automation engineer" "build engineer" "release engineer" "implementation engineer" "integration engineer" devsecops "cloud native" "it support specialist" "analista de infraestrutura" "analista de redes" "técnico de informática" "tecnico de informatica" "auxiliar de ti" "estágio em tecnologia" "estagio em tecnologia" "residência em tecnologia" "residencia em tecnologia" "residente tech" "sucesso do cliente" "customer success" cs "atendimento" "customer support engineer" "suporte técnico" "suporte tecnico" "technical support" "help desk" helpdesk "it support" noc qa "quality assurance" "implementation specialist" "especialista de implantação" "onboarding specialist" "especialista de onboarding" "solutions engineer" "sales engineer"
 
 ## **Linguagens, frameworks e ferramentas (match \= certeza de vaga tech)**
 
@@ -42,7 +42,7 @@ nodejs php ruby go golang rust c\# csharp .net asp.net c++ kotlin swift flutter
 dart sass nextjs nuxt nestjs express django flask spring sql mysql postgresql  
 mongodb redis elasticsearch nosql aws azure gcp "google cloud" docker kubernetes  
 k8s terraform ansible jenkins gitlab github "github actions" ci/cd pipeline graphql rest  
-api microservices microsserviços html css bootstrap tailwind
+api microservices microsserviços html css bootstrap tailwind robot playwright
 
 ## **Design & Criativo**
 
@@ -60,15 +60,17 @@ tipografia typography "ux research" "ux researcher" "pesquisa com usuário"
 "design thinking" "design sprint" "pessoa designer" "pessoa de design" "interaction designer"  
 cx "customer experience designer" "ux writer" "ux writing" "product ops" "growth designer"  
 "head of design" "design manager" "design lead" "vp of product" cpo framer webflow  
-midjourney "brand designer" "motion graphics"
-"interactive designer" "content designer" "conversational designer" "voice designer" "design technologist" "creative technologist" "ux engineer" "design system" "design ops" "vr designer" "ar designer" "xr designer" "strategic designer" "design researcher" "design intern" "estágio em design" "estagio em design" "estagiário de design" "estagiario de design"
+midjourney "brand designer" "motion graphics" "content designer" "conversational designer" 
+"voice designer" "design technologist" "creative technologist" "ux engineer" "design system" 
+"design ops" "vr designer" "ar designer" "xr designer" "strategic designer" "design researcher" 
+"design intern" "estágio em design" "estagio em design" "estagiário de design" "estagiario de design" "business designer"
 
 ## **Marketing & Comunicação**
 
 marketing marketeiro marketeira "marketing digital" "digital marketing" "marketing de conteúdo"  
 "marketing de conteudo" "content marketing" "content strategy" conteúdo conteudo "social media"  
 "mídias sociais" "midias sociais" "community manager" "social listening" seo sem "google ads"  
-"facebook ads" "meta ads" "paid media" "mídia paga" "midia paga" tráfego trafego traffic  
+"facebook ads" "meta ads" "paid media" "mídia paga" "midia paga" tráfego trafego traffic "tráfego pago" "gestor de tráfego" "gestora de tráfego" "mídia performance"
 growth "growth hacking" "growth marketing" copywriter copywriting copy redator redação redacao  
 "redação publicitária" "redacao publicitaria" analytics "google analytics" "marketing analytics"  
 "digital analyst" "analista de marketing" e-commerce ecommerce e.commerce marketplace shopify  
@@ -77,7 +79,7 @@ vtex woocommerce magento inbound "inbound marketing" outbound hubspot "rd statio
 mailchimp activecampaign "lead generation" pr "relações públicas" "relacoes publicas"  
 "public relations" "assessoria de imprensa" brand branding "brand manager" "gestão de marca"  
 "gestao de marca" mídia "midia planner" "mídia online" "midia online" "offline media"  
-programmatic display crm "customer relationship" "customer success" cs funil funnel  
+programmatic display crm "customer relationship" "customer success" cs "customer experience" cx "sucesso do cliente" "atendimento" funil funnel  
 conversão conversao conversion cro "taxa de conversão" "taxa de conversao" afiliado affiliate  
 partnership "marketing de parceria" influencer influenciador influenciadora influência influencia  
 "pré-venda" "pre-venda" "pré vendas" "pre vendas" sdr bdr "sales development" eventos  
@@ -88,7 +90,7 @@ comunicação comunicacao communication "comunicação corporativa" "comunicacao
 pax "tiktok ads" "pinterest ads" "linkedin ads" "growth marketing manager" "content creator"  
 ghostwriter videomaker "video editor" "editor de videos" "brand publisher" comms  
 "conversion rate optimization" dropshipping d2c "direct-to-consumer" "b2b marketing"  
-"b2c marketing" "inside sales" "account executive" ae martech "growth ops"
+"b2c marketing" "inside sales" "account executive" ae "account manager" "executivo de contas" "gestão de contas" martech "growth ops" "revops"
 "ppc specialist" "digital pr" "marketing coordinator" "brand strategist" "marketing intern" "influencer marketing" "social media coordinator" "estágio em marketing" "estagio em marketing" "estagiário de marketing" "estagiario de marketing" "marketing trainee" mautic
 
 ## **Digital / Produto / Dados / Gestão**
@@ -97,15 +99,15 @@ ghostwriter videomaker "video editor" "editor de videos" "brand publisher" comms
 "product owner" po "product analyst" analyst product digital "digital transformation"  
 "transformação digital" "transformacao digital" "digital business" "business analyst"  
 "analista de negócios" "analista de negocios" "analista de processos" projetos "project manager"  
-"gerente de projeto" "project management" pm agile scrum kanban jira trello asana notion  
+"gerente de projeto" "project management" pm agile scrum kanban jira trello asana notion ágil agilidade agilista "consultor ágil" "consultora ágil"  
 analytics "business intelligence" bi "power bi" tableau looker "analista de dados"  
 "analista de inteligência" "analista de inteligencia" reporting "digital operations"  
 "revenue operations" "sales operations" revops "tech recruiter" "recrutador tech"  
-"tech sourcing" "people analyst" "rh tech" "coordenador digital" "coordenador de marketing"  
+"tech sourcing" "people analyst" "rh tech" recruiter recrutamento seleção sourcer "coordenador digital"
 "coordenador de produto" coordinator digital "head of" "diretor de" "director of" "vp of"  
 "chief of" "consultor digital" "consultor de marketing" "estrategista digital" "digital strategist"  
 inovação inovacao innovation "open innovation" omnichannel omnichannel multicanal startup  
-"digital native" tecnologia tech
+"digital native" tecnologia tech "product ops" "growth ops" "revops" "analytics engineer"
 "program manager" "program management" "gerente de programa" "gestão de programa" "gestao de programa" "coordenador de programa" "coordenadora de programa" "delivery manager" "delivery lead" "portfolio manager" "technical writer" "instructional designer" "program analyst" "analista de programa"
 
 # **\================================================================================**
@@ -207,4 +209,4 @@ foreach ($matches\[0\] as $match) {
 //   \[2\] \=\> frontend  
 //   \[3\] \=\> front end  
 // )  
-?\>  
+?\>
