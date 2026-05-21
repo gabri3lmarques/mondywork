@@ -205,6 +205,15 @@
         return 'titulo';
     }
 
+    function updateSearchPlaceholder() {
+        var modo = getSearchMode();
+        searchInput.placeholder = modo === 'descricao'
+            ? 'Skill (ex: css, python, react...)'
+            : 'Job title, keyword or company';
+    }
+
+    updateSearchPlaceholder();
+
     function fetchVagas() {
         if (loading || !hasMore) return;
         loading = true;
@@ -232,9 +241,10 @@
                 }
 
                 if (currentQuery && page === 1) {
+                    var labelModo = json.modo === 'descricao' ? 'skill' : 'title';
                     resultsInfo.textContent = json.total > 0
-                        ? json.total + ' result(s) for "' + currentQuery + '"'
-                        : 'No results for "' + currentQuery + '"';
+                        ? json.total + ' result(s) for "' + currentQuery + '" (mode: ' + labelModo + ')'
+                        : 'No results for "' + currentQuery + '" (mode: ' + labelModo + ')';
                 }
 
                 if (page === 1 && json.query_corrigida) {
@@ -273,6 +283,7 @@
         hideSearchLoading();
         debounceTimer = setTimeout(function() {
             hideSearchLoading();
+            updateSearchPlaceholder();
             const val = searchInput.value.trim();
             if (val !== currentQuery) {
                 currentQuery = val;
@@ -286,6 +297,7 @@
 
     for (var i = 0; i < searchModes.length; i++) {
         searchModes[i].addEventListener('change', function() {
+            updateSearchPlaceholder();
             if (currentQuery) {
                 resetAndFetch();
             }

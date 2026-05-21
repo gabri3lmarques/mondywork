@@ -233,6 +233,15 @@
         return 'titulo';
     }
 
+    function updateSearchPlaceholder() {
+        var modo = getSearchMode();
+        searchInput.placeholder = modo === 'descricao'
+            ? 'Habilidade (ex: css, python, react...)'
+            : 'Cargo, palavra-chave ou empresa';
+    }
+
+    updateSearchPlaceholder();
+
     function fetchVagas() {
         if (loading || !hasMore) return;
         loading = true;
@@ -260,9 +269,10 @@
                 }
 
                 if (currentQuery && page === 1) {
+                    var labelModo = json.modo === 'descricao' ? 'habilidade' : 'cargo';
                     resultsInfo.textContent = json.total > 0
-                        ? json.total + ' resultado(s) para "' + currentQuery + '"'
-                        : 'Nenhum resultado para "' + currentQuery + '"';
+                        ? json.total + ' resultado(s) para "' + currentQuery + '" (modo: ' + labelModo + ')'
+                        : 'Nenhum resultado para "' + currentQuery + '" (modo: ' + labelModo + ')';
                 }
 
                 if (page === 1 && json.query_corrigida) {
@@ -301,6 +311,7 @@
         hideSearchLoading();
         debounceTimer = setTimeout(function() {
             hideSearchLoading();
+            updateSearchPlaceholder();
             const val = searchInput.value.trim();
             if (val !== currentQuery) {
                 currentQuery = val;
@@ -314,6 +325,7 @@
 
     for (var i = 0; i < searchModes.length; i++) {
         searchModes[i].addEventListener('change', function() {
+            updateSearchPlaceholder();
             if (currentQuery) {
                 resetAndFetch();
             }
