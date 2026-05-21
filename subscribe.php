@@ -37,7 +37,7 @@ try {
         json_safe(['success' => false, 'code' => 'invalid_email'], 400);
     }
 
-    $areasValidas = ['dev', 'design', 'marketing', 'digital'];
+    $areasValidas = ['dev', 'engenharia', 'dados', 'design', 'marketing', 'social-media', 'produto', 'agile', 'gestao', 'vendas', 'customer-success', 'suporte', 'qa', 'infra'];
     if ($area === null || $area === '' || !in_array($area, $areasValidas)) {
         json_safe(['success' => false, 'code' => 'invalid_area'], 400);
     }
