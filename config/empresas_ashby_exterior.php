@@ -1,3 +1,3 @@
 <?php
 
-return ["deel" => "deel", "harvey" => "harvey", "niramedical" => "niramedical", "permitflow" => "permitflow", "sesame" => "sesame", "suno" => "suno", "withpulley" => "withpulley"];
+return ["atomicsemi" => "atomicsemi", "cartesia" => "cartesia", "claylabs" => "claylabs", "cohere" => "cohere", "dash0" => "dash0", "deel" => "deel", "etched" => "etched", "everai" => "everai", "harvey" => "harvey", "hopper" => "hopper", "join9am" => "join9am", "kota" => "kota", "niramedical" => "niramedical", "onebrief" => "onebrief", "permitflow" => "permitflow", "perplexity" => "perplexity", "ridealso" => "ridealso", "riveron" => "riveron", "savvy" => "savvy", "sesame" => "sesame", "skelar" => "skelar", "suno" => "suno", "withpulley" => "withpulley"];
