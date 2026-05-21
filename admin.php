@@ -27,6 +27,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 
 $isLoggedIn = !empty($_SESSION['admin_logged_in']);
 
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_action'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $ids = array_map('intval', explode(',', $_POST['batch_ids']));
+        if (!empty($ids)) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $targetStatus = $_POST['batch_action'] === 'ativar' ? 'ativa' : 'inativa';
+            $stmt = $pdo->prepare("UPDATE vagas SET status = ? WHERE id IN ($placeholders)");
+            $stmt->execute(array_merge([$targetStatus], $ids));
+        }
+    } catch (Exception $e) {}
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . (isset($_GET['origem']) ? '&origem=' . urlencode($_GET['origem']) : ''));
+    exit;
+}
+
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_id'])) {
     try {
         $pdo = new PDO(
@@ -103,6 +123,12 @@ $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional',
 .admin-tab:hover { color: #4b41e1; }
 .admin-tab.active { color: #4b41e1; background: #fff; border-color: #c6c6cd; }
 .badge-velha { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+.batch-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 16px; background: #fff; border: 1px solid #c6c6cd; border-radius: 0.5rem; }
+.batch-select-all { font-size: 14px; font-weight: 500; color: #0b1c30; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.batch-select-all input { width: 16px; height: 16px; cursor: pointer; }
+.batch-count { font-size: 13px; color: #45464d; margin-right: auto; }
+.admin-check-wrap { display: flex; align-items: center; padding: 4px 8px 0 0; }
+.admin-check-wrap input { width: 18px; height: 18px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -192,13 +218,23 @@ try {
     <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior">Exterior</a>
   </div>
 
+  <div class="batch-bar" id="batch-bar">
+    <label class="batch-select-all"><input type="checkbox" id="select-all"> Selecionar todas</label>
+    <span class="batch-count" id="batch-count">0 selecionadas</span>
+    <button type="button" class="btn-toggle inativar" id="btn-batch-inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
+    <button type="button" class="btn-toggle ativar" id="btn-batch-ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
+  </div>
+
   <?php if (empty($vagas)): ?>
     <div class="admin-empty">Nenhuma vaga encontrada.</div>
   <?php else:
     foreach ($vagas as $v): ?>
       <div class="admin-card" style="margin-bottom:12px">
         <div class="admin-card-header">
-          <div>
+          <label class="admin-check-wrap">
+            <input type="checkbox" class="batch-check" value="<?php echo (int)$v['id'] ?>" data-status="<?php echo $v['status'] ?>">
+          </label>
+          <div style="flex:1">
             <div class="admin-card-title"><?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?></div>
             <div class="admin-card-company"><?php echo htmlspecialchars($v['empresa'], ENT_QUOTES, 'UTF-8') ?><?php echo $v['localizacao'] ? ' • ' . htmlspecialchars($v['localizacao'], ENT_QUOTES, 'UTF-8') : '' ?></div>
           </div>
@@ -254,7 +290,51 @@ try {
       </div>
     <?php endif; ?>
   <?php endif; ?>
+
+  <form id="batch-form" method="post" style="display:none">
+    <input type="hidden" name="batch_ids" id="batch-ids">
+    <input type="hidden" name="batch_action" id="batch-action">
+  </form>
 </main>
+
+<script>
+(function() {
+  var selectAll = document.getElementById('select-all');
+  var checks = document.querySelectorAll('.batch-check');
+  var countEl = document.getElementById('batch-count');
+  var batchBar = document.getElementById('batch-bar');
+
+  function updateCount() {
+    var checked = document.querySelectorAll('.batch-check:checked').length;
+    countEl.textContent = checked + ' selecionada(s)';
+    if (selectAll) selectAll.checked = checked === checks.length;
+  }
+
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      checks.forEach(function(cb) { cb.checked = selectAll.checked; });
+      updateCount();
+    });
+  }
+
+  checks.forEach(function(cb) {
+    cb.addEventListener('change', updateCount);
+  });
+
+  window.batchToggle = function(action) {
+    var ids = [];
+    document.querySelectorAll('.batch-check:checked').forEach(function(cb) {
+      ids.push(cb.value);
+    });
+    if (!ids.length) return;
+    var msg = action === 'inativar' ? 'Inativar ' + ids.length + ' vaga(s)?' : 'Ativar ' + ids.length + ' vaga(s)?';
+    if (!confirm(msg)) return;
+    document.getElementById('batch-ids').value = ids.join(',');
+    document.getElementById('batch-action').value = action;
+    document.getElementById('batch-form').submit();
+  };
+})();
+</script>
 
 <?php endif; ?>
 </body>
