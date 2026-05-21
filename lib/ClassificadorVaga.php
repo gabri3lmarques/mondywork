@@ -6,10 +6,20 @@
 function mapaAreas(): array
 {
     return [
-        'dev'      => ['dev', 'engenharia', 'tecnologia', 'linguagens', 'frameworks', 'ferramentas'],
-        'design'   => ['design', 'criativo'],
-        'marketing' => ['marketing', 'comunicação', 'comunicacao'],
-        'digital'  => ['digital', 'produto', 'dados', 'gestão', 'gestao'],
+        'dev'              => ['dev', 'desenvolvedor', 'desenvolvedora', 'programador', 'programadora', 'software', 'frontend', 'backend', 'fullstack', 'web', 'mobile', 'app', 'ios', 'android', 'sistemas', 'linguagens', 'frameworks', 'ferramentas'],
+        'engenharia'       => ['engenharia', 'engineer', 'engineering', 'sre', 'platform engineer', 'staff engineer', 'principal engineer', 'embedded', 'firmware'],
+        'dados'            => ['dados', 'data', 'science', 'scientist', 'analyst', 'analytics', 'bi', 'business intelligence', 'power bi', 'tableau', 'looker', 'ia', 'ai', 'intelligence', 'inteligência', 'inteligencia', 'machine learning', 'deep learning', 'nlp', 'llm'],
+        'design'           => ['design', 'designer', 'ux', 'ui', 'ux/ui', 'product design', 'visual', 'graphic', 'web designer', 'figma', 'sketch', 'adobe xd'],
+        'marketing'        => ['marketing', 'digital', 'growth', 'performance', 'seo', 'sem', 'ads', 'google ads', 'facebook ads', 'meta ads', 'paid media', 'mídia paga', 'midia paga', 'tráfego', 'trafego', 'traffic', 'tráfego pago', 'gestor de tráfego', 'mídia performance', 'analytics'],
+        'social-media'     => ['social media', 'mídias sociais', 'midias sociais', 'community manager', 'conteúdo', 'conteudo', 'content', 'copywriter', 'copywriting', 'copy', 'redator', 'redação', 'redacao', 'influencer', 'influenciador'],
+        'produto'          => ['produto', 'product', 'pm', 'po', 'product manager', 'product owner', 'product analyst'],
+        'agile'            => ['agile', 'scrum', 'kanban', 'agilista', 'agilidade', 'ágil', 'scrum master', 'agile coach', 'agile master'],
+        'gestao'           => ['gestão', 'gestao', 'gestor', 'gestora', 'gerente', 'manager', 'management', 'diretor', 'director', 'vp', 'chief', 'head of', 'projetos', 'project manager', 'program manager', 'delivery manager'],
+        'vendas'           => ['vendas', 'sales', 'comercial', 'business development', 'bdr', 'sdr', 'inside sales', 'account executive', 'ae', 'account manager', 'executivo de contas', 'pré-venda', 'pre-venda'],
+        'customer-success' => ['customer success', 'cs', 'customer experience', 'cx', 'sucesso do cliente', 'atendimento', 'onboarding', 'implementation'],
+        'suporte'          => ['suporte', 'support', 'help desk', 'helpdesk', 'it support', 'desk support', 'analista de suporte', 'suporte técnico', 'suporte tecnico', 'technical support'],
+        'qa'               => ['qa', 'quality assurance', 'testador', 'testes', 'test', 'automation', 'sdet', 'robot', 'playwright', 'qualidade de software'],
+        'infra'            => ['infraestrutura', 'infrastructure', 'cloud', 'devops', 'sysadmin', 'administrador de sistemas', 'security', 'segurança', 'seguranca', 'cyber', 'cybersecurity', 'networks', 'redes', 'network engineer', 'network administrator'],
     ];
 }
 
