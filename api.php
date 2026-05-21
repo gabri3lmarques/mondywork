@@ -166,7 +166,7 @@ try {
                     AND origem = :origem
                     $areaCondicao
                     AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)
-                    ORDER BY vagas.publicado_em DESC, score DESC
+                    ORDER BY score DESC, vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         }
     } else {
