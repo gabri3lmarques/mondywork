@@ -2,9 +2,11 @@
     const container    = document.getElementById('vagas-container');
     const loadingEl    = document.getElementById('loading');
     const sentinel     = document.getElementById('sentinel');
-    const searchInput  = document.getElementById('search');
+    const searchInput   = document.getElementById('search');
     const searchLoading = document.getElementById('search-loading');
-    const resultsInfo  = document.getElementById('results-info');
+    const searchCorrection = document.getElementById('search-correction');
+    const searchModes   = document.querySelectorAll('input[name="modo"]');
+    const resultsInfo   = document.getElementById('results-info');
     const vagasTotal  = document.getElementById('vagas-total');
     const backToTop   = document.getElementById('back-to-top');
     const newsletterForm = document.getElementById('newsletter-form');
@@ -34,6 +36,7 @@
         container.innerHTML = '';
         resultsInfo.textContent = '';
         vagasTotal.textContent = '';
+        searchCorrection.classList.add('hidden');
         loadingEl.classList.add('hidden');
         page = 0;
         hasMore = true;
@@ -223,6 +226,13 @@
         return div.innerHTML;
     }
 
+    function getSearchMode() {
+        for (var i = 0; i < searchModes.length; i++) {
+            if (searchModes[i].checked) return searchModes[i].value;
+        }
+        return 'titulo';
+    }
+
     function fetchVagas() {
         if (loading || !hasMore) return;
         loading = true;
@@ -230,7 +240,8 @@
         loadingEl.classList.remove('hidden');
         page++;
 
-        const url = '/api.php?page=' + page + '&limit=' + LIMIT + (currentQuery ? '&q=' + encodeURIComponent(currentQuery) : '');
+        var modo = getSearchMode();
+        var url = '/api.php?page=' + page + '&limit=' + LIMIT + (currentQuery ? '&q=' + encodeURIComponent(currentQuery) + '&modo=' + modo : '');
         let hasError = false;
 
         fetch(url)
@@ -252,6 +263,13 @@
                     resultsInfo.textContent = json.total > 0
                         ? json.total + ' resultado(s) para "' + currentQuery + '"'
                         : 'Nenhum resultado para "' + currentQuery + '"';
+                }
+
+                if (page === 1 && json.query_corrigida) {
+                    searchCorrection.textContent = 'Você quis dizer: "' + json.query_corrigida + '"';
+                    searchCorrection.classList.remove('hidden');
+                } else if (page === 1) {
+                    searchCorrection.classList.add('hidden');
                 }
 
                 if (!hasMore) {
@@ -278,7 +296,7 @@
 
     observer.observe(sentinel);
 
-    searchInput.addEventListener('input', function() {
+    function onSearchChange() {
         clearTimeout(debounceTimer);
         hideSearchLoading();
         debounceTimer = setTimeout(function() {
@@ -290,7 +308,17 @@
             }
         }, DEBOUNCE_MS);
         showSearchLoading();
-    });
+    }
+
+    searchInput.addEventListener('input', onSearchChange);
+
+    for (var i = 0; i < searchModes.length; i++) {
+        searchModes[i].addEventListener('change', function() {
+            if (currentQuery) {
+                resetAndFetch();
+            }
+        });
+    }
 
     function handleHash() {
         if (location.hash) {

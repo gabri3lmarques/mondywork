@@ -11,6 +11,94 @@ $q = isset($_GET['q']) ? trim($_GET['q']) : '';
 $origem = isset($_GET['origem']) ? trim($_GET['origem']) : 'nacional';
 $area = isset($_GET['area']) ? trim($_GET['area']) : '';
 $vagaId = isset($_GET['vaga_id']) ? trim($_GET['vaga_id']) : '';
+$modo = isset($_GET['modo']) && $_GET['modo'] === 'descricao' ? 'descricao' : 'titulo';
+
+function removerAcentos($str) {
+    $acentos = [
+        'á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'ae',
+        'ç' => 'c', 'ð' => 'd',
+        'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+        'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i',
+        'ñ' => 'n',
+        'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o',
+        'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u',
+        'ý' => 'y', 'ÿ' => 'y', 'þ' => 'b', 'ß' => 'ss',
+        'Á' => 'A', 'À' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'AE',
+        'Ç' => 'C', 'Ð' => 'D',
+        'É' => 'E', 'È' => 'E', 'Ê' => 'E', 'Ë' => 'E',
+        'Í' => 'I', 'Ì' => 'I', 'Î' => 'I', 'Ï' => 'I',
+        'Ñ' => 'N',
+        'Ó' => 'O', 'Ò' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O',
+        'Ú' => 'U', 'Ù' => 'U', 'Û' => 'U', 'Ü' => 'U',
+        'Ý' => 'Y', 'Ÿ' => 'Y', 'Þ' => 'B',
+    ];
+    return strtr($str, $acentos);
+}
+
+function corrigirQueryFuzzy($query, $pdo) {
+    $palavras = preg_split('/\s+/', trim($query));
+    $palavras = array_values(array_filter($palavras, function($p) { return $p !== ''; }));
+
+    if (count($palavras) <= 1) return [$query, false];
+
+    $stmt = $pdo->query("SELECT DISTINCT titulo FROM vagas WHERE status = 'ativa' AND titulo IS NOT NULL AND titulo != ''");
+    $titulos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    $dicionario = [];
+    foreach ($titulos as $titulo) {
+        foreach (preg_split('/\s+/', $titulo) as $palavra) {
+            $p = trim(mb_strtolower($palavra));
+            $p = removerAcentos($p);
+            $p = preg_replace('/[^a-z0-9]/', '', $p);
+            if (mb_strlen($p) > 1) {
+                $dicionario[$p] = true;
+            }
+        }
+    }
+
+    if (empty($dicionario)) return [$query, false];
+
+    $stopwords = ['de', 'da', 'do', 'das', 'dos', 'em', 'no', 'na', 'nos', 'nas', 'com', 'para', 'por', 'e', 'a', 'ao', 'aos', 'o', 'um', 'uma', 'é', 'se', 'sua', 'seu', 'que', 'mais', 'mas', 'como'];
+
+    $houveCorrecao = false;
+    $palavrasCorrigidas = [];
+
+    foreach ($palavras as $palavra) {
+        $lower = trim(mb_strtolower($palavra));
+        $lowerNorm = removerAcentos($lower);
+        $lowerNorm = preg_replace('/[^a-z0-9]/', '', $lowerNorm);
+
+        if (mb_strlen($lowerNorm) <= 1 || in_array($lowerNorm, $stopwords)) {
+            $palavrasCorrigidas[] = $palavra;
+            continue;
+        }
+
+        if (isset($dicionario[$lowerNorm])) {
+            $palavrasCorrigidas[] = $palavra;
+            continue;
+        }
+
+        $melhorDistancia = PHP_INT_MAX;
+        $melhorPalavra = null;
+        foreach ($dicionario as $palavraDict => $_) {
+            $dist = levenshtein($lowerNorm, $palavraDict);
+            $maxDist = mb_strlen($lowerNorm) <= 4 ? 1 : (mb_strlen($lowerNorm) <= 7 ? 2 : 3);
+            if ($dist < $melhorDistancia && $dist <= $maxDist) {
+                $melhorDistancia = $dist;
+                $melhorPalavra = $palavraDict;
+            }
+        }
+
+        if ($melhorPalavra !== null) {
+            $palavrasCorrigidas[] = $melhorPalavra;
+            $houveCorrecao = true;
+        } else {
+            $palavrasCorrigidas[] = $palavra;
+        }
+    }
+
+    return [implode(' ', $palavrasCorrigidas), $houveCorrecao];
+}
 
 try {
     $pdo = new PDO(
@@ -32,20 +120,32 @@ try {
 
     $areaCondicao = $area !== '' ? " AND area = " . $pdo->quote($area) : "";
 
+    $queryCorrigida = null;
+
     if ($q !== '') {
+        $camposBusca = $modo === 'descricao' ? 'descricao, resumo' : 'titulo';
         $searchTerm = $pdo->quote($q);
-        $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)");
+
+        if ($modo !== 'descricao') {
+            [$corrigida, $houveCorrecao] = corrigirQueryFuzzy($q, $pdo);
+            if ($houveCorrecao) {
+                $queryCorrigida = $corrigida;
+                $searchTerm = $pdo->quote($corrigida);
+            }
+        }
+
+        $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH($camposBusca) AGAINST($searchTerm IN BOOLEAN MODE)");
         $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
         $totalStmt->execute();
         $total = (int)$totalStmt->fetchColumn();
 
         $sql = "SELECT $campos,
-                MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm) AS score
+                MATCH($camposBusca) AGAINST($searchTerm) AS score
                 FROM vagas
                 WHERE status = 'ativa'
                 AND origem = :origem
                 $areaCondicao
-                AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)
+                AND MATCH($camposBusca) AGAINST($searchTerm IN BOOLEAN MODE)
                 ORDER BY vagas.publicado_em DESC, score DESC
                 LIMIT :limit OFFSET :offset";
     } else {
@@ -71,13 +171,15 @@ try {
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([
-        'query'     => $q,
-        'data'      => $vagas,
-        'page'      => $page,
-        'limit'     => $limit,
-        'total'     => $total,
-        'area'      => $area,
-        'has_more'  => ($offset + $limit) < $total,
+        'query'           => $q,
+        'query_corrigida' => $queryCorrigida,
+        'data'            => $vagas,
+        'page'            => $page,
+        'limit'           => $limit,
+        'total'           => $total,
+        'area'            => $area,
+        'modo'            => $modo,
+        'has_more'        => ($offset + $limit) < $total,
     ]);
 
 } catch (Exception $e) {
