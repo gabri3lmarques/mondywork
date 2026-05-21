@@ -140,16 +140,24 @@ try {
                     LIMIT :limit OFFSET :offset";
         } else {
             $searchTerm = $pdo->quote($q);
-            [$corrigida, $houveCorrecao] = corrigirQueryFuzzy($q, $pdo);
-            if ($houveCorrecao) {
-                $queryCorrigida = $corrigida;
-                $searchTerm = $pdo->quote($corrigida);
-            }
 
             $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
+
+            if ($total === 0) {
+                [$corrigida, $houveCorrecao] = corrigirQueryFuzzy($q, $pdo);
+                if ($houveCorrecao) {
+                    $queryCorrigida = $corrigida;
+                    $searchTerm = $pdo->quote($corrigida);
+
+                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)");
+                    $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+                    $totalStmt->execute();
+                    $total = (int)$totalStmt->fetchColumn();
+                }
+            }
 
             $sql = "SELECT $campos,
                     MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm) AS score
