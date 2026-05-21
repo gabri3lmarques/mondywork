@@ -141,7 +141,7 @@ try {
         } else {
             $searchTerm = $pdo->quote($q);
 
-            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo) AGAINST($searchTerm IN BOOLEAN MODE)");
+            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
@@ -152,7 +152,7 @@ try {
                     $queryCorrigida = $corrigida;
                     $searchTerm = $pdo->quote($corrigida);
 
-                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo) AGAINST($searchTerm IN BOOLEAN MODE)");
+                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)");
                     $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
                     $totalStmt->execute();
                     $total = (int)$totalStmt->fetchColumn();
@@ -160,12 +160,12 @@ try {
             }
 
             $sql = "SELECT $campos,
-                    MATCH(titulo) AGAINST($searchTerm) AS score
+                    MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm) AS score
                     FROM vagas
                     WHERE status = 'ativa'
                     AND origem = :origem
                     $areaCondicao
-                    AND MATCH(titulo) AGAINST($searchTerm IN BOOLEAN MODE)
+                    AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)
                     ORDER BY score DESC, vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         }
