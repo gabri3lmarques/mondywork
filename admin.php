@@ -43,7 +43,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             $stmt->execute(array_merge([$targetStatus], $ids));
         }
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . (isset($_GET['origem']) ? '&origem=' . urlencode($_GET['origem']) : ''));
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $qParam);
     exit;
 }
 
@@ -58,11 +58,16 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
         $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . (isset($_GET['origem']) ? '&origem=' . urlencode($_GET['origem']) : ''));
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $qParam);
     exit;
 }
 
 $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
+$searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
+
+$qParam = $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '';
+$origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : '';
+$pageParam = isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '';
 
 ?><!DOCTYPE html>
 <html lang="pt-BR">
@@ -129,6 +134,13 @@ $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional',
 .batch-count { font-size: 13px; color: #45464d; margin-right: auto; }
 .admin-check-wrap { display: flex; align-items: center; padding: 4px 8px 0 0; }
 .admin-check-wrap input { width: 18px; height: 18px; cursor: pointer; }
+.admin-search { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.admin-search-input { flex: 1; min-width: 200px; background: #fff; border: 1px solid #c6c6cd; border-radius: 0.5rem; padding: 10px 16px; font-size: 14px; color: #0b1c30; outline: none; transition: border-color 0.2s; }
+.admin-search-input:focus { border-color: #4b41e1; box-shadow: 0 0 0 1px #4b41e1; }
+.btn-search { background: #4b41e1; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border: none; border-radius: 0.5rem; cursor: pointer; transition: background 0.3s; }
+.btn-search:hover { background: #645efb; }
+.btn-clear { display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; color: #45464d; padding: 10px 16px; border: 1px solid #c6c6cd; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s; }
+.btn-clear:hover { border-color: #ba1a1a; color: #ba1a1a; }
 </style>
 </head>
 <body>
@@ -169,24 +181,33 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
-    $origemCondicao = $origemFilter !== '' ? " WHERE origem = " . $pdo->quote($origemFilter) : '';
+    $whereClauses = [];
+    if ($origemFilter !== '') $whereClauses[] = "origem = " . $pdo->quote($origemFilter);
+    if ($searchQuery !== '') {
+        $escaped = str_replace(['%', '_'], ['\%', '\_'], $searchQuery);
+        $like = $pdo->quote('%' . $escaped . '%');
+        $whereClauses[] = "(titulo LIKE $like OR empresa LIKE $like OR localizacao LIKE $like)";
+    }
+    $where = !empty($whereClauses) ? " WHERE " . implode(" AND ", $whereClauses) : '';
+    $whereStatusAtiva = " WHERE status = 'ativa'" . (!empty($whereClauses) ? " AND " . implode(" AND ", $whereClauses) : '');
+    $whereStatusInativa = " WHERE status = 'inativa'" . (!empty($whereClauses) ? " AND " . implode(" AND ", $whereClauses) : '');
 
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = 30;
     $offset = ($page - 1) * $limit;
 
-    $totalStmt = $pdo->query("SELECT COUNT(*) FROM vagas" . $origemCondicao);
+    $totalStmt = $pdo->query("SELECT COUNT(*) FROM vagas" . $where);
     $totalVagas = (int)$totalStmt->fetchColumn();
 
-    $ativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas WHERE status = 'ativa'" . ($origemFilter !== '' ? " AND origem = " . $pdo->quote($origemFilter) : ''));
+    $ativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas" . $whereStatusAtiva);
     $totalAtivas = (int)$ativasStmt->fetchColumn();
 
-    $inativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas WHERE status = 'inativa'" . ($origemFilter !== '' ? " AND origem = " . $pdo->quote($origemFilter) : ''));
+    $inativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas" . $whereStatusInativa);
     $totalInativas = (int)$inativasStmt->fetchColumn();
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, resumo, status, origem, publicado_em, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em_fmt FROM vagas" . $origemCondicao . " ORDER BY publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, resumo, status, origem, publicado_em, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em_fmt FROM vagas" . $where . " ORDER BY publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -212,18 +233,24 @@ try {
     <div class="stat">Inativas: <strong style="color:#ba1a1a"><?php echo $totalInativas ?></strong></div>
   </div>
 
+  <form class="admin-search" method="get">
+    <input type="search" name="q" class="admin-search-input" placeholder="Buscar por título, empresa ou local..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" autofocus>
+    <?php if ($origemFilter !== ''): ?>
+      <input type="hidden" name="origem" value="<?php echo htmlspecialchars($origemFilter, ENT_QUOTES, 'UTF-8') ?>">
+    <?php endif; ?>
+    <button type="submit" class="btn-search">Buscar</button>
+    <?php if ($searchQuery !== ''): ?>
+      <a href="admin.php<?php echo $origemParam ?>" class="btn-clear">Limpar</a>
+    <?php endif; ?>
+  </form>
+
   <div class="admin-tabs">
-    <a class="admin-tab <?php echo $origemFilter === '' ? 'active' : '' ?>" href="admin.php">Todas</a>
-    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional">Brasil</a>
-    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior">Exterior</a>
+    <a class="admin-tab <?php echo $origemFilter === '' ? 'active' : '' ?>" href="admin.php<?php echo $qParam ?>">Todas</a>
+    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional<?php echo $qParam ?>">Brasil</a>
+    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior<?php echo $qParam ?>">Exterior</a>
   </div>
 
-  <div class="batch-bar" id="batch-bar">
-    <label class="batch-select-all"><input type="checkbox" id="select-all"> Selecionar todas</label>
-    <span class="batch-count" id="batch-count">0 selecionadas</span>
-    <button type="button" class="btn-toggle inativar" id="btn-batch-inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
-    <button type="button" class="btn-toggle ativar" id="btn-batch-ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
-  </div>
+  <div class="batch-bar" id="batch-bar-top"></div>
 
   <?php if (empty($vagas)): ?>
     <div class="admin-empty">Nenhuma vaga encontrada.</div>
@@ -269,10 +296,9 @@ try {
     <?php endforeach; ?>
 
     <?php if ($totalPages > 1): ?>
-      <?php $origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : ''; ?>
       <div class="admin-pagination">
         <?php if ($page > 1): ?>
-          <a href="?page=<?php echo $page - 1 . $origemParam ?>">&laquo;</a>
+          <a href="?page=<?php echo $page - 1 . $origemParam . $qParam ?>">&laquo;</a>
         <?php endif; ?>
         <?php
         $startPage = max(1, $page - 4);
@@ -281,15 +307,24 @@ try {
           <?php if ($i === $page): ?>
             <span class="current"><?php echo $i ?></span>
           <?php else: ?>
-            <a href="?page=<?php echo $i . $origemParam ?>"><?php echo $i ?></a>
+            <a href="?page=<?php echo $i . $origemParam . $qParam ?>"><?php echo $i ?></a>
           <?php endif; ?>
         <?php endfor; ?>
         <?php if ($page < $totalPages): ?>
-          <a href="?page=<?php echo $page + 1 . $origemParam ?>">&raquo;</a>
+          <a href="?page=<?php echo $page + 1 . $origemParam . $qParam ?>">&raquo;</a>
         <?php endif; ?>
       </div>
     <?php endif; ?>
   <?php endif; ?>
+
+  <div class="batch-bar" id="batch-bar-bottom"></div>
+
+  <template id="batch-bar-tpl">
+    <label class="batch-select-all"><input type="checkbox" class="select-all"> Selecionar todas</label>
+    <span class="batch-count">0 selecionadas</span>
+    <button type="button" class="btn-toggle inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
+    <button type="button" class="btn-toggle ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
+  </template>
 
   <form id="batch-form" method="post" style="display:none">
     <input type="hidden" name="batch_ids" id="batch-ids">
@@ -299,23 +334,28 @@ try {
 
 <script>
 (function() {
-  var selectAll = document.getElementById('select-all');
+  var tpl = document.getElementById('batch-bar-tpl');
+  var topBar = document.getElementById('batch-bar-top');
+  var bottomBar = document.getElementById('batch-bar-bottom');
+  topBar.appendChild(tpl.content.cloneNode(true));
+  bottomBar.appendChild(tpl.content.cloneNode(true));
+
   var checks = document.querySelectorAll('.batch-check');
-  var countEl = document.getElementById('batch-count');
-  var batchBar = document.getElementById('batch-bar');
+  var countEls = document.querySelectorAll('.batch-count');
+  var selectAlls = document.querySelectorAll('.select-all');
 
   function updateCount() {
     var checked = document.querySelectorAll('.batch-check:checked').length;
-    countEl.textContent = checked + ' selecionada(s)';
-    if (selectAll) selectAll.checked = checked === checks.length;
+    countEls.forEach(function(el) { el.textContent = checked + ' selecionada(s)'; });
+    selectAlls.forEach(function(el) { el.checked = checked === checks.length; });
   }
 
-  if (selectAll) {
-    selectAll.addEventListener('change', function() {
-      checks.forEach(function(cb) { cb.checked = selectAll.checked; });
+  selectAlls.forEach(function(sa) {
+    sa.addEventListener('change', function() {
+      checks.forEach(function(cb) { cb.checked = sa.checked; });
       updateCount();
     });
-  }
+  });
 
   checks.forEach(function(cb) {
     cb.addEventListener('change', updateCount);
