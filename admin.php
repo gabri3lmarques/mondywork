@@ -38,9 +38,11 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
         $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)));
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . (isset($_GET['origem']) ? '&origem=' . urlencode($_GET['origem']) : ''));
     exit;
 }
+
+$origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
 
 ?><!DOCTYPE html>
 <html lang="pt-BR">
@@ -96,6 +98,11 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
 .admin-pagination a:hover { border-color: #4b41e1; color: #4b41e1; }
 .admin-pagination .current { background: #4b41e1; color: #fff; border-color: #4b41e1; }
 .admin-empty { text-align: center; padding: 64px 16px; color: #45464d; }
+.admin-tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid #c6c6cd; padding-bottom: 0; }
+.admin-tab { padding: 10px 20px; font-size: 14px; font-weight: 600; color: #45464d; border: 1px solid transparent; border-bottom: none; border-radius: 0.5rem 0.5rem 0 0; transition: all 0.2s; margin-bottom: -1px; }
+.admin-tab:hover { color: #4b41e1; }
+.admin-tab.active { color: #4b41e1; background: #fff; border-color: #c6c6cd; }
+.badge-velha { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -136,22 +143,24 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
+    $origemCondicao = $origemFilter !== '' ? " WHERE origem = " . $pdo->quote($origemFilter) : '';
+
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = 30;
     $offset = ($page - 1) * $limit;
 
-    $totalStmt = $pdo->query("SELECT COUNT(*) FROM vagas");
+    $totalStmt = $pdo->query("SELECT COUNT(*) FROM vagas" . $origemCondicao);
     $totalVagas = (int)$totalStmt->fetchColumn();
 
-    $ativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas WHERE status = 'ativa'");
+    $ativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas WHERE status = 'ativa'" . ($origemFilter !== '' ? " AND origem = " . $pdo->quote($origemFilter) : ''));
     $totalAtivas = (int)$ativasStmt->fetchColumn();
 
-    $inativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas WHERE status = 'inativa'");
+    $inativasStmt = $pdo->query("SELECT COUNT(*) FROM vagas WHERE status = 'inativa'" . ($origemFilter !== '' ? " AND origem = " . $pdo->quote($origemFilter) : ''));
     $totalInativas = (int)$inativasStmt->fetchColumn();
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, resumo, status, origem, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em FROM vagas ORDER BY publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, resumo, status, origem, publicado_em, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em_fmt FROM vagas" . $origemCondicao . " ORDER BY publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -177,6 +186,12 @@ try {
     <div class="stat">Inativas: <strong style="color:#ba1a1a"><?php echo $totalInativas ?></strong></div>
   </div>
 
+  <div class="admin-tabs">
+    <a class="admin-tab <?php echo $origemFilter === '' ? 'active' : '' ?>" href="admin.php">Todas</a>
+    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional">Brasil</a>
+    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior">Exterior</a>
+  </div>
+
   <?php if (empty($vagas)): ?>
     <div class="admin-empty">Nenhuma vaga encontrada.</div>
   <?php else:
@@ -195,7 +210,11 @@ try {
           <?php endif; ?>
           <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
           <?php if ($v['publicado_em']): ?>
-            <span><?php echo htmlspecialchars($v['publicado_em'], ENT_QUOTES, 'UTF-8') ?></span>
+            <?php $isOld = strtotime($v['publicado_em']) < strtotime('-90 days'); ?>
+            <span><?php echo htmlspecialchars($v['publicado_em_fmt'], ENT_QUOTES, 'UTF-8') ?></span>
+            <?php if ($isOld): ?>
+              <span class="badge-velha">90+ dias</span>
+            <?php endif; ?>
           <?php endif; ?>
         </div>
         <?php if ($v['resumo']): ?>
@@ -214,9 +233,10 @@ try {
     <?php endforeach; ?>
 
     <?php if ($totalPages > 1): ?>
+      <?php $origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : ''; ?>
       <div class="admin-pagination">
         <?php if ($page > 1): ?>
-          <a href="?page=<?php echo $page - 1 ?>">&laquo;</a>
+          <a href="?page=<?php echo $page - 1 . $origemParam ?>">&laquo;</a>
         <?php endif; ?>
         <?php
         $startPage = max(1, $page - 4);
@@ -225,11 +245,11 @@ try {
           <?php if ($i === $page): ?>
             <span class="current"><?php echo $i ?></span>
           <?php else: ?>
-            <a href="?page=<?php echo $i ?>"><?php echo $i ?></a>
+            <a href="?page=<?php echo $i . $origemParam ?>"><?php echo $i ?></a>
           <?php endif; ?>
         <?php endfor; ?>
         <?php if ($page < $totalPages): ?>
-          <a href="?page=<?php echo $page + 1 ?>">&raquo;</a>
+          <a href="?page=<?php echo $page + 1 . $origemParam ?>">&raquo;</a>
         <?php endif; ?>
       </div>
     <?php endif; ?>
