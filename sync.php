@@ -4,7 +4,6 @@
  */
 require __DIR__ . '/lib/Database.php';
 require __DIR__ . '/lib/VagaRepository.php';
-require __DIR__ . '/lib/ClassificadorVaga.php';
 
 $configFile = __DIR__ . '/config.local.php';
 $dbConfig = require file_exists($configFile) ? $configFile : __DIR__ . '/config.php';
@@ -27,8 +26,6 @@ try {
     ]);
 
     echo "[" . date('Y-m-d H:i:s') . "] Iniciando sincronizacao...\n";
-
-    backfillAreas($pdo);
 
     // ── Orphan cleanup ──
     $todasEmpresas = array_merge(
@@ -149,12 +146,6 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                     continue;
                 }
 
-                $classif = classificarVaga($titulo);
-                if (!$classif['aprovada']) {
-                    echo " - [FORA ESCOPO] $titulo ({$classif['motivo']})\n";
-                    continue;
-                }
-
                 curl_setopt($ch, CURLOPT_URL, "$urlBase/$jobId?company=$slug");
                 $resDet = curl_exec($ch);
 
@@ -178,12 +169,6 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                     continue;
                 }
 
-                $classif = classificarVaga($titulo, $descricao);
-                if (!$classif['aprovada']) {
-                    echo " - [FORA ESCOPO] $titulo ({$classif['motivo']})\n";
-                    continue;
-                }
-
                 upsertVaga($pdo, [
                     'vaga_id_externo' => $jobId,
                     'titulo'          => $titulo,
@@ -195,10 +180,10 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                     'resumo'          => $resumo,
                     'publicado_em'    => $publicadoEm,
                     'origem'          => $origem,
-                    'area'            => $classif['area'],
+                    'area'            => null,
                 ]);
 
-                echo " - [NOVA] {$classif['area']} :: $titulo\n";
+                echo " - [NOVA] $titulo\n";
                 usleep(200000);
             }
         }
@@ -313,12 +298,6 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
                 continue;
             }
 
-            $classif = classificarVaga($titulo);
-            if (!$classif['aprovada']) {
-                echo " - [FORA ESCOPO] $titulo ({$classif['motivo']})\n";
-                continue;
-            }
-
             $detailRes = fetchAshbyGraphQL(
                 $ch,
                 'ApiJobPosting',
@@ -342,12 +321,6 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
                 ? date('Y-m-d H:i:s', strtotime($detalhe['publishedDate']))
                 : null;
 
-            $classif = classificarVaga($titulo, $descricao);
-            if (!$classif['aprovada']) {
-                echo " - [FORA ESCOPO] $titulo ({$classif['motivo']})\n";
-                continue;
-            }
-
             upsertVaga($pdo, [
                 'vaga_id_externo' => $jobIdPrefixed,
                 'titulo'          => $titulo,
@@ -359,39 +332,13 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
                 'resumo'          => $resumo,
                 'publicado_em'    => $publicadoEm,
                 'origem'          => $origem,
-                'area'            => $classif['area'],
+                'area'            => null,
             ]);
 
-            echo " - [NOVA] {$classif['area']} :: $titulo\n";
+            echo " - [NOVA] $titulo\n";
             usleep(500000);
         }
     }
 }
 
-// ─────────────────────────────────────────────
-// Backfill de áreas para vagas existentes
-// ─────────────────────────────────────────────
 
-function backfillAreas(PDO $pdo): void
-{
-    $stmt = $pdo->query("SELECT id, vaga_id_externo, titulo, descricao FROM vagas WHERE area IS NULL AND status = 'ativa' LIMIT 500");
-    $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (empty($vagas)) {
-        return;
-    }
-
-    $count = 0;
-    foreach ($vagas as $vaga) {
-        $classif = classificarVaga($vaga['titulo'], $vaga['descricao'] ?? '');
-        if (!$classif['aprovada']) {
-            $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE id = :id")->execute([':id' => $vaga['id']]);
-            $count++;
-        } else {
-            $pdo->prepare("UPDATE vagas SET area = :area WHERE id = :id")->execute([':id' => $vaga['id'], ':area' => $classif['area']]);
-            $count++;
-        }
-    }
-
-    echo "[BACKFILL] $count vagas existentes processadas (area/null).\n";
-}
