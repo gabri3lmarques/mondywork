@@ -1,6 +1,6 @@
 <?php
 /**
- * Worker de Sincronização - InHire + Ashby
+ * Worker de Sincronização - InHire + Ashby + Greenhouse
  */
 require __DIR__ . '/lib/Database.php';
 require __DIR__ . '/lib/VagaRepository.php';
@@ -11,8 +11,9 @@ $dbConfig = require file_exists($configFile) ? $configFile : __DIR__ . '/config.
 $empresasInhireNacional  = require __DIR__ . '/config/empresas_inhire_nacional.php';
 $empresasInhireExterior  = require __DIR__ . '/config/empresas_inhire_exterior.php';
 $empresasAshbyNacional   = require __DIR__ . '/config/empresas_ashby_nacional.php';
-$empresasAshbyExterior   = require __DIR__ . '/config/empresas_ashby_exterior.php';
-$empresasIgnorar         = require __DIR__ . '/config/empresas_ignorar.php';
+$empresasAshbyExterior    = require __DIR__ . '/config/empresas_ashby_exterior.php';
+$empresasGreenhouseExterior = require __DIR__ . '/config/empresas_greenhouse_exterior.php';
+$empresasIgnorar          = require __DIR__ . '/config/empresas_ignorar.php';
 
 try {
     $pdo = conectarBanco($dbConfig);
@@ -33,6 +34,7 @@ try {
         array_values($empresasInhireExterior),
         array_values($empresasAshbyNacional),
         array_values($empresasAshbyExterior),
+        array_values($empresasGreenhouseExterior),
         array_values($empresasIgnorar)
     );
     if (!empty($todasEmpresas)) {
@@ -50,6 +52,7 @@ try {
     $empresasInhireExterior = array_filter($empresasInhireExterior, fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasAshbyNacional  = array_filter($empresasAshbyNacional,  fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasAshbyExterior  = array_filter($empresasAshbyExterior,  fn($nome) => !in_array($nome, $empresasIgnorar));
+    $empresasGreenhouseExterior = array_filter($empresasGreenhouseExterior, fn($nome) => !in_array($nome, $empresasIgnorar));
 
     // ── InHire Nacional ──
     if (!empty($empresasInhireNacional)) {
@@ -69,6 +72,11 @@ try {
     // ── Ashby Exterior ──
     if (!empty($empresasAshbyExterior)) {
         sincronizarAshby($pdo, $ch, $empresasAshbyExterior, $dbConfig, 'exterior');
+    }
+
+    // ── Greenhouse Exterior ──
+    if (!empty($empresasGreenhouseExterior)) {
+        sincronizarGreenhouse($pdo, $ch, $empresasGreenhouseExterior, $dbConfig, 'exterior');
     }
 
     curl_close($ch);
@@ -337,6 +345,89 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
 
             echo " - [NOVA] $titulo\n";
             usleep(500000);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────
+// Greenhouse (REST)
+// ─────────────────────────────────────────────
+
+function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'exterior'): void
+{
+    foreach ($empresas as $boardToken => $nomeReal) {
+        echo "\n[Greenhouse] Buscando: $nomeReal...\n";
+        manterConexao($pdo, $dbConfig);
+
+        $url = "https://boards-api.greenhouse.io/v1/boards/{$boardToken}/jobs?content=true";
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+            CURLOPT_POST => false,
+        ]);
+
+        $res = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($httpCode !== 200) {
+            echo " - [ERRO HTTP $httpCode] Falha ao acessar vagas. Pulando...\n";
+            continue;
+        }
+
+        $dados = json_decode($res, true);
+        $vagasNaAPI = $dados['jobs'] ?? [];
+
+        $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
+        $stmtCheck->execute([':empresa' => $nomeReal]);
+        $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
+
+        $idsNaAPI = array_map(fn($v) => "greenhouse-{$v['id']}", $vagasNaAPI);
+        $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
+
+        if (!empty($idsParaInativar)) {
+            $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
+            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa'");
+            $stmtInativar->execute(array_values($idsParaInativar));
+            echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
+        }
+
+        if (empty($vagasNaAPI)) {
+            echo " - Nenhuma vaga ativa encontrada.\n";
+            continue;
+        }
+
+        foreach ($vagasNaAPI as $vaga) {
+            $jobIdPrefixed = "greenhouse-{$vaga['id']}";
+            $titulo = $vaga['title'];
+
+            if (in_array($jobIdPrefixed, $idsNoBanco)) {
+                echo " - [MANTIDA] $titulo\n";
+                continue;
+            }
+
+            $publicadoEm = isset($vaga['first_published'])
+                ? date('Y-m-d H:i:s', strtotime($vaga['first_published']))
+                : null;
+
+            $descricao = $vaga['content'] ?? 'Descricao nao fornecida.';
+            $resumo = extrairResumo($descricao);
+
+            upsertVaga($pdo, [
+                'vaga_id_externo' => $jobIdPrefixed,
+                'titulo'          => $titulo,
+                'empresa'         => $nomeReal,
+                'localizacao'     => $vaga['location']['name'] ?? null,
+                'modelo_trabalho' => null,
+                'url_vaga'        => $vaga['absolute_url'] ?? "https://job-boards.greenhouse.io/{$boardToken}/jobs/{$vaga['id']}",
+                'descricao'       => $descricao,
+                'resumo'          => $resumo,
+                'publicado_em'    => $publicadoEm,
+                'origem'          => $origem,
+                'area'            => null,
+            ]);
+
+            echo " - [NOVA] $titulo\n";
+            usleep(200000);
         }
     }
 }
