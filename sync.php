@@ -8,12 +8,30 @@ require __DIR__ . '/lib/VagaRepository.php';
 $configFile = __DIR__ . '/config.local.php';
 $dbConfig = require file_exists($configFile) ? $configFile : __DIR__ . '/config.php';
 
+$ignorar_todas = false;
 $empresasInhireNacional  = require __DIR__ . '/config/empresas_inhire_nacional.php';
+$ignorarInhireNacional = $ignorar_todas;
+
+$ignorar_todas = false;
 $empresasInhireExterior  = require __DIR__ . '/config/empresas_inhire_exterior.php';
+$ignorarInhireExterior = $ignorar_todas;
+
+$ignorar_todas = false;
 $empresasAshbyNacional   = require __DIR__ . '/config/empresas_ashby_nacional.php';
+$ignorarAshbyNacional = $ignorar_todas;
+
+$ignorar_todas = false;
 $empresasAshbyExterior    = require __DIR__ . '/config/empresas_ashby_exterior.php';
+$ignorarAshbyExterior = $ignorar_todas;
+
+$ignorar_todas = false;
 $empresasGreenhouseNacional = require __DIR__ . '/config/empresas_greenhouse_nacional.php';
+$ignorarGreenhouseNacional = $ignorar_todas;
+
+$ignorar_todas = false;
 $empresasGreenhouseExterior = require __DIR__ . '/config/empresas_greenhouse_exterior.php';
+$ignorarGreenhouseExterior = $ignorar_todas;
+
 $empresasIgnorar          = require __DIR__ . '/config/empresas_ignorar.php';
 
 try {
@@ -56,6 +74,14 @@ try {
     $empresasAshbyExterior  = array_filter($empresasAshbyExterior,  fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasGreenhouseNacional = array_filter($empresasGreenhouseNacional, fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasGreenhouseExterior = array_filter($empresasGreenhouseExterior, fn($nome) => !in_array($nome, $empresasIgnorar));
+
+    // ── Aplicar ignorar_todas ──
+    if ($ignorarInhireNacional)       { $empresasInhireNacional = [];       echo "[CONFIG] InHire Nacional ignorado.\n"; }
+    if ($ignorarInhireExterior)       { $empresasInhireExterior = [];       echo "[CONFIG] InHire Exterior ignorado.\n"; }
+    if ($ignorarAshbyNacional)        { $empresasAshbyNacional = [];        echo "[CONFIG] Ashby Nacional ignorado.\n"; }
+    if ($ignorarAshbyExterior)        { $empresasAshbyExterior = [];        echo "[CONFIG] Ashby Exterior ignorado.\n"; }
+    if ($ignorarGreenhouseNacional)   { $empresasGreenhouseNacional = [];   echo "[CONFIG] Greenhouse Nacional ignorado.\n"; }
+    if ($ignorarGreenhouseExterior)   { $empresasGreenhouseExterior = [];   echo "[CONFIG] Greenhouse Exterior ignorado.\n"; }
 
     // ── InHire Nacional ──
     if (!empty($empresasInhireNacional)) {
