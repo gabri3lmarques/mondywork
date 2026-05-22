@@ -62,6 +62,51 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
     exit;
 }
 
+$mensagemCadastro = '';
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_vaga'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+
+        $vagaId = 'manual-' . time() . '-' . bin2hex(random_bytes(4));
+        $titulo = trim($_POST['titulo'] ?? '');
+        $empresa = trim($_POST['empresa'] ?? '');
+        $localizacao = trim($_POST['localizacao'] ?? '');
+        $modeloTrabalho = trim($_POST['modelo_trabalho'] ?? '');
+        $urlVaga = trim($_POST['url_vaga'] ?? '');
+        $descricao = trim($_POST['descricao'] ?? '');
+        $resumo = trim($_POST['resumo'] ?? '');
+        $publicadoEm = date('Y-m-d H:i:s');
+        $origem = $_POST['origem'] ?? 'nacional';
+        $area = trim($_POST['area'] ?? '') ?: null;
+
+        $stmt = $pdo->prepare("INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, area) VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'ativa', :origem, :area)");
+        $stmt->execute([
+            ':id'        => $vagaId,
+            ':titulo'    => $titulo,
+            ':empresa'   => $empresa,
+            ':local'     => $localizacao ?: null,
+            ':modelo'    => $modeloTrabalho ?: null,
+            ':url'       => $urlVaga ?: null,
+            ':desc'      => $descricao,
+            ':resumo'    => $resumo,
+            ':publicado' => $publicadoEm ?: null,
+            ':origem'    => $origem,
+            ':area'      => $area,
+        ]);
+
+        $mensagemCadastro = 'Vaga cadastrada com sucesso!';
+    } catch (Exception $e) {
+        $mensagemCadastro = 'Erro ao cadastrar: ' . $e->getMessage();
+    }
+}
+
+$tab = isset($_GET['tab']) && $_GET['tab'] === 'cadastro' ? 'cadastro' : 'lista';
+
 $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
 
@@ -220,6 +265,100 @@ try {
 ?>
 
 <main class="admin-main">
+  <div class="admin-tabs">
+    <a class="admin-tab <?php echo $tab === 'lista' ? 'active' : '' ?>" href="admin.php">Vagas</a>
+    <a class="admin-tab <?php echo $tab === 'cadastro' ? 'active' : '' ?>" href="admin.php?tab=cadastro">Cadastrar Vaga</a>
+    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional<?php echo $qParam ?>">Brasil</a>
+    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior<?php echo $qParam ?>">Exterior</a>
+  </div>
+
+  <?php if ($tab === 'cadastro'): ?>
+
+  <div class="admin-header">
+    <div>
+      <h1>Cadastrar Vaga</h1>
+      <span>Preencha os campos para criar uma nova vaga manualmente</span>
+    </div>
+  </div>
+
+  <?php if ($mensagemCadastro): ?>
+    <div class="admin-card" style="margin-bottom:16px;padding:16px 24px;border-left:4px solid <?php echo str_starts_with($mensagemCadastro, 'Erro') ? '#ba1a1a' : '#1a7d1a' ?>">
+      <p style="font-weight:600;margin:0;color:<?php echo str_starts_with($mensagemCadastro, 'Erro') ? '#ba1a1a' : '#1a7d1a' ?>"><?php echo htmlspecialchars($mensagemCadastro, ENT_QUOTES, 'UTF-8') ?></p>
+    </div>
+  <?php endif; ?>
+
+  <div class="admin-card">
+    <form method="post" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Título *</label>
+          <input type="text" name="titulo" required class="admin-search-input" style="width:100%">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Empresa *</label>
+          <input type="text" name="empresa" required class="admin-search-input" style="width:100%">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Localização</label>
+          <input type="text" name="localizacao" class="admin-search-input" style="width:100%" placeholder="Ex: São Paulo, SP">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Modelo de Trabalho</label>
+          <select name="modelo_trabalho" class="admin-search-input" style="width:100%">
+            <option value="">Selecione</option>
+            <option value="Remote">Remoto</option>
+            <option value="Hybrid">Híbrido</option>
+            <option value="On-site">Presencial</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">URL da Vaga</label>
+          <input type="url" name="url_vaga" class="admin-search-input" style="width:100%" placeholder="https://...">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Origem *</label>
+          <select name="origem" required class="admin-search-input" style="width:100%">
+            <option value="nacional">Brasil</option>
+            <option value="exterior">Exterior</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Área</label>
+          <select name="area" class="admin-search-input" style="width:100%">
+            <option value="">Selecione</option>
+            <option value="dev">Desenvolvimento / Software</option>
+            <option value="engenharia">Engenharia</option>
+            <option value="dados">Dados / BI / IA</option>
+            <option value="design">UX / UI / Product Design</option>
+            <option value="marketing">Marketing Digital / Growth</option>
+            <option value="social-media">Social Media / Conteúdo</option>
+            <option value="produto">Produto (PM/PO)</option>
+            <option value="agile">Agilidade / Scrum</option>
+            <option value="gestao">Gestão / Projetos</option>
+            <option value="vendas">Comercial / Vendas</option>
+            <option value="customer-success">Customer Success / CX</option>
+            <option value="suporte">Suporte Técnico / Help Desk</option>
+            <option value="qa">QA / Testes</option>
+            <option value="infra">Infraestrutura / Cloud / DevOps</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo</label>
+        <textarea name="resumo" class="admin-search-input" style="width:100%;min-height:60px;resize:vertical" placeholder="Breve resumo da vaga..."></textarea>
+      </div>
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Descrição (HTML)</label>
+        <textarea name="descricao" class="admin-search-input" style="width:100%;min-height:200px;resize:vertical;font-family:monospace" placeholder="<p>Descrição da vaga em HTML...</p>"></textarea>
+      </div>
+      <div>
+        <button type="submit" name="cadastrar_vaga" class="btn-search" style="font-size:15px;padding:12px 32px">Cadastrar Vaga</button>
+      </div>
+    </form>
+  </div>
+
+  <?php else: ?>
+
   <div class="admin-header">
     <div>
       <h1>Vagas</h1>
@@ -243,12 +382,6 @@ try {
       <a href="admin.php<?php echo $origemParam ?>" class="btn-clear">Limpar</a>
     <?php endif; ?>
   </form>
-
-  <div class="admin-tabs">
-    <a class="admin-tab <?php echo $origemFilter === '' ? 'active' : '' ?>" href="admin.php<?php echo $qParam ?>">Todas</a>
-    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional<?php echo $qParam ?>">Brasil</a>
-    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior<?php echo $qParam ?>">Exterior</a>
-  </div>
 
   <div class="batch-bar" id="batch-bar-top"></div>
 
@@ -330,6 +463,8 @@ try {
     <input type="hidden" name="batch_ids" id="batch-ids">
     <input type="hidden" name="batch_action" id="batch-action">
   </form>
+
+  <?php endif; ?>
 </main>
 
 <script>

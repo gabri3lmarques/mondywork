@@ -12,6 +12,7 @@ $empresasInhireNacional  = require __DIR__ . '/config/empresas_inhire_nacional.p
 $empresasInhireExterior  = require __DIR__ . '/config/empresas_inhire_exterior.php';
 $empresasAshbyNacional   = require __DIR__ . '/config/empresas_ashby_nacional.php';
 $empresasAshbyExterior    = require __DIR__ . '/config/empresas_ashby_exterior.php';
+$empresasGreenhouseNacional = require __DIR__ . '/config/empresas_greenhouse_nacional.php';
 $empresasGreenhouseExterior = require __DIR__ . '/config/empresas_greenhouse_exterior.php';
 $empresasIgnorar          = require __DIR__ . '/config/empresas_ignorar.php';
 
@@ -34,6 +35,7 @@ try {
         array_values($empresasInhireExterior),
         array_values($empresasAshbyNacional),
         array_values($empresasAshbyExterior),
+        array_values($empresasGreenhouseNacional),
         array_values($empresasGreenhouseExterior),
         array_values($empresasIgnorar)
     );
@@ -52,6 +54,7 @@ try {
     $empresasInhireExterior = array_filter($empresasInhireExterior, fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasAshbyNacional  = array_filter($empresasAshbyNacional,  fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasAshbyExterior  = array_filter($empresasAshbyExterior,  fn($nome) => !in_array($nome, $empresasIgnorar));
+    $empresasGreenhouseNacional = array_filter($empresasGreenhouseNacional, fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasGreenhouseExterior = array_filter($empresasGreenhouseExterior, fn($nome) => !in_array($nome, $empresasIgnorar));
 
     // ── InHire Nacional ──
@@ -72,6 +75,11 @@ try {
     // ── Ashby Exterior ──
     if (!empty($empresasAshbyExterior)) {
         sincronizarAshby($pdo, $ch, $empresasAshbyExterior, $dbConfig, 'exterior');
+    }
+
+    // ── Greenhouse Nacional ──
+    if (!empty($empresasGreenhouseNacional)) {
+        sincronizarGreenhouse($pdo, $ch, $empresasGreenhouseNacional, $dbConfig, 'nacional');
     }
 
     // ── Greenhouse Exterior ──
