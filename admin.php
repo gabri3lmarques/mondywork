@@ -105,7 +105,52 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadast
     }
 }
 
-$tab = isset($_GET['tab']) && $_GET['tab'] === 'cadastro' ? 'cadastro' : 'lista';
+$mensagemEdicao = '';
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_vaga'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+
+        $id = (int)($_POST['id'] ?? 0);
+        $titulo = trim($_POST['titulo'] ?? '');
+        $empresa = trim($_POST['empresa'] ?? '');
+        $localizacao = trim($_POST['localizacao'] ?? '');
+        $modeloTrabalho = trim($_POST['modelo_trabalho'] ?? '');
+        $urlVaga = trim($_POST['url_vaga'] ?? '');
+        $descricao = trim($_POST['descricao'] ?? '');
+        $resumo = trim($_POST['resumo'] ?? '');
+        $publicadoEm = trim($_POST['publicado_em'] ?? '') ?: date('Y-m-d H:i:s');
+        $origem = $_POST['origem'] ?? 'nacional';
+        $area = trim($_POST['area'] ?? '') ?: null;
+        $status = $_POST['status'] ?? 'ativa';
+
+        $stmt = $pdo->prepare("UPDATE vagas SET titulo = :titulo, empresa = :empresa, localizacao = :local, modelo_trabalho = :modelo, url_vaga = :url, descricao = :desc, resumo = :resumo, publicado_em = :publicado, origem = :origem, area = :area, status = :status WHERE id = :id");
+        $stmt->execute([
+            ':id'        => $id,
+            ':titulo'    => $titulo,
+            ':empresa'   => $empresa,
+            ':local'     => $localizacao ?: null,
+            ':modelo'    => $modeloTrabalho ?: null,
+            ':url'       => $urlVaga ?: null,
+            ':desc'      => $descricao,
+            ':resumo'    => $resumo,
+            ':publicado' => $publicadoEm,
+            ':origem'    => $origem,
+            ':area'      => $area,
+            ':status'    => $status,
+        ]);
+
+        $mensagemEdicao = 'Vaga atualizada com sucesso!';
+    } catch (Exception $e) {
+        $mensagemEdicao = 'Erro ao atualizar: ' . $e->getMessage();
+    }
+}
+
+$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar']) ? $_GET['tab'] : 'lista';
 
 $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -252,11 +297,23 @@ try {
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, resumo, status, origem, publicado_em, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em_fmt FROM vagas" . $where . " ORDER BY publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, area, publicado_em, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em_fmt FROM vagas" . $where . " ORDER BY publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $vagaEditar = null;
+    if ($tab === 'editar' && isset($_GET['id'])) {
+        $editId = (int)$_GET['id'];
+        $stmtEdit = $pdo->prepare("SELECT * FROM vagas WHERE id = :id LIMIT 1");
+        $stmtEdit->execute([':id' => $editId]);
+        $vagaEditar = $stmtEdit->fetch(PDO::FETCH_ASSOC);
+        if (!$vagaEditar) {
+            $mensagemEdicao = 'Vaga não encontrada.';
+            $tab = 'lista';
+        }
+    }
 
 } catch (Exception $e) {
     echo '<div class="admin-main"><p style="color:#ba1a1a;">Erro ao conectar ao banco de dados.</p></div>';
@@ -357,6 +414,97 @@ try {
     </form>
   </div>
 
+  <?php elseif ($tab === 'editar' && $vagaEditar): ?>
+
+  <div class="admin-header">
+    <div>
+      <h1>Editar Vaga</h1>
+      <span>ID: <?php echo (int)$vagaEditar['id'] ?> — <?php echo htmlspecialchars($vagaEditar['vaga_id_externo'], ENT_QUOTES, 'UTF-8') ?></span>
+    </div>
+    <a href="admin.php<?php echo $origemParam . $qParam ?>" class="btn-clear" style="font-size:13px">&larr; Voltar</a>
+  </div>
+
+  <?php if ($mensagemEdicao): ?>
+    <div class="admin-card" style="margin-bottom:16px;padding:16px 24px;border-left:4px solid <?php echo str_starts_with($mensagemEdicao, 'Erro') ? '#ba1a1a' : '#1a7d1a' ?>">
+      <p style="font-weight:600;margin:0;color:<?php echo str_starts_with($mensagemEdicao, 'Erro') ? '#ba1a1a' : '#1a7d1a' ?>"><?php echo htmlspecialchars($mensagemEdicao, ENT_QUOTES, 'UTF-8') ?></p>
+    </div>
+  <?php endif; ?>
+
+  <div class="admin-card">
+    <form method="post" style="display:flex;flex-direction:column;gap:16px">
+      <input type="hidden" name="id" value="<?php echo (int)$vagaEditar['id'] ?>">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Título *</label>
+          <input type="text" name="titulo" required class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($vagaEditar['titulo'], ENT_QUOTES, 'UTF-8') ?>">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Empresa *</label>
+          <input type="text" name="empresa" required class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($vagaEditar['empresa'], ENT_QUOTES, 'UTF-8') ?>">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Localização</label>
+          <input type="text" name="localizacao" class="admin-search-input" style="width:100%" placeholder="Ex: São Paulo, SP" value="<?php echo htmlspecialchars($vagaEditar['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Modelo de Trabalho</label>
+          <select name="modelo_trabalho" class="admin-search-input" style="width:100%">
+            <option value="">Selecione</option>
+            <option value="Remote" <?php echo $vagaEditar['modelo_trabalho'] === 'Remote' ? 'selected' : '' ?>>Remoto</option>
+            <option value="Hybrid" <?php echo $vagaEditar['modelo_trabalho'] === 'Hybrid' ? 'selected' : '' ?>>Híbrido</option>
+            <option value="On-site" <?php echo $vagaEditar['modelo_trabalho'] === 'On-site' ? 'selected' : '' ?>>Presencial</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">URL da Vaga</label>
+          <input type="url" name="url_vaga" class="admin-search-input" style="width:100%" placeholder="https://..." value="<?php echo htmlspecialchars($vagaEditar['url_vaga'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Publicado em</label>
+          <input type="date" name="publicado_em" class="admin-search-input" style="width:100%" value="<?php echo $vagaEditar['publicado_em'] ? date('Y-m-d', strtotime($vagaEditar['publicado_em'])) : '' ?>">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Origem *</label>
+          <select name="origem" required class="admin-search-input" style="width:100%">
+            <option value="nacional" <?php echo $vagaEditar['origem'] === 'nacional' ? 'selected' : '' ?>>Brasil</option>
+            <option value="exterior" <?php echo $vagaEditar['origem'] === 'exterior' ? 'selected' : '' ?>>Exterior</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Área</label>
+          <select name="area" class="admin-search-input" style="width:100%">
+            <option value="">Selecione</option>
+            <?php $areas = ['dev' => 'Desenvolvimento / Software', 'engenharia' => 'Engenharia', 'dados' => 'Dados / BI / IA', 'design' => 'UX / UI / Product Design', 'marketing' => 'Marketing Digital / Growth', 'social-media' => 'Social Media / Conteúdo', 'produto' => 'Produto (PM/PO)', 'agile' => 'Agilidade / Scrum', 'gestao' => 'Gestão / Projetos', 'vendas' => 'Comercial / Vendas', 'customer-success' => 'Customer Success / CX', 'suporte' => 'Suporte Técnico / Help Desk', 'qa' => 'QA / Testes', 'infra' => 'Infraestrutura / Cloud / DevOps']; ?>
+            <?php foreach ($areas as $v => $r): ?>
+              <option value="<?php echo $v ?>" <?php echo $vagaEditar['area'] === $v ? 'selected' : '' ?>><?php echo $r ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Status</label>
+          <select name="status" class="admin-search-input" style="width:100%">
+            <option value="ativa" <?php echo $vagaEditar['status'] === 'ativa' ? 'selected' : '' ?>>Ativa</option>
+            <option value="inativa" <?php echo $vagaEditar['status'] === 'inativa' ? 'selected' : '' ?>>Inativa</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo</label>
+          <textarea name="resumo" class="admin-search-input" style="width:100%;min-height:60px;resize:vertical" placeholder="Breve resumo da vaga..."><?php echo htmlspecialchars($vagaEditar['resumo'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Descrição (HTML)</label>
+        <textarea name="descricao" class="admin-search-input" style="width:100%;min-height:200px;resize:vertical;font-family:monospace"><?php echo htmlspecialchars($vagaEditar['descricao'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button type="submit" name="editar_vaga" class="btn-search" style="font-size:15px;padding:12px 32px">Salvar Alterações</button>
+        <a href="admin.php<?php echo $origemParam . $qParam ?>" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
   <?php else: ?>
 
   <div class="admin-header">
@@ -417,6 +565,7 @@ try {
           <p style="font-size:14px;line-height:20px;color:#45464d;margin-top:12px"><?php echo htmlspecialchars(mb_substr($v['resumo'], 0, 200), ENT_QUOTES, 'UTF-8') ?><?php echo mb_strlen($v['resumo']) > 200 ? '...' : '' ?></p>
         <?php endif; ?>
         <div class="admin-card-actions">
+          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $qParam ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
           <form method="post" style="margin:0">
             <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
             <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
