@@ -409,7 +409,7 @@ function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string
                 ? date('Y-m-d H:i:s', strtotime($vaga['first_published']))
                 : null;
 
-            $descricao = $vaga['content'] ?? 'Descricao nao fornecida.';
+            $descricao = html_entity_decode($vaga['content'] ?? 'Descricao nao fornecida.', ENT_QUOTES, 'UTF-8');
             $resumo = extrairResumo($descricao);
 
             upsertVaga($pdo, [
