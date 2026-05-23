@@ -400,7 +400,8 @@ try {
             <option value="">Selecione</option>
             <option value="dev">Desenvolvimento / Software</option>
             <option value="engenharia">Engenharia</option>
-            <option value="dados">Dados / BI / IA</option>
+            <option value="dados">Dados / BI</option>
+            <option value="ia">IA / Machine Learning</option>
             <option value="design">UX / UI / Product Design</option>
             <option value="marketing">Marketing Digital / Growth</option>
             <option value="social-media">Social Media / Conteúdo</option>
@@ -493,7 +494,7 @@ try {
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Área</label>
           <select name="area" class="admin-search-input" style="width:100%">
             <option value="">Selecione</option>
-            <?php $areas = ['dev' => 'Desenvolvimento / Software', 'engenharia' => 'Engenharia', 'dados' => 'Dados / BI / IA', 'design' => 'UX / UI / Product Design', 'marketing' => 'Marketing Digital / Growth', 'social-media' => 'Social Media / Conteúdo', 'produto' => 'Produto (PM/PO)', 'agile' => 'Agilidade / Scrum', 'gestao' => 'Gestão / Projetos', 'vendas' => 'Comercial / Vendas', 'customer-success' => 'Customer Success / CX', 'suporte' => 'Suporte Técnico / Help Desk', 'qa' => 'QA / Testes', 'infra' => 'Infraestrutura / Cloud / DevOps']; ?>
+            <?php $areas = ['dev' => 'Desenvolvimento / Software', 'engenharia' => 'Engenharia', 'dados' => 'Dados / BI', 'ia' => 'IA / Machine Learning', 'design' => 'UX / UI / Product Design', 'marketing' => 'Marketing Digital / Growth', 'social-media' => 'Social Media / Conteúdo', 'produto' => 'Produto (PM/PO)', 'agile' => 'Agilidade / Scrum', 'gestao' => 'Gestão / Projetos', 'vendas' => 'Comercial / Vendas', 'customer-success' => 'Customer Success / CX', 'suporte' => 'Suporte Técnico / Help Desk', 'qa' => 'QA / Testes', 'infra' => 'Infraestrutura / Cloud / DevOps']; ?>
             <?php foreach ($areas as $v => $r): ?>
               <option value="<?php echo $v ?>" <?php echo $vagaEditar['area'] === $v ? 'selected' : '' ?>><?php echo $r ?></option>
             <?php endforeach; ?>
