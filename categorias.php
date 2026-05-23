@@ -131,14 +131,14 @@ $categorias_mondywork = [
         '"customer success"', '"sucesso do cliente"', 'cs', '"analista de cs"', '"cs manager"', '"gerente de sucesso do cliente"', 
         '"client success"', '"customer experience"', '"experiência do cliente"', 'cx', '"analista de cx"', '"especialista em cx"', 
         '"cx manager"', '"customer support"', '"atendimento b2b"', '"suporte ao cliente b2b"', '"customer onboarding"', 
-        '"voice of customer"', 'voc', '"customer journey"'
+        '"voice of customer"', 'voc', '"customer journey"', 'customer'
     ],
 
     'Suporte Técnico' => [
         '"suporte técnico"', '"technical support"', '"help desk"', '"service desk"', 'helpdesk', 'servicedesk', 
         '"analista de suporte"', '"it support"', '"suporte de ti"', '"analista de ti"', '"it analyst"', 
         '"suporte n1"', '"suporte n2"', '"suporte n3"', '"field service"', 'sysadmin', '"administrador de sistemas"', 
-        '"analista de infraestrutura e suporte"', '"suporte de aplicações"', '"application support", "support", "suporte"'
+        '"analista de infraestrutura e suporte"', '"suporte de aplicações"', '"application support"', 'support', 'suporte'
     ],
 
     'QA/Testes' => [
@@ -152,7 +152,7 @@ $categorias_mondywork = [
 
     'Infra/DevOps' => [
         // DevOps e Cloud
-        'devops', '"cloud engineer"', '"engenheiro cloud"', '"engenheira cloud"', '"arquiteto cloud"', '"cloud architect"', 
+        'devops', 'cloud', 'infra', '"cloud engineer"', '"engenheiro cloud"', '"engenheira cloud"', '"arquiteto cloud"', '"cloud architect"', 
         '"cloud computing"', 'sre', '"site reliability engineer"', '"engenheiro de confiabilidade"', 'sysops', '"platform engineer"', 
         '"engenheiro de plataforma"', 'finops', 'aws', 'azure', 'gcp', 'kubernetes', 'docker', 'k8s', 'terraform', 'ansible', 'serverless',
         // Redes, Sistemas e DBAs
