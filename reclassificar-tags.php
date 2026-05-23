@@ -8,9 +8,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-require __DIR__ . '/lib/Database.php';
-require __DIR__ . '/lib/VagaRepository.php';
-require __DIR__ . '/categorias.php';
+require_once __DIR__ . '/lib/Database.php';
+require_once __DIR__ . '/lib/VagaRepository.php';
 
 $configFile = __DIR__ . '/config.local.php';
 $dbConfig = require file_exists($configFile) ? $configFile : __DIR__ . '/config.php';
