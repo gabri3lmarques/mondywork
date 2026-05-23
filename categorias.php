@@ -65,7 +65,7 @@ $categorias_mondywork = [
 
     'Design' => [
         // Design de Produto e Interfaces
-        'ux', 'ui', '"ux/ui"', '"product design"', '"product designer"', '"designer de produto"', '"ui designer"', '"ux designer"', 
+        'ux', 'ui', '"ux/ui"', 'designer', 'motion', '"product design"', '"product designer"', '"designer de produto"', '"ui designer"', '"ux designer"', 
         '"web designer"', '"web design"', '"interaction designer"', '"designer de interação"', '"design de experiência"', 
         // Pesquisa e Experiência
         '"ux research"', '"ux researcher"', '"pesquisador de ux"', '"customer experience designer"', '"ux writer"', '"ux writing"', 
