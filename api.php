@@ -118,15 +118,23 @@ try {
         return;
     }
 
-    $areaCondicao = $area !== '' ? " AND area = " . $pdo->quote($area) : "";
+    $areaCondicao = '';
+    $areaParams = [];
+    if ($area !== '') {
+        $areaCondicao = ' AND area = :area';
+        $areaParams[':area'] = $area;
+    }
 
     $queryCorrigida = null;
 
     if ($q !== '') {
         if ($modo === 'descricao') {
-            $likeTerm = $pdo->quote('%' . $q . '%');
-            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND (descricao LIKE $likeTerm OR resumo LIKE $likeTerm)");
+            $likeQ = '%' . $q . '%';
+
+            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND (descricao LIKE :like_q OR resumo LIKE :like_q)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+            foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            $totalStmt->bindValue(':like_q', $likeQ, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
 
@@ -135,14 +143,14 @@ try {
                     WHERE status = 'ativa'
                     AND origem = :origem
                     $areaCondicao
-                    AND (descricao LIKE $likeTerm OR resumo LIKE $likeTerm)
+                    AND (descricao LIKE :like_q OR resumo LIKE :like_q)
                     ORDER BY vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         } else {
-            $searchTerm = $pdo->quote($q);
-
-            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)");
+            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q IN BOOLEAN MODE)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+            foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            $totalStmt->bindValue(':search_q', $q, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
 
@@ -150,28 +158,32 @@ try {
                 [$corrigida, $houveCorrecao] = corrigirQueryFuzzy($q, $pdo);
                 if ($houveCorrecao) {
                     $queryCorrigida = $corrigida;
-                    $searchTerm = $pdo->quote($corrigida);
 
-                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)");
+                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q IN BOOLEAN MODE)");
                     $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+                    foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+                    $totalStmt->bindValue(':search_q', $corrigida, PDO::PARAM_STR);
                     $totalStmt->execute();
                     $total = (int)$totalStmt->fetchColumn();
                 }
             }
 
+            $searchQ = $queryCorrigida ?? $q;
+
             $sql = "SELECT $campos,
-                    MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm) AS score
+                    MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q) AS score
                     FROM vagas
                     WHERE status = 'ativa'
                     AND origem = :origem
                     $areaCondicao
-                    AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST($searchTerm IN BOOLEAN MODE)
+                    AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q IN BOOLEAN MODE)
                     ORDER BY score DESC, vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         }
     } else {
         $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao);
         $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+        foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
         $totalStmt->execute();
         $total = (int)$totalStmt->fetchColumn();
 
@@ -186,8 +198,16 @@ try {
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+    foreach ($areaParams as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    if ($q !== '') {
+        if ($modo === 'descricao') {
+            $stmt->bindValue(':like_q', $likeQ, PDO::PARAM_STR);
+        } else {
+            $stmt->bindValue(':search_q', $searchQ, PDO::PARAM_STR);
+        }
+    }
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
