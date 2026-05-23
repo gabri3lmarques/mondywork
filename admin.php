@@ -6,6 +6,7 @@ $config = require $configFile;
 $adminPassword = $config['admin_password'] ?? '';
 
 require_once __DIR__ . '/categorias.php';
+require_once __DIR__ . '/lib/Database.php';
 require_once __DIR__ . '/lib/VagaRepository.php';
 
 if ($adminPassword === '') {
@@ -298,6 +299,8 @@ try {
         $config['pass'],
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
+
+    setupSchema($pdo);
 
     $whereClauses = [];
     if ($origemFilter !== '') $whereClauses[] = "origem = " . $pdo->quote($origemFilter);
