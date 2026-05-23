@@ -3,3 +3,4 @@ config.local.php
 new_template.html
 add_nova_api.txt
 google_adds_code.txt
+config.php
