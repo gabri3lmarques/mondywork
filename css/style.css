@@ -97,6 +97,7 @@ input { font-family: inherit; }
   transition: color 0.2s;
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .nav-icon:hover { color: #3a32c0; }
