@@ -138,7 +138,7 @@ $categorias_mondywork = [
         '"suporte técnico"', '"technical support"', '"help desk"', '"service desk"', 'helpdesk', 'servicedesk', 
         '"analista de suporte"', '"it support"', '"suporte de ti"', '"analista de ti"', '"it analyst"', 
         '"suporte n1"', '"suporte n2"', '"suporte n3"', '"field service"', 'sysadmin', '"administrador de sistemas"', 
-        '"analista de infraestrutura e suporte"', '"suporte de aplicações"', '"application support"'
+        '"analista de infraestrutura e suporte"', '"suporte de aplicações"', '"application support", "support", "suporte"'
     ],
 
     'QA/Testes' => [
