@@ -170,7 +170,7 @@ $categorias_mondywork = [
     'QA/Testes' => [
         // Profissões de Teste
         'qa', 'tester', '"quality assurance"', '"analista de qa"', '"qa engineer"', '"engenheiro de qa"', '"engenheira de qa"', '"qa tester"', 
-        '"analista de testes"', 'testador', '"qualidade de software"', '"quality engineer"', '"software tester"', tester,
+        '"analista de testes"', 'testador', '"qualidade de software"', '"quality engineer"', '"software tester"', 'tester',
         // Especialidades e Ferramentas
         '"automação de testes"', '"test automation"', '"teste de software"', '"testes manuais"', '"manual tester"', 
         'sdet', 'cypress', 'selenium', 'playwright', 'appium',
