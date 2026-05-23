@@ -43,7 +43,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             $stmt->execute(array_merge([$targetStatus], $ids));
         }
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $statusParam . $qParam);
     exit;
 }
 
@@ -58,7 +58,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
         $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $statusParam . $qParam);
     exit;
 }
 
@@ -161,10 +161,12 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
 $tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar']) ? $_GET['tab'] : 'lista';
 
 $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
+$statusFilter = isset($_GET['status']) && in_array($_GET['status'], ['ativa', 'inativa']) ? $_GET['status'] : '';
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
 
 $qParam = $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '';
 $origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : '';
+$statusParam = $statusFilter !== '' ? '&status=' . urlencode($statusFilter) : '';
 $pageParam = isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '';
 
 ?><!DOCTYPE html>
@@ -281,6 +283,7 @@ try {
 
     $whereClauses = [];
     if ($origemFilter !== '') $whereClauses[] = "origem = " . $pdo->quote($origemFilter);
+    if ($statusFilter !== '') $whereClauses[] = "status = " . $pdo->quote($statusFilter);
     if ($searchQuery !== '') {
         $escaped = str_replace(['%', '_'], ['\%', '\_'], $searchQuery);
         $like = $pdo->quote('%' . $escaped . '%');
@@ -333,8 +336,12 @@ try {
   <div class="admin-tabs">
     <a class="admin-tab <?php echo $tab === 'lista' ? 'active' : '' ?>" href="admin.php">Vagas</a>
     <a class="admin-tab <?php echo $tab === 'cadastro' ? 'active' : '' ?>" href="admin.php?tab=cadastro">Cadastrar Vaga</a>
-    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional<?php echo $qParam ?>">Brasil</a>
-    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior<?php echo $qParam ?>">Exterior</a>
+    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional<?php echo $qParam . $statusParam ?>">Brasil</a>
+    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior<?php echo $qParam . $statusParam ?>">Exterior</a>
+    <span style="flex:1"></span>
+    <a class="admin-tab <?php echo $statusFilter === '' ? 'active' : '' ?>" href="admin.php?<?php echo $origemParam . $qParam ?>">Todas</a>
+    <a class="admin-tab <?php echo $statusFilter === 'ativa' ? 'active' : '' ?>" href="admin.php?status=ativa<?php echo $origemParam . $qParam ?>">Ativas</a>
+    <a class="admin-tab <?php echo $statusFilter === 'inativa' ? 'active' : '' ?>" href="admin.php?status=inativa<?php echo $origemParam . $qParam ?>">Inativas</a>
   </div>
 
   <?php if ($tab === 'cadastro'): ?>
@@ -429,7 +436,7 @@ try {
       <h1>Editar Vaga</h1>
       <span>ID: <?php echo (int)$vagaEditar['id'] ?> — <?php echo htmlspecialchars($vagaEditar['vaga_id_externo'], ENT_QUOTES, 'UTF-8') ?></span>
     </div>
-    <a href="admin.php<?php echo $origemParam . $qParam ?>" class="btn-clear" style="font-size:13px">&larr; Voltar</a>
+    <a href="admin.php<?php echo $origemParam . $statusParam . $qParam ?>" class="btn-clear" style="font-size:13px">&larr; Voltar</a>
   </div>
 
   <?php if ($mensagemEdicao): ?>
@@ -512,7 +519,7 @@ try {
       </div>
       <div style="display:flex;gap:12px">
         <button type="submit" name="editar_vaga" class="btn-search" style="font-size:15px;padding:12px 32px">Salvar Alterações</button>
-        <a href="admin.php<?php echo $origemParam . $qParam ?>" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
+        <a href="admin.php<?php echo $origemParam . $statusParam . $qParam ?>" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
       </div>
     </form>
   </div>
@@ -537,9 +544,12 @@ try {
     <?php if ($origemFilter !== ''): ?>
       <input type="hidden" name="origem" value="<?php echo htmlspecialchars($origemFilter, ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
+    <?php if ($statusFilter !== ''): ?>
+      <input type="hidden" name="status" value="<?php echo htmlspecialchars($statusFilter, ENT_QUOTES, 'UTF-8') ?>">
+    <?php endif; ?>
     <button type="submit" class="btn-search">Buscar</button>
     <?php if ($searchQuery !== ''): ?>
-      <a href="admin.php<?php echo $origemParam ?>" class="btn-clear">Limpar</a>
+      <a href="admin.php<?php echo $origemParam . $statusParam ?>" class="btn-clear">Limpar</a>
     <?php endif; ?>
   </form>
 
@@ -577,7 +587,7 @@ try {
           <p style="font-size:14px;line-height:20px;color:#45464d;margin-top:12px"><?php echo htmlspecialchars(mb_substr($v['resumo'], 0, 200), ENT_QUOTES, 'UTF-8') ?><?php echo mb_strlen($v['resumo']) > 200 ? '...' : '' ?></p>
         <?php endif; ?>
         <div class="admin-card-actions">
-          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $qParam ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
+          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $statusParam . $qParam ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
           <form method="post" style="margin:0">
             <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
             <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
@@ -592,7 +602,7 @@ try {
     <?php if ($totalPages > 1): ?>
       <div class="admin-pagination">
         <?php if ($page > 1): ?>
-          <a href="?page=<?php echo $page - 1 . $origemParam . $qParam ?>">&laquo;</a>
+          <a href="?page=<?php echo $page - 1 . $origemParam . $statusParam . $qParam ?>">&laquo;</a>
         <?php endif; ?>
         <?php
         $startPage = max(1, $page - 4);
@@ -601,11 +611,11 @@ try {
           <?php if ($i === $page): ?>
             <span class="current"><?php echo $i ?></span>
           <?php else: ?>
-            <a href="?page=<?php echo $i . $origemParam . $qParam ?>"><?php echo $i ?></a>
+            <a href="?page=<?php echo $i . $origemParam . $statusParam . $qParam ?>"><?php echo $i ?></a>
           <?php endif; ?>
         <?php endfor; ?>
         <?php if ($page < $totalPages): ?>
-          <a href="?page=<?php echo $page + 1 . $origemParam . $qParam ?>">&raquo;</a>
+          <a href="?page=<?php echo $page + 1 . $origemParam . $statusParam . $qParam ?>">&raquo;</a>
         <?php endif; ?>
       </div>
     <?php endif; ?>
