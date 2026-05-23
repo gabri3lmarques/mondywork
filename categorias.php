@@ -21,7 +21,7 @@ $categorias_mondywork = [
         'desenvolvedor', 'desenvolvedora', 'programador', 'programadora', 'developer', 'dev', '"software engineer"', 
         '"engenheiro de software"', '"engenheira de software"', '"front end"', 'frontend', '"back end"', 'backend', 
         '"full stack"', 'fullstack', '"web developer"', '"desenvolvedor web"', '"desenvolvedora web"', 
-        '"mobile developer"', '"ios developer"', '"android developer"', 'ios', 'android', '"rest api"', 'dba'
+        '"mobile developer"', '"ios developer"', '"android developer"', 'ios', 'android', '"rest api"', 'dba',
         // Equivalentes em Inglês (Complemento)
         'programmer', '"software developer"', '"systems developer"', '"application developer"'
     ],
