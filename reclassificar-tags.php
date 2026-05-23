@@ -5,6 +5,9 @@
  * Uso: php reclassificar-tags.php
  */
 
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
 require __DIR__ . '/lib/Database.php';
 require __DIR__ . '/lib/VagaRepository.php';
 require __DIR__ . '/categorias.php';
@@ -16,20 +19,20 @@ try {
     $pdo = conectarBanco($dbConfig);
     setupSchema($pdo);
 
-    $stmt = $pdo->query("SELECT id, titulo FROM vagas ORDER BY id");
-    $total = $stmt->rowCount();
-    $contador = 0;
+    $contagem = $pdo->query("SELECT COUNT(*) FROM vagas")->fetchColumn();
+    echo "Reclassificando {$contagem} vagas...\n\n";
 
-    echo "Reclassificando {$total} vagas...\n\n";
+    $stmt = $pdo->query("SELECT id, titulo FROM vagas ORDER BY id");
+    $total = 0;
 
     while ($vaga = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $contador++;
+        $total++;
         $tags = classificarVaga($vaga['titulo'], $categorias_mondywork);
         salvarTagsVaga($pdo, (int)$vaga['id'], $tags);
-        echo sprintf("  [%4d/%d] ID %d → %s\n", $contador, $total, $vaga['id'], $vaga['titulo']);
+        echo "  [{$total}] ID {$vaga['id']} → {$vaga['titulo']}\n";
     }
 
-    echo "\nConcluído! {$total} vagas reclassificadas.\n";
+    echo "\nConcluido! {$total} vagas reclassificadas.\n";
 
 } catch (Exception $e) {
     echo "\n[ERRO] " . $e->getMessage() . "\n";
