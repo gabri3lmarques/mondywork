@@ -39,7 +39,7 @@ $categorias_mondywork = [
 
     'Dados' => [
         // Cargos de Dados
-        '"analista de dados"', 'dados' '"data analyst"', '"cientista de dados"', '"data scientist"', '"engenheiro de dados"', 
+        '"analista de dados"', 'dados', '"data analyst"', '"cientista de dados"', '"data scientist"', '"engenheiro de dados"', 
         '"engenheira de dados"', '"data engineer"', '"business intelligence"', 'bi', '"analista de bi"', 
         '"analytics engineer"', '"engenheiro de analytics"', '"arquiteto de dados"', '"data architect"', 
         '"data ops"', 'dataops', '"master data"', '"data governance"', '"governança de dados"',
