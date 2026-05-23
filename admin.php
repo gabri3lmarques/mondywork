@@ -123,26 +123,34 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
         $urlVaga = trim($_POST['url_vaga'] ?? '');
         $descricao = trim($_POST['descricao'] ?? '');
         $resumo = trim($_POST['resumo'] ?? '');
-        $publicadoEm = trim($_POST['publicado_em'] ?? '') ?: date('Y-m-d H:i:s');
         $origem = $_POST['origem'] ?? 'nacional';
         $area = trim($_POST['area'] ?? '') ?: null;
         $status = $_POST['status'] ?? 'ativa';
 
-        $stmt = $pdo->prepare("UPDATE vagas SET titulo = :titulo, empresa = :empresa, localizacao = :local, modelo_trabalho = :modelo, url_vaga = :url, descricao = :desc, resumo = :resumo, publicado_em = :publicado, origem = :origem, area = :area, status = :status WHERE id = :id");
-        $stmt->execute([
-            ':id'        => $id,
-            ':titulo'    => $titulo,
-            ':empresa'   => $empresa,
-            ':local'     => $localizacao ?: null,
-            ':modelo'    => $modeloTrabalho ?: null,
-            ':url'       => $urlVaga ?: null,
-            ':desc'      => $descricao,
-            ':resumo'    => $resumo,
-            ':publicado' => $publicadoEm,
-            ':origem'    => $origem,
-            ':area'      => $area,
-            ':status'    => $status,
-        ]);
+        $setParts = ['titulo = :titulo', 'empresa = :empresa', 'localizacao = :local', 'modelo_trabalho = :modelo', 'url_vaga = :url', 'descricao = :desc', 'resumo = :resumo', 'origem = :origem', 'area = :area', 'status = :status'];
+        $params = [
+            ':id'      => $id,
+            ':titulo'  => $titulo,
+            ':empresa' => $empresa,
+            ':local'   => $localizacao ?: null,
+            ':modelo'  => $modeloTrabalho ?: null,
+            ':url'     => $urlVaga ?: null,
+            ':desc'    => $descricao,
+            ':resumo'  => $resumo,
+            ':origem'  => $origem,
+            ':area'    => $area,
+            ':status'  => $status,
+        ];
+
+        if (!isset($_POST['manter_data'])) {
+            $publicadoEm = trim($_POST['publicado_em'] ?? '') ?: date('Y-m-d H:i:s');
+            $setParts[] = 'publicado_em = :publicado';
+            $params[':publicado'] = $publicadoEm;
+        }
+
+        $sql = "UPDATE vagas SET " . implode(', ', $setParts) . " WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
 
         $mensagemEdicao = 'Vaga atualizada com sucesso!';
     } catch (Exception $e) {
@@ -461,7 +469,11 @@ try {
         </div>
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Publicado em</label>
-          <input type="date" name="publicado_em" class="admin-search-input" style="width:100%" value="<?php echo $vagaEditar['publicado_em'] ? date('Y-m-d', strtotime($vagaEditar['publicado_em'])) : '' ?>">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#45464d;cursor:pointer;margin-bottom:8px">
+            <input type="checkbox" name="manter_data" id="manter_data" checked>
+            Manter a data original
+          </label>
+          <input type="date" name="publicado_em" id="campo_data" class="admin-search-input" style="width:100%;display:none" value="<?php echo $vagaEditar['publicado_em'] ? date('Y-m-d', strtotime($vagaEditar['publicado_em'])) : '' ?>">
         </div>
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Origem *</label>
@@ -618,6 +630,16 @@ try {
 
 <script>
 (function() {
+  var manterData = document.getElementById('manter_data');
+  var campoData = document.getElementById('campo_data');
+  if (manterData && campoData) {
+    function toggleDataField() {
+      campoData.style.display = manterData.checked ? 'none' : 'block';
+    }
+    manterData.addEventListener('change', toggleDataField);
+    toggleDataField();
+  }
+
   var tpl = document.getElementById('batch-bar-tpl');
   var topBar = document.getElementById('batch-bar-top');
   var bottomBar = document.getElementById('batch-bar-bottom');
