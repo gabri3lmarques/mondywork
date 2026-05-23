@@ -212,7 +212,7 @@
             : 'Job title, keyword or company';
     }
 
-    updateSearchPlaceholder();
+    if (container) updateSearchPlaceholder();
 
     function fetchVagas() {
         if (loading || !hasMore) return;
@@ -270,74 +270,76 @@
             });
     }
 
-    const observer = new IntersectionObserver(function(entries) {
-        if (entries[0].isIntersecting) {
-            fetchVagas();
-        }
-    }, { rootMargin: '100px' });
-
-    observer.observe(sentinel);
-
-    function onSearchChange() {
-        clearTimeout(debounceTimer);
-        hideSearchLoading();
-        debounceTimer = setTimeout(function() {
-            hideSearchLoading();
-            updateSearchPlaceholder();
-            const val = searchInput.value.trim();
-            if (val !== currentQuery) {
-                currentQuery = val;
-                resetAndFetch();
+    if (container) {
+        const observer = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting) {
+                fetchVagas();
             }
-        }, DEBOUNCE_MS);
-        showSearchLoading();
-    }
+        }, { rootMargin: '100px' });
 
-    searchInput.addEventListener('input', onSearchChange);
+        observer.observe(sentinel);
 
-    for (var i = 0; i < searchModes.length; i++) {
-        searchModes[i].addEventListener('change', function() {
-            updateSearchPlaceholder();
-            if (currentQuery) {
-                resetAndFetch();
+        function onSearchChange() {
+            clearTimeout(debounceTimer);
+            hideSearchLoading();
+            debounceTimer = setTimeout(function() {
+                hideSearchLoading();
+                updateSearchPlaceholder();
+                const val = searchInput.value.trim();
+                if (val !== currentQuery) {
+                    currentQuery = val;
+                    resetAndFetch();
+                }
+            }, DEBOUNCE_MS);
+            showSearchLoading();
+        }
+
+        searchInput.addEventListener('input', onSearchChange);
+
+        for (var i = 0; i < searchModes.length; i++) {
+            searchModes[i].addEventListener('change', function() {
+                updateSearchPlaceholder();
+                if (currentQuery) {
+                    resetAndFetch();
+                }
+            });
+        }
+
+        function handleHash() {
+            if (location.hash) {
+                var id = decodeURIComponent(location.hash.substring(1));
+                fetchVagaById(id).then(function(vaga) {
+                    if (vaga && vaga.vaga_id_externo) openModal(vaga);
+                });
+            }
+        }
+
+        window.addEventListener('hashchange', function() {
+            if (location.hash) {
+                var id = decodeURIComponent(location.hash.substring(1));
+                fetchVagaById(id).then(function(vaga) {
+                    if (vaga && vaga.vaga_id_externo) openModal(vaga);
+                });
+            } else {
+                if (!modalOverlay.classList.contains('hidden')) closeModal();
             }
         });
+
+        handleHash();
+        fetchVagas();
+
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 400) {
+                backToTop.classList.remove('hidden');
+            } else {
+                backToTop.classList.add('hidden');
+            }
+        });
+
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     }
-
-    function handleHash() {
-        if (location.hash) {
-            var id = decodeURIComponent(location.hash.substring(1));
-            fetchVagaById(id).then(function(vaga) {
-                if (vaga && vaga.vaga_id_externo) openModal(vaga);
-            });
-        }
-    }
-
-    window.addEventListener('hashchange', function() {
-        if (location.hash) {
-            var id = decodeURIComponent(location.hash.substring(1));
-            fetchVagaById(id).then(function(vaga) {
-                if (vaga && vaga.vaga_id_externo) openModal(vaga);
-            });
-        } else {
-            if (!modalOverlay.classList.contains('hidden')) closeModal();
-        }
-    });
-
-    handleHash();
-    fetchVagas();
-
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 400) {
-            backToTop.classList.remove('hidden');
-        } else {
-            backToTop.classList.add('hidden');
-        }
-    });
-
-    backToTop.addEventListener('click', function() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
 
     /* ==== ABOUT MODAL ==== */
     function openAboutModal() {
@@ -352,9 +354,37 @@
         document.body.style.overflow = 'hidden';
     }
 
+    function openContactModal() {
+        modalTitle.textContent = 'Contact';
+        modalSubtitle.textContent = '';
+        modalBody.innerHTML =
+            '<p>Contact us via email:</p>' +
+            '<p style="font-size:1.5rem;font-weight:600;color:#4b41e1;text-align:center;padding:24px 0"><a href="mailto:hello@mondywork.com" style="color:#4b41e1;text-decoration:none">hello@mondywork.com</a></p>' +
+            '<p>We will get back to you as soon as possible.</p>';
+        modalFooter.classList.add('hidden');
+        modalOverlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    var linkAbout = document.getElementById('link-about');
+    if (linkAbout) {
+        linkAbout.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAboutModal();
+        });
+    }
+
     var linkAboutFooter = document.getElementById('link-sobre-footer');
     if (linkAboutFooter) {
         linkAboutFooter.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAboutModal();
+        });
+    }
+
+    var linkAboutFooterEn = document.getElementById('link-about-footer');
+    if (linkAboutFooterEn) {
+        linkAboutFooterEn.addEventListener('click', function(e) {
             e.preventDefault();
             openAboutModal();
         });
@@ -365,6 +395,13 @@
             e.preventDefault();
             closeMenu();
             openAboutModal();
+        });
+    });
+
+    document.querySelectorAll('.contact-link').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            e.preventDefault();
+            openContactModal();
         });
     });
 
