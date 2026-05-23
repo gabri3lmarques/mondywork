@@ -207,7 +207,7 @@ $categorias_mondywork = [
 
     'Administrativo' => [
         // Auxiliar e Gestão de Escritório
-        '"assistente administrativo"', 'compras' '"auxiliar administrativo"', '"analista administrativo"', '"administrative assistant"', 'admin',
+        '"assistente administrativo"', 'compras', '"auxiliar administrativo"', '"analista administrativo"', '"administrative assistant"', 'admin',
         '"gerente administrativo"', '"office manager"', 'secretária', 'secretário', 'recepcionista', '"receptionist"', '"executive assistant"', '"data entry"',
         // Compras e Facilities
         'compras', 'procurement', '"analista de compras"', 'logística', '"supply chain"', 'facilities',
