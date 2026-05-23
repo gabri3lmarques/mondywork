@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../categorias.php';
+
 function extrairResumo($html, $maxChars = 280)
 {
     $html = preg_replace('/\s*style\s*=\s*["\'][^"\']*["\']\s*/i', ' ', $html);
@@ -49,9 +51,9 @@ function upsertVaga(PDO $pdo, array $dados): void
     static $stmt = null;
     if ($stmt === null) {
         $stmt = $pdo->prepare("
-            INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, area)
-            VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'ativa', :origem, :area)
-            ON DUPLICATE KEY UPDATE status = IF(status = 'inativa', 'inativa', 'ativa'), data_coleta = CURRENT_TIMESTAMP, modelo_trabalho = VALUES(modelo_trabalho), publicado_em = VALUES(publicado_em), origem = VALUES(origem), area = VALUES(area)
+            INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem)
+            VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'ativa', :origem)
+            ON DUPLICATE KEY UPDATE status = IF(status = 'inativa', 'inativa', 'ativa'), data_coleta = CURRENT_TIMESTAMP, modelo_trabalho = VALUES(modelo_trabalho), publicado_em = VALUES(publicado_em), origem = VALUES(origem)
         ");
     }
 
@@ -66,6 +68,41 @@ function upsertVaga(PDO $pdo, array $dados): void
         ':resumo'    => $dados['resumo'] ?? '',
         ':publicado' => $dados['publicado_em'] ?? null,
         ':origem'    => $dados['origem'] ?? 'nacional',
-        ':area'      => $dados['area'] ?? null,
     ]);
+
+    global $categorias_mondywork;
+    $vagaId = (int)$pdo->lastInsertId();
+    if ($vagaId === 0) {
+        $stmtId = $pdo->prepare("SELECT id FROM vagas WHERE vaga_id_externo = :id LIMIT 1");
+        $stmtId->execute([':id' => $dados['vaga_id_externo']]);
+        $vagaId = (int)$stmtId->fetchColumn();
+    }
+    if ($vagaId > 0) {
+        $tags = classificarVaga($dados['titulo'], $categorias_mondywork);
+        salvarTagsVaga($pdo, $vagaId, $tags);
+    }
+}
+
+function salvarTagsVagaPorSlugs(PDO $pdo, int $vagaId, array $slugs): void
+{
+    $stmtDel = $pdo->prepare("DELETE FROM vaga_categorias WHERE vaga_id = :id");
+    $stmtDel->execute([':id' => $vagaId]);
+
+    if (empty($slugs)) {
+        $slugs = ['sem-categoria'];
+    }
+
+    $stmtIns = $pdo->prepare("INSERT INTO vaga_categorias (vaga_id, categoria_id) SELECT :vaga_id, id FROM categorias WHERE slug = :slug");
+    foreach ($slugs as $slug) {
+        $stmtIns->execute([':vaga_id' => $vagaId, ':slug' => $slug]);
+    }
+}
+
+function salvarTagsVaga(PDO $pdo, int $vagaId, array $tags): void
+{
+    $slugs = [];
+    foreach ($tags as $tag) {
+        $slugs[] = categoriaSlug($tag);
+    }
+    salvarTagsVagaPorSlugs($pdo, $vagaId, $slugs);
 }

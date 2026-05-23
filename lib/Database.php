@@ -55,6 +55,64 @@ function setupSchema(PDO $pdo): void
         $pdo->exec("ALTER TABLE vagas ADD FULLTEXT INDEX idx_busca (titulo, empresa, localizacao, descricao, resumo)");
     }
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS categorias (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        slug VARCHAR(30) NOT NULL UNIQUE,
+        nome_pt VARCHAR(50) NOT NULL,
+        nome_en VARCHAR(50) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS vaga_categorias (
+        vaga_id INT NOT NULL,
+        categoria_id INT NOT NULL,
+        PRIMARY KEY (vaga_id, categoria_id),
+        FOREIGN KEY (vaga_id) REFERENCES vagas(id) ON DELETE CASCADE,
+        FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $catCount = $pdo->query("SELECT COUNT(*) FROM categorias")->fetchColumn();
+    if ((int)$catCount === 0) {
+        $pdo->exec("INSERT INTO categorias (slug, nome_pt, nome_en) VALUES
+            ('desenvolvimento', 'Desenvolvimento', 'Development'),
+            ('engenharia', 'Engenharia', 'Engineering'),
+            ('dados', 'Dados', 'Data'),
+            ('ia', 'IA', 'AI'),
+            ('design', 'Design', 'Design'),
+            ('marketing-digital', 'Marketing Digital', 'Digital Marketing'),
+            ('conteudo', 'Conteúdo', 'Content'),
+            ('produto', 'Produto', 'Product'),
+            ('agil', 'Ágil', 'Agile'),
+            ('gestao-projetos', 'Gestão Projetos', 'Project Management'),
+            ('comercial', 'Comercial', 'Sales'),
+            ('customer-success', 'Customer Success', 'Customer Success'),
+            ('suporte-tecnico', 'Suporte Técnico', 'Technical Support'),
+            ('qa-testes', 'QA/Testes', 'QA/Testing'),
+            ('infra-devops', 'Infra/DevOps', 'Infra/DevOps'),
+            ('sem-categoria', 'Sem Categoria', 'Uncategorized')");
+    }
+
+    $migrated = $pdo->query("SHOW COLUMNS FROM vagas WHERE Field = 'area_migrada'")->fetchAll();
+    if (empty($migrated)) {
+        $pdo->exec("INSERT INTO vaga_categorias (vaga_id, categoria_id)
+            SELECT v.id, c.id FROM vagas v
+            JOIN categorias c ON c.slug = CASE v.area
+                WHEN 'dev' THEN 'desenvolvimento'
+                WHEN 'ia' THEN 'ia'
+                WHEN 'marketing' THEN 'marketing-digital'
+                WHEN 'social-media' THEN 'conteudo'
+                WHEN 'agile' THEN 'agil'
+                WHEN 'gestao' THEN 'gestao-projetos'
+                WHEN 'vendas' THEN 'comercial'
+                WHEN 'suporte' THEN 'suporte-tecnico'
+                WHEN 'qa' THEN 'qa-testes'
+                WHEN 'infra' THEN 'infra-devops'
+                ELSE v.area
+            END
+            WHERE v.area IS NOT NULL AND v.area != ''
+            ON DUPLICATE KEY UPDATE vaga_categorias.vaga_id = vaga_categorias.vaga_id");
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN area_migrada TINYINT(1) DEFAULT 1 AFTER area");
+    }
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS newsletters (
         id INT AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(255) NOT NULL,

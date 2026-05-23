@@ -5,6 +5,9 @@ $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.lo
 $config = require $configFile;
 $adminPassword = $config['admin_password'] ?? '';
 
+require_once __DIR__ . '/categorias.php';
+require_once __DIR__ . '/lib/VagaRepository.php';
+
 if ($adminPassword === '') {
     http_response_code(500);
     exit('Admin password not configured.');
@@ -82,7 +85,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadast
         $resumo = trim($_POST['resumo'] ?? '');
         $publicadoEm = date('Y-m-d H:i:s');
         $origem = $_POST['origem'] ?? 'nacional';
-        $area = trim($_POST['area'] ?? '') ?: null;
+        $categoriasSlugs = $_POST['categorias'] ?? [];
+
+        $primeiraArea = !empty($categoriasSlugs) ? $categoriasSlugs[0] : null;
 
         $stmt = $pdo->prepare("INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, area) VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'ativa', :origem, :area)");
         $stmt->execute([
@@ -96,8 +101,13 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadast
             ':resumo'    => $resumo,
             ':publicado' => $publicadoEm ?: null,
             ':origem'    => $origem,
-            ':area'      => $area,
+            ':area'      => $primeiraArea,
         ]);
+
+        $novoId = (int)$pdo->lastInsertId();
+        if ($novoId > 0) {
+            salvarTagsVagaPorSlugs($pdo, $novoId, $categoriasSlugs);
+        }
 
         $mensagemCadastro = 'Vaga cadastrada com sucesso!';
     } catch (Exception $e) {
@@ -124,8 +134,10 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
         $descricao = trim($_POST['descricao'] ?? '');
         $resumo = trim($_POST['resumo'] ?? '');
         $origem = $_POST['origem'] ?? 'nacional';
-        $area = trim($_POST['area'] ?? '') ?: null;
         $status = $_POST['status'] ?? 'ativa';
+        $categoriasSlugs = $_POST['categorias'] ?? [];
+
+        $primeiraArea = !empty($categoriasSlugs) ? $categoriasSlugs[0] : null;
 
         $setParts = ['titulo = :titulo', 'empresa = :empresa', 'localizacao = :local', 'modelo_trabalho = :modelo', 'url_vaga = :url', 'descricao = :desc', 'resumo = :resumo', 'origem = :origem', 'area = :area', 'status = :status'];
         $params = [
@@ -138,7 +150,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
             ':desc'    => $descricao,
             ':resumo'  => $resumo,
             ':origem'  => $origem,
-            ':area'    => $area,
+            ':area'    => $primeiraArea,
             ':status'  => $status,
         ];
 
@@ -151,6 +163,8 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
         $sql = "UPDATE vagas SET " . implode(', ', $setParts) . " WHERE id = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
+
+        salvarTagsVagaPorSlugs($pdo, $id, $categoriasSlugs);
 
         $mensagemEdicao = 'Vaga atualizada com sucesso!';
     } catch (Exception $e) {
@@ -241,6 +255,10 @@ $pageParam = isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '';
 .btn-search:hover { background: #645efb; }
 .btn-clear { display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; color: #45464d; padding: 10px 16px; border: 1px solid #c6c6cd; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s; }
 .btn-clear:hover { border-color: #ba1a1a; color: #ba1a1a; }
+.cat-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.cat-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #c6c6cd; border-radius: 0.5rem; background: #fff; transition: all 0.2s; }
+.cat-checkbox:hover { border-color: #4b41e1; }
+.cat-checkbox input { width: 16px; height: 16px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -308,13 +326,16 @@ try {
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, area, publicado_em, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em_fmt FROM vagas" . $where . " ORDER BY publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT v.id, v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.descricao, v.resumo, v.status, v.origem, v.area, v.publicado_em, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas v LEFT JOIN vaga_categorias vc ON vc.vaga_id = v.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY v.id ORDER BY v.publicado_em DESC, v.data_coleta DESC LIMIT :limit OFFSET :offset");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $todasCategorias = $pdo->query("SELECT * FROM categorias ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+
     $vagaEditar = null;
+    $categoriasVaga = [];
     if ($tab === 'editar' && isset($_GET['id'])) {
         $editId = (int)$_GET['id'];
         $stmtEdit = $pdo->prepare("SELECT * FROM vagas WHERE id = :id LIMIT 1");
@@ -323,6 +344,10 @@ try {
         if (!$vagaEditar) {
             $mensagemEdicao = 'Vaga não encontrada.';
             $tab = 'lista';
+        } else {
+            $stmtCat = $pdo->prepare("SELECT c.slug FROM vaga_categorias vc JOIN categorias c ON c.id = vc.categoria_id WHERE vc.vaga_id = :id");
+            $stmtCat->execute([':id' => $editId]);
+            $categoriasVaga = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
         }
     }
 
@@ -395,25 +420,15 @@ try {
           </select>
         </div>
         <div>
-          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Área</label>
-          <select name="area" class="admin-search-input" style="width:100%">
-            <option value="">Selecione</option>
-            <option value="dev">Desenvolvimento / Software</option>
-            <option value="engenharia">Engenharia</option>
-            <option value="dados">Dados / BI</option>
-            <option value="ia">IA / Machine Learning</option>
-            <option value="design">UX / UI / Product Design</option>
-            <option value="marketing">Marketing Digital / Growth</option>
-            <option value="social-media">Social Media / Conteúdo</option>
-            <option value="produto">Produto (PM/PO)</option>
-            <option value="agile">Agilidade / Scrum</option>
-            <option value="gestao">Gestão / Projetos</option>
-            <option value="vendas">Comercial / Vendas</option>
-            <option value="customer-success">Customer Success / CX</option>
-            <option value="suporte">Suporte Técnico / Help Desk</option>
-            <option value="qa">QA / Testes</option>
-            <option value="infra">Infraestrutura / Cloud / DevOps</option>
-          </select>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Categorias (tags)</label>
+          <div class="cat-checkboxes">
+            <?php foreach ($todasCategorias as $cat): ?>
+              <label class="cat-checkbox">
+                <input type="checkbox" name="categorias[]" value="<?php echo $cat['slug'] ?>">
+                <span><?php echo htmlspecialchars($cat['nome_pt'], ENT_QUOTES, 'UTF-8') ?></span>
+              </label>
+            <?php endforeach; ?>
+          </div>
         </div>
       </div>
       <div>
@@ -491,14 +506,15 @@ try {
           </select>
         </div>
         <div>
-          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Área</label>
-          <select name="area" class="admin-search-input" style="width:100%">
-            <option value="">Selecione</option>
-            <?php $areas = ['dev' => 'Desenvolvimento / Software', 'engenharia' => 'Engenharia', 'dados' => 'Dados / BI', 'ia' => 'IA / Machine Learning', 'design' => 'UX / UI / Product Design', 'marketing' => 'Marketing Digital / Growth', 'social-media' => 'Social Media / Conteúdo', 'produto' => 'Produto (PM/PO)', 'agile' => 'Agilidade / Scrum', 'gestao' => 'Gestão / Projetos', 'vendas' => 'Comercial / Vendas', 'customer-success' => 'Customer Success / CX', 'suporte' => 'Suporte Técnico / Help Desk', 'qa' => 'QA / Testes', 'infra' => 'Infraestrutura / Cloud / DevOps']; ?>
-            <?php foreach ($areas as $v => $r): ?>
-              <option value="<?php echo $v ?>" <?php echo $vagaEditar['area'] === $v ? 'selected' : '' ?>><?php echo $r ?></option>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Categorias (tags)</label>
+          <div class="cat-checkboxes">
+            <?php foreach ($todasCategorias as $cat): ?>
+              <label class="cat-checkbox">
+                <input type="checkbox" name="categorias[]" value="<?php echo $cat['slug'] ?>" <?php echo in_array($cat['slug'], $categoriasVaga) ? 'checked' : '' ?>>
+                <span><?php echo htmlspecialchars($cat['nome_pt'], ENT_QUOTES, 'UTF-8') ?></span>
+              </label>
             <?php endforeach; ?>
-          </select>
+          </div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -576,6 +592,9 @@ try {
             <span class="badge badge-<?php echo htmlspecialchars(strtolower($v['modelo_trabalho']), ENT_QUOTES, 'UTF-8') === 'remote' ? 'remote' : (strtolower($v['modelo_trabalho']) === 'hybrid' ? 'hybrid' : 'onsite') ?>"><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
           <?php endif; ?>
           <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
+          <?php if (!empty($v['tags_str'])): ?>
+            <span style="font-size:12px;color:#4b41e1;font-weight:600"><?php echo htmlspecialchars($v['tags_str'], ENT_QUOTES, 'UTF-8') ?></span>
+          <?php endif; ?>
           <?php if ($v['publicado_em']): ?>
             <?php $isOld = strtotime($v['publicado_em']) < strtotime('-90 days'); ?>
             <span><?php echo htmlspecialchars($v['publicado_em_fmt'], ENT_QUOTES, 'UTF-8') ?></span>

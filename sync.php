@@ -222,7 +222,6 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                     'resumo'          => $resumo,
                     'publicado_em'    => $publicadoEm,
                     'origem'          => $origem,
-                    'area'            => null,
                 ]);
 
                 echo " - [NOVA] $titulo\n";
@@ -374,7 +373,6 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
                 'resumo'          => $resumo,
                 'publicado_em'    => $publicadoEm,
                 'origem'          => $origem,
-                'area'            => null,
             ]);
 
             echo " - [NOVA] $titulo\n";
@@ -457,7 +455,6 @@ function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string
                 'resumo'          => $resumo,
                 'publicado_em'    => $publicadoEm,
                 'origem'          => $origem,
-                'area'            => null,
             ]);
 
             echo " - [NOVA] $titulo\n";
