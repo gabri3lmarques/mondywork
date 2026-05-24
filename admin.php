@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
-
 session_start();
 
 $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
@@ -182,9 +179,17 @@ $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional',
 $statusFilter = isset($_GET['status']) && in_array($_GET['status'], ['ativa', 'inativa']) ? $_GET['status'] : '';
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
 
+$catFilter = isset($_GET['categorias']) && is_array($_GET['categorias']) ? $_GET['categorias'] : [];
+$semCategoria = in_array('sem-categoria', $catFilter);
+$catSlugs = array_values(array_filter($catFilter, fn($s) => $s !== 'sem-categoria'));
+
 $qParam = $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '';
 $origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : '';
 $statusParam = $statusFilter !== '' ? '&status=' . urlencode($statusFilter) : '';
+$categoriasParam = '';
+foreach ($catFilter as $slug) {
+    $categoriasParam .= '&categorias[]=' . urlencode($slug);
+}
 $pageParam = isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '';
 
 ?><!DOCTYPE html>
@@ -263,6 +268,14 @@ $pageParam = isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '';
 .cat-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #c6c6cd; border-radius: 0.5rem; background: #fff; transition: all 0.2s; }
 .cat-checkbox:hover { border-color: #4b41e1; }
 .cat-checkbox input { width: 16px; height: 16px; cursor: pointer; }
+.cat-filter { background: #fff; border: 1px solid #c6c6cd; border-radius: 0.5rem; margin-bottom: 16px; overflow: hidden; }
+.cat-filter-summary { padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; color: #0b1c30; user-select: none; }
+.cat-filter-summary:hover { background: #f8f9fa; }
+.cat-filter-form { padding: 0 16px 16px; border-top: 1px solid #c6c6cd; padding-top: 12px; }
+.cat-filter-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.cat-filter-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #c6c6cd; border-radius: 0.5rem; background: #f8f9fa; transition: all 0.2s; }
+.cat-filter-checkbox:hover { border-color: #4b41e1; }
+.cat-filter-checkbox input { width: 16px; height: 16px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -313,6 +326,13 @@ try {
         $like = $pdo->quote('%' . $escaped . '%');
         $whereClauses[] = "(titulo LIKE $like OR empresa LIKE $like OR localizacao LIKE $like)";
     }
+    if (!empty($catSlugs)) {
+        $quoted = array_map(fn($s) => $pdo->quote($s), $catSlugs);
+        $whereClauses[] = "EXISTS (SELECT 1 FROM vaga_categorias vc JOIN categorias c ON c.id = vc.categoria_id WHERE vc.vaga_id = vagas.id AND c.slug IN (" . implode(',', $quoted) . "))";
+    }
+    if ($semCategoria) {
+        $whereClauses[] = "NOT EXISTS (SELECT 1 FROM vaga_categorias WHERE vaga_id = vagas.id)";
+    }
     $where = !empty($whereClauses) ? " WHERE " . implode(" AND ", $whereClauses) : '';
     $whereStatusAtiva = " WHERE status = 'ativa'" . (!empty($whereClauses) ? " AND " . implode(" AND ", $whereClauses) : '');
     $whereStatusInativa = " WHERE status = 'inativa'" . (!empty($whereClauses) ? " AND " . implode(" AND ", $whereClauses) : '');
@@ -332,7 +352,7 @@ try {
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT v.id, v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.descricao, v.resumo, v.status, v.origem, v.area, v.publicado_em, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas v LEFT JOIN vaga_categorias vc ON vc.vaga_id = v.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY v.id ORDER BY v.publicado_em DESC, v.data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -542,7 +562,7 @@ try {
       </div>
       <div style="display:flex;gap:12px">
         <button type="submit" name="editar_vaga" class="btn-search" style="font-size:15px;padding:12px 32px">Salvar Alterações</button>
-        <a href="admin.php<?php echo $origemParam . $statusParam . $qParam ?>" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
+        <a href="admin.php<?php echo $origemParam . $statusParam . $qParam . $categoriasParam ?>" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
       </div>
     </form>
   </div>
@@ -562,6 +582,39 @@ try {
     <div class="stat">Inativas: <strong style="color:#ba1a1a"><?php echo $totalInativas ?></strong></div>
   </div>
 
+  <details class="cat-filter"<?php echo !empty($catFilter) ? ' open' : '' ?>>
+    <summary class="cat-filter-summary">Categorias (tags) <?php echo !empty($catFilter) ? '— ' . count($catFilter) . ' ativo(s)' : '' ?></summary>
+    <form class="cat-filter-form" method="get">
+      <div class="cat-filter-grid">
+        <?php foreach ($todasCategorias as $cat): ?>
+          <label class="cat-filter-checkbox">
+            <input type="checkbox" name="categorias[]" value="<?php echo $cat['slug'] ?>" <?php echo in_array($cat['slug'], $catFilter) ? 'checked' : '' ?>>
+            <span><?php echo htmlspecialchars($cat['nome_pt'], ENT_QUOTES, 'UTF-8') ?></span>
+          </label>
+        <?php endforeach; ?>
+        <label class="cat-filter-checkbox">
+          <input type="checkbox" name="categorias[]" value="sem-categoria" <?php echo $semCategoria ? 'checked' : '' ?>>
+          <span style="color:#ba1a1a">Sem categoria</span>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <?php if ($origemFilter !== ''): ?>
+          <input type="hidden" name="origem" value="<?php echo htmlspecialchars($origemFilter, ENT_QUOTES, 'UTF-8') ?>">
+        <?php endif; ?>
+        <?php if ($statusFilter !== ''): ?>
+          <input type="hidden" name="status" value="<?php echo htmlspecialchars($statusFilter, ENT_QUOTES, 'UTF-8') ?>">
+        <?php endif; ?>
+        <?php if ($searchQuery !== ''): ?>
+          <input type="hidden" name="q" value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>">
+        <?php endif; ?>
+        <button type="submit" class="btn-search">Filtrar</button>
+        <?php if (!empty($catFilter)): ?>
+          <a href="admin.php<?php echo $origemParam . $statusParam . $qParam ?>" class="btn-clear">Limpar filtros</a>
+        <?php endif; ?>
+      </div>
+    </form>
+  </details>
+
   <form class="admin-search" method="get">
     <input type="search" name="q" class="admin-search-input" placeholder="Buscar por título, empresa ou local..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" autofocus>
     <?php if ($origemFilter !== ''): ?>
@@ -570,8 +623,11 @@ try {
     <?php if ($statusFilter !== ''): ?>
       <input type="hidden" name="status" value="<?php echo htmlspecialchars($statusFilter, ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
+    <?php foreach ($catFilter as $slug): ?>
+      <input type="hidden" name="categorias[]" value="<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>">
+    <?php endforeach; ?>
     <button type="submit" class="btn-search">Buscar</button>
-    <?php if ($searchQuery !== ''): ?>
+    <?php if ($searchQuery !== '' || !empty($catFilter)): ?>
       <a href="admin.php<?php echo $origemParam . $statusParam ?>" class="btn-clear">Limpar</a>
     <?php endif; ?>
   </form>
@@ -613,7 +669,7 @@ try {
           <p style="font-size:14px;line-height:20px;color:#45464d;margin-top:12px"><?php echo htmlspecialchars(mb_substr($v['resumo'], 0, 200), ENT_QUOTES, 'UTF-8') ?><?php echo mb_strlen($v['resumo']) > 200 ? '...' : '' ?></p>
         <?php endif; ?>
         <div class="admin-card-actions">
-          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $statusParam . $qParam ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
+          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $statusParam . $qParam . $categoriasParam ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
           <form method="post" style="margin:0">
             <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
             <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
@@ -628,7 +684,7 @@ try {
     <?php if ($totalPages > 1): ?>
       <div class="admin-pagination">
         <?php if ($page > 1): ?>
-          <a href="?page=<?php echo $page - 1 . $origemParam . $statusParam . $qParam ?>">&laquo;</a>
+          <a href="?page=<?php echo $page - 1 . $origemParam . $statusParam . $qParam . $categoriasParam ?>">&laquo;</a>
         <?php endif; ?>
         <?php
         $startPage = max(1, $page - 4);
@@ -637,11 +693,11 @@ try {
           <?php if ($i === $page): ?>
             <span class="current"><?php echo $i ?></span>
           <?php else: ?>
-            <a href="?page=<?php echo $i . $origemParam . $statusParam . $qParam ?>"><?php echo $i ?></a>
+            <a href="?page=<?php echo $i . $origemParam . $statusParam . $qParam . $categoriasParam ?>"><?php echo $i ?></a>
           <?php endif; ?>
         <?php endfor; ?>
         <?php if ($page < $totalPages): ?>
-          <a href="?page=<?php echo $page + 1 . $origemParam . $statusParam . $qParam ?>">&raquo;</a>
+          <a href="?page=<?php echo $page + 1 . $origemParam . $statusParam . $qParam . $categoriasParam ?>">&raquo;</a>
         <?php endif; ?>
       </div>
     <?php endif; ?>
