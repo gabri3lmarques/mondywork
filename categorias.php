@@ -219,4 +219,75 @@ $categorias_mondywork = [
     ]
 ];
 
+function removerAcentosCat($str) {
+    $acentos = [
+        'á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'ae',
+        'ç' => 'c', 'ð' => 'd', 'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+        'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i', 'ñ' => 'n',
+        'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o',
+        'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u',
+        'ý' => 'y', 'ÿ' => 'y', 'þ' => 'b', 'ß' => 'ss',
+        'Á' => 'A', 'À' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'AE',
+        'Ç' => 'C', 'Ð' => 'D', 'É' => 'E', 'È' => 'E', 'Ê' => 'E', 'Ë' => 'E',
+        'Í' => 'I', 'Ì' => 'I', 'Î' => 'I', 'Ï' => 'I', 'Ñ' => 'N',
+        'Ó' => 'O', 'Ò' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O',
+        'Ú' => 'U', 'Ù' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ý' => 'Y', 'Ÿ' => 'Y', 'Þ' => 'B',
+    ];
+    return strtr($str, $acentos);
+}
+
+function classificarVaga(string $titulo, array $categoriasDict): array {
+    $titulo = mb_strtolower(removerAcentosCat($titulo));
+    $tags = [];
+
+    foreach ($categoriasDict as $categoria => $termos) {
+        foreach ($termos as $termo) {
+            $raw = $termo;
+            $termo = mb_strtolower(removerAcentosCat(trim($termo, '"')));
+
+            if (str_starts_with($raw, '"')) {
+                if (str_contains($titulo, $termo)) {
+                    $tags[] = $categoria;
+                    break;
+                }
+            } else {
+                if (preg_match('/\b' . preg_quote($termo, '/') . '\b/u', $titulo)) {
+                    $tags[] = $categoria;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (empty($tags)) {
+        $tags[] = 'Sem Categoria';
+    }
+
+    return array_values(array_unique($tags));
+}
+
+function categoriaSlug(string $nome): string {
+    $map = [
+        'Desenvolvimento' => 'desenvolvimento',
+        'Engenharia' => 'engenharia',
+        'Dados' => 'dados',
+        'IA' => 'ia',
+        'Design' => 'design',
+        'Marketing Digital' => 'marketing-digital',
+        'Conteúdo' => 'conteudo',
+        'Produto' => 'produto',
+        'Ágil' => 'agil',
+        'Gestão Projetos' => 'gestao-projetos',
+        'Comercial' => 'comercial',
+        'Customer Success' => 'customer-success',
+        'Suporte Técnico' => 'suporte-tecnico',
+        'QA/Testes' => 'qa-testes',
+        'Infra/DevOps' => 'infra-devops',
+        'Financeiro' => 'financeiro',
+        'Administrativo' => 'administrativo',
+        'Jurídico' => 'juridico',
+        'Sem Categoria' => 'sem-categoria',
+    ];
+    return $map[$nome] ?? 'sem-categoria';
+}
 ?>

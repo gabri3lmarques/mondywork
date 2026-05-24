@@ -88,7 +88,20 @@ function setupSchema(PDO $pdo): void
             ('suporte-tecnico', 'Suporte Técnico', 'Technical Support'),
             ('qa-testes', 'QA/Testes', 'QA/Testing'),
             ('infra-devops', 'Infra/DevOps', 'Infra/DevOps'),
-            ('sem-categoria', 'Sem Categoria', 'Uncategorized')");
+            ('sem-categoria', 'Sem Categoria', 'Uncategorized'),
+            ('financeiro', 'Financeiro', 'Finance'),
+            ('administrativo', 'Administrativo', 'Administrative'),
+            ('juridico', 'Jurídico', 'Legal')");
+    } else {
+        $novasCats = [
+            ['financeiro', 'Financeiro', 'Finance'],
+            ['administrativo', 'Administrativo', 'Administrative'],
+            ['juridico', 'Jurídico', 'Legal'],
+        ];
+        foreach ($novasCats as $nc) {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO categorias (slug, nome_pt, nome_en) VALUES (:slug, :pt, :en)");
+            $stmt->execute([':slug' => $nc[0], ':pt' => $nc[1], ':en' => $nc[2]]);
+        }
     }
 
     $migrated = $pdo->query("SHOW COLUMNS FROM vagas WHERE Field = 'area_migrada'")->fetchAll();
