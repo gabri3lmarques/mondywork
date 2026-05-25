@@ -198,7 +198,7 @@ $pageParam = isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '';
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Mondywork</title>
-<link rel="stylesheet" href="/css/style.css?v=1.1.0">
+<link rel="stylesheet" href="/css/style.css?v=1.0.2">
 <style>
 .admin-nav { background: #0b1c30; height: 64px; }
 .admin-nav .nav-inner { height: 64px; }

@@ -73,7 +73,7 @@ CARD;
 <meta property="twitter:title" content="Mondywork | Vagas de Tecnologia, Design e Marketing">
 <meta property="twitter:description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto em todo o Brasil.">
 <meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
-<link rel="stylesheet" href="/css/style.css?v=1.1.0">
+<link rel="stylesheet" href="/css/style.css?v=1.0.2">
 <link rel="icon" href="./img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="./img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./img/favicon/apple-touch-icon.png">
@@ -263,6 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app.js?v=1.1.0"></script>
+<script src="/js/app.js?v=1.0.2"></script>
 </body>
 </html>

@@ -336,16 +336,19 @@
 
         handleHash();
 
-        document.querySelectorAll('#vagas-container .job-card[data-vaga-id]').forEach(function(card) {
-            card.querySelector('.btn-open-desc').addEventListener('click', function() {
-                var id = card.getAttribute('data-vaga-id');
-                fetchVagaById(id).then(function(vaga) {
-                    if (vaga && vaga.vaga_id_externo) openModal(vaga);
-                });
-            });
-        });
-
         fetchVagas();
+
+        document.querySelectorAll('#vagas-container .job-card[data-vaga-id]').forEach(function(card) {
+            var btn = card.querySelector('.btn-open-desc');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    var id = card.getAttribute('data-vaga-id');
+                    fetchVagaById(id).then(function(vaga) {
+                        if (vaga && vaga.vaga_id_externo) openModal(vaga);
+                    });
+                });
+            }
+        });
 
         window.addEventListener('scroll', function() {
             if (window.scrollY > 400) {
