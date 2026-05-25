@@ -73,7 +73,7 @@ CARD;
 <meta property="twitter:title" content="Mondywork | Tech, Design & Marketing Jobs in USA">
 <meta property="twitter:description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
 <meta property="twitter:image" content="https://mondywork.com.br/img/og-image-usa.jpg">
-<link rel="stylesheet" href="/css/style.css?v=1.0.2">
+<link rel="stylesheet" href="/css/style.css?v=1.0.3">
 <link rel="icon" href="../img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="../img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../img/favicon/apple-touch-icon.png">
@@ -167,7 +167,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div id="results-info" class="results-info"></div>
     <div class="job-grid">
       <div class="job-list" id="vagas-container">
-<span id="ssr-end" style="display:none"></span>
 <?= $vagasHtml ?>
       </div>
       <aside class="sidebar">
@@ -263,6 +262,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.0.2"></script>
+<script src="/js/app-exterior.js?v=1.0.3"></script>
 </body>
 </html>

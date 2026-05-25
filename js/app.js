@@ -36,10 +36,6 @@
 
     function resetAndFetch() {
         container.innerHTML = '';
-        var marker = document.createElement('span');
-        marker.id = 'ssr-end';
-        marker.style.display = 'none';
-        container.appendChild(marker);
         resultsInfo.textContent = '';
         vagasTotal.textContent = '';
         searchCorrection.classList.add('hidden');
@@ -249,12 +245,7 @@
         var openBtn = card.querySelector('.btn-open-desc');
         openBtn.addEventListener('click', function() { openModal(v); });
 
-        var ssrEnd = document.getElementById('ssr-end');
-        if (ssrEnd) {
-            container.insertBefore(card, ssrEnd);
-        } else {
-            container.appendChild(card);
-        }
+        container.appendChild(card);
     }
 
     function formatModelo(modelo) {
