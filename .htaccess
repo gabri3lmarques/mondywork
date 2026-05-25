@@ -13,4 +13,4 @@ RewriteRule ^api$ api.php [L,QSA]
     Deny from all
 </FilesMatch>
 
-DirectoryIndex index.html
+DirectoryIndex index.php index.html

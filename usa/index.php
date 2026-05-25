@@ -1,4 +1,62 @@
-<!DOCTYPE html>
+<?php
+$configFile = file_exists(__DIR__ . '/../config.local.php') ? __DIR__ . '/../config.local.php' : __DIR__ . '/../config.php';
+$config = require $configFile;
+
+$vagasHtml = '';
+try {
+    $pdo = new PDO(
+        "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+        $config['user'],
+        $config['pass'],
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+
+    $stmt = $pdo->prepare("SELECT vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, resumo, DATE_FORMAT(publicado_em, '%m/%d/%Y') as publicado_em
+                           FROM vagas WHERE status = 'ativa' AND origem = 'exterior'
+                           ORDER BY publicado_em DESC, data_coleta DESC
+                           LIMIT 10");
+    $stmt->execute();
+    $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($vagas as $v) {
+        $modeloRaw = $v['modelo_trabalho'] ?? '';
+        $badgeClass = 'badge-onsite';
+        $badgeLabel = 'On-site';
+        if ($modeloRaw === 'Remote') {
+            $badgeClass = 'badge-remote';
+            $badgeLabel = 'Remote';
+        } elseif ($modeloRaw === 'Hybrid') {
+            $badgeClass = 'badge-hybrid';
+            $badgeLabel = 'Hybrid';
+        }
+
+        $titulo  = htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8');
+        $empresa = htmlspecialchars($v['empresa'], ENT_QUOTES, 'UTF-8');
+        $local   = htmlspecialchars($v['localizacao'] ?: 'Remote', ENT_QUOTES, 'UTF-8');
+        $resumo  = htmlspecialchars($v['resumo'] ?: "This {$v['titulo']} position.", ENT_QUOTES, 'UTF-8');
+        $vagaId  = htmlspecialchars($v['vaga_id_externo'], ENT_QUOTES, 'UTF-8');
+        $data    = htmlspecialchars($v['publicado_em'] ?? '', ENT_QUOTES, 'UTF-8');
+
+        $vagasHtml .= <<<CARD
+<article class="job-card" data-vaga-id="{$vagaId}">
+  <div>
+    <h3 class="job-card-title">{$titulo}</h3>
+    <p class="job-card-company">{$empresa}</p>
+  </div>
+  <div class="job-card-info">
+    <span class="badge {$badgeClass}">{$badgeLabel}</span>
+    <span class="job-card-info-text"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>{$local}</span>
+    <span class="job-card-info-text job-card-date"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>{$data}</span>
+  </div>
+  <p class="job-card-resumo line-clamp-2">{$resumo}</p>
+  <div class="job-card-footer"><button class="job-card-btn btn-open-desc">View Details</button></div>
+</article>
+CARD;
+    }
+} catch (Exception $e) {
+    $vagasHtml = '<!-- jobs temporarily unavailable -->';
+}
+?><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -108,7 +166,10 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
     <div id="results-info" class="results-info"></div>
     <div class="job-grid">
-      <div class="job-list" id="vagas-container"></div>
+      <div class="job-list" id="vagas-container">
+<span id="ssr-end" style="display:none"></span>
+<?= $vagasHtml ?>
+      </div>
       <aside class="sidebar">
         <div class="sidebar-card">
           <div class="sidebar-icon">
