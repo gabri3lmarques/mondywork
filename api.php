@@ -107,6 +107,8 @@ try {
         $config['pass'],
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
+    require_once __DIR__ . '/lib/Database.php';
+    setupSchema($pdo);
 
     $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, descricao, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em, area";
 
