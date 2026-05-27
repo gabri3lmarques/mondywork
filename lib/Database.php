@@ -55,6 +55,11 @@ function setupSchema(PDO $pdo): void
         $pdo->exec("ALTER TABLE vagas ADD FULLTEXT INDEX idx_busca (titulo, empresa, localizacao, descricao, resumo)");
     }
 
+    $idxTituloExists = $pdo->query("SHOW INDEX FROM vagas WHERE Key_name = 'idx_titulo'")->fetchAll();
+    if (empty($idxTituloExists)) {
+        $pdo->exec("ALTER TABLE vagas ADD FULLTEXT INDEX idx_titulo (titulo)");
+    }
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS categorias (
         id INT AUTO_INCREMENT PRIMARY KEY,
         slug VARCHAR(30) NOT NULL UNIQUE,
