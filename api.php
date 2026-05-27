@@ -127,6 +127,19 @@ try {
 
     $queryCorrigida = null;
 
+    // MySQL full-text ignora palavras < 3 caracteres (innodb_ft_min_token_size)
+    $shortTerms = false;
+    if ($q !== '') {
+        $termos = preg_split('/\s+/', trim($q));
+        foreach ($termos as $t) {
+            $t = trim($t);
+            if ($t !== '' && mb_strlen($t) < 3) {
+                $shortTerms = true;
+                break;
+            }
+        }
+    }
+
     if ($q !== '') {
         if ($modo === 'descricao') {
             $likeQ = '%' . $q . '%';
@@ -146,8 +159,36 @@ try {
                     AND (descricao LIKE :like_q OR resumo LIKE :like_q)
                     ORDER BY vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
+        } elseif ($shortTerms) {
+            $termos = preg_split('/\s+/', trim($q));
+            $conds = [];
+            $wordParams = [];
+            foreach ($termos as $i => $t) {
+                $t = trim($t);
+                if ($t === '') continue;
+                $pn = ":w_{$i}";
+                $conds[] = "CONCAT(' ',COALESCE(titulo,''),' ') LIKE CONCAT('% ',{$pn},' %')";
+                $wordParams[$pn] = $t;
+            }
+            $wordCond = implode(' AND ', $conds);
+
+            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND {$wordCond}");
+            $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+            foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            foreach ($wordParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            $totalStmt->execute();
+            $total = (int)$totalStmt->fetchColumn();
+
+            $sql = "SELECT $campos
+                    FROM vagas
+                    WHERE status = 'ativa'
+                    AND origem = :origem
+                    $areaCondicao
+                    AND {$wordCond}
+                    ORDER BY vagas.publicado_em DESC
+                    LIMIT :limit OFFSET :offset";
         } else {
-            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q IN BOOLEAN MODE)");
+            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo) AGAINST(:search_q IN BOOLEAN MODE)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
             foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
             $totalStmt->bindValue(':search_q', $q, PDO::PARAM_STR);
@@ -159,7 +200,7 @@ try {
                 if ($houveCorrecao) {
                     $queryCorrigida = $corrigida;
 
-                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q IN BOOLEAN MODE)");
+                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo) AGAINST(:search_q IN BOOLEAN MODE)");
                     $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
                     foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
                     $totalStmt->bindValue(':search_q', $corrigida, PDO::PARAM_STR);
@@ -171,12 +212,12 @@ try {
             $searchQ = $queryCorrigida ?? $q;
 
             $sql = "SELECT $campos,
-                    MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q) AS score
+                    MATCH(titulo) AGAINST(:search_q) AS score
                     FROM vagas
                     WHERE status = 'ativa'
                     AND origem = :origem
                     $areaCondicao
-                    AND MATCH(titulo, empresa, localizacao, descricao, resumo) AGAINST(:search_q IN BOOLEAN MODE)
+                    AND MATCH(titulo) AGAINST(:search_q IN BOOLEAN MODE)
                     ORDER BY score DESC, vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         }
@@ -204,6 +245,8 @@ try {
     if ($q !== '') {
         if ($modo === 'descricao') {
             $stmt->bindValue(':like_q', $likeQ, PDO::PARAM_STR);
+        } elseif ($shortTerms) {
+            foreach ($wordParams as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
         } else {
             $stmt->bindValue(':search_q', $searchQ, PDO::PARAM_STR);
         }
