@@ -173,7 +173,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
     }
 }
 
-$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar']) ? $_GET['tab'] : 'lista';
+$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails']) ? $_GET['tab'] : 'lista';
 
 $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
 $statusFilter = isset($_GET['status']) && in_array($_GET['status'], ['ativa', 'inativa']) ? $_GET['status'] : '';
@@ -191,6 +191,33 @@ foreach ($catFilter as $slug) {
     $categoriasParam .= '&categorias[]=' . urlencode($slug);
 }
 $pageParam = isset($_GET['page']) ? '&page=' . (int)$_GET['page'] : '';
+
+// ── CSV Export ──
+if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'] === 'csv') {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $stmt = $pdo->query("SELECT nome, email, area, origem, created_at FROM newsletters ORDER BY created_at DESC");
+        $emails = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="newsletters-' . date('Y-m-d') . '.csv"');
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        fputcsv($output, ['Nome', 'Email', 'Area', 'Origem', 'Data de Cadastro']);
+        foreach ($emails as $row) {
+            fputcsv($output, [$row['nome'], $row['email'], $row['area'], $row['origem'], $row['created_at']]);
+        }
+        fclose($output);
+        exit;
+    } catch (Exception $e) {
+        // fallback: continua para pagina normal
+    }
+}
 
 ?><!DOCTYPE html>
 <html lang="pt-BR">
@@ -360,6 +387,21 @@ try {
 
     $todasCategorias = $pdo->query("SELECT * FROM categorias ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
 
+    $newsletters = [];
+    $totalNewsletters = 0;
+    if ($tab === 'emails') {
+        $pageNews = max(1, (int)($_GET['page'] ?? 1));
+        $limitNews = 50;
+        $offsetNews = ($pageNews - 1) * $limitNews;
+        $totalNewsletters = (int)$pdo->query("SELECT COUNT(*) FROM newsletters")->fetchColumn();
+        $totalNewsPages = max(1, (int)ceil($totalNewsletters / $limitNews));
+        $stmtNews = $pdo->prepare("SELECT * FROM newsletters ORDER BY created_at DESC LIMIT :lim OFFSET :off");
+        $stmtNews->bindValue(':lim', $limitNews, PDO::PARAM_INT);
+        $stmtNews->bindValue(':off', $offsetNews, PDO::PARAM_INT);
+        $stmtNews->execute();
+        $newsletters = $stmtNews->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     $vagaEditar = null;
     $categoriasVaga = [];
     if ($tab === 'editar' && isset($_GET['id'])) {
@@ -393,6 +435,8 @@ try {
     <a class="admin-tab <?php echo $statusFilter === '' ? 'active' : '' ?>" href="admin.php?<?php echo $origemParam . $qParam ?>">Todas</a>
     <a class="admin-tab <?php echo $statusFilter === 'ativa' ? 'active' : '' ?>" href="admin.php?status=ativa<?php echo $origemParam . $qParam ?>">Ativas</a>
     <a class="admin-tab <?php echo $statusFilter === 'inativa' ? 'active' : '' ?>" href="admin.php?status=inativa<?php echo $origemParam . $qParam ?>">Inativas</a>
+    <span style="flex:1"></span>
+    <a class="admin-tab <?php echo $tab === 'emails' ? 'active' : '' ?>" href="admin.php?tab=emails">Emails</a>
   </div>
 
   <?php if ($tab === 'cadastro'): ?>
@@ -566,6 +610,63 @@ try {
       </div>
     </form>
   </div>
+
+  <?php elseif ($tab === 'emails'): ?>
+
+  <div class="admin-header">
+    <div>
+      <h1>Emails Cadastrados</h1>
+      <span><?php echo $totalNewsletters ?> inscritos no total</span>
+    </div>
+    <a href="?tab=emails&export=csv" class="btn-search" style="text-decoration:none;font-size:14px;padding:10px 24px">Exportar CSV</a>
+  </div>
+
+  <?php if (empty($newsletters)): ?>
+    <div class="admin-empty">Nenhum email cadastrado.</div>
+  <?php else: ?>
+    <div style="overflow-x:auto;background:#fff;border-radius:0.75rem;border:1px solid #c6c6cd">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <thead>
+          <tr style="background:#f8f9fa;border-bottom:2px solid #c6c6cd">
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Nome</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Email</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Área</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Origem</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Cadastro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($newsletters as $n): ?>
+            <tr style="border-bottom:1px solid #e5e7eb">
+              <td style="padding:10px 16px;font-weight:600;color:#0b1c30"><?php echo htmlspecialchars($n['nome'], ENT_QUOTES, 'UTF-8') ?></td>
+              <td style="padding:10px 16px;color:#4b41e1"><?php echo htmlspecialchars($n['email'], ENT_QUOTES, 'UTF-8') ?></td>
+              <td style="padding:10px 16px;color:#45464d"><?php echo htmlspecialchars($n['area'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+              <td style="padding:10px 16px"><span class="badge-origem <?php echo $n['origem'] === 'exterior' ? 'exterior' : '' ?>"><?php echo $n['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span></td>
+              <td style="padding:10px 16px;color:#45464d"><?php echo date('d/m/Y H:i', strtotime($n['created_at'])) ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <?php if ($totalNewsPages > 1): ?>
+      <div class="admin-pagination">
+        <?php if ($pageNews > 1): ?>
+          <a href="?tab=emails&page=<?php echo $pageNews - 1 ?>">&laquo;</a>
+        <?php endif; ?>
+        <?php for ($i = 1; $i <= $totalNewsPages; $i++): ?>
+          <?php if ($i === $pageNews): ?>
+            <span class="current"><?php echo $i ?></span>
+          <?php else: ?>
+            <a href="?tab=emails&page=<?php echo $i ?>"><?php echo $i ?></a>
+          <?php endif; ?>
+        <?php endfor; ?>
+        <?php if ($pageNews < $totalNewsPages): ?>
+          <a href="?tab=emails&page=<?php echo $pageNews + 1 ?>">&raquo;</a>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
+  <?php endif; ?>
 
   <?php else: ?>
 
