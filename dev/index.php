@@ -77,6 +77,164 @@ endif;
 <link rel="icon" href="../img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="../img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../img/favicon/apple-touch-icon.png">
+<style>
+.job-card-featured {
+  background: linear-gradient(135deg, #fefcf0 0%, #fffdf7 50%, #ffffff 100%);
+  border-radius: 0.75rem;
+  padding: 32px;
+  box-shadow: 0 8px 20px -6px rgba(180, 150, 60, 0.12), 0 4px 6px -1px rgba(0,0,0,0.06);
+  border: 1px solid #e8dcc8;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.2s;
+  position: relative;
+}
+
+.job-card-featured:hover {
+  box-shadow: 0 14px 28px -8px rgba(180, 150, 60, 0.18), 0 4px 12px -2px rgba(0,0,0,0.08);
+  border-color: #d4c4a8;
+  transform: translateY(-2px);
+}
+
+.job-card-featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #e8b84b, #d4a43a);
+  border-radius: 4px 0 0 4px;
+}
+
+.job-card-featured .badge-featured {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #f0d78a, #e8c56a);
+  color: #5c4510;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(200, 170, 70, 0.3);
+  margin-bottom: 12px;
+}
+
+.job-card-featured .job-card-title {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+  color: #0b1c30;
+}
+
+.job-card-featured .job-card-company {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #45464d;
+  margin-top: 4px;
+}
+
+.job-card-featured .job-card-info {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.job-card-featured .job-card-info-text {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #45464d;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.job-card-featured .job-card-info-text svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.job-card-featured .job-card-resumo {
+  font-size: 16px;
+  line-height: 24px;
+  color: #45464d;
+  margin-top: 16px;
+}
+
+.job-card-featured .job-card-footer {
+  border-top: 1px solid #e8dcc8;
+  padding-top: 16px;
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job-card-featured .job-card-btn {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #4b41e1;
+  background: transparent;
+  border: 1px solid #4b41e1;
+  padding: 8px 24px;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.job-card-featured .job-card-btn:hover { background-color: #eff4ff; }
+
+.job-card-featured .featured-price {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8a7030;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.job-card-featured .featured-price svg {
+  width: 14px;
+  height: 14px;
+}
+
+.section-featured {
+  padding: 0 16px;
+  max-width: 1280px;
+  margin: 0 auto 48px;
+}
+
+@media (min-width: 768px) {
+  .section-featured { padding: 0 48px; }
+}
+
+.section-featured .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.section-featured .section-subtitle {
+  font-size: 14px;
+  color: #8a7030;
+  font-weight: 500;
+}
+
+.featured-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+</style>
 </head>
 <body>
 
@@ -144,6 +302,61 @@ endif;
         <div id="search-correction" class="search-correction hidden"></div>
         <div id="vagas-total" class="search-info"></div>
       </div>
+    </div>
+  </section>
+
+  <section class="section-featured">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title" style="font-size:30px;font-weight:600;letter-spacing:-0.01em;color:#0b1c30">Vagas em Destaque</h2>
+        <p class="section-subtitle">Posicione sua empresa aqui &mdash; <a href="mailto:hello@mondywork.com" style="color:#4b41e1;text-decoration:underline">hello@mondywork.com</a></p>
+      </div>
+    </div>
+    <div class="featured-list">
+      <article class="job-card-featured">
+        <span class="badge-featured">✦ Destaque</span>
+        <div>
+          <h3 class="job-card-title">Senior Software Engineer</h3>
+          <p class="job-card-company">Empresa Exemplo • <span style="color:#8a7030;font-weight:600">Patrocinado</span></p>
+        </div>
+        <div class="job-card-info">
+          <span class="badge badge-remote">Remoto</span>
+          <span class="job-card-info-text">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Brasil
+          </span>
+        </div>
+        <p class="job-card-resumo line-clamp-2">Oportunidade como Senior Software Engineer em modelo remoto. Stack moderna, time multicultural e benefícios competitivos.</p>
+        <div class="job-card-footer">
+          <button class="job-card-btn" onclick="alert('Vaga de exemplo — anuncie a sua aqui!')">Ver Detalhes</button>
+          <span class="featured-price">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Vaga Patrocinada
+          </span>
+        </div>
+      </article>
+      <article class="job-card-featured">
+        <span class="badge-featured">✦ Destaque</span>
+        <div>
+          <h3 class="job-card-title">Product Designer (UX/UI)</h3>
+          <p class="job-card-company">Outra Empresa • <span style="color:#8a7030;font-weight:600">Patrocinado</span></p>
+        </div>
+        <div class="job-card-info">
+          <span class="badge badge-hybrid">Híbrido</span>
+          <span class="job-card-info-text">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            São Paulo, SP
+          </span>
+        </div>
+        <p class="job-card-resumo line-clamp-2">Buscamos um Product Designer para criar experiências incríveis. Design System, prototipação avançada e pesquisa com usuários.</p>
+        <div class="job-card-footer">
+          <button class="job-card-btn" onclick="alert('Vaga de exemplo — anuncie a sua aqui!')">Ver Detalhes</button>
+          <span class="featured-price">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Vaga Patrocinada
+          </span>
+        </div>
+      </article>
     </div>
   </section>
 
