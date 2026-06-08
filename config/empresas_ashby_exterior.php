@@ -2,4 +2,35 @@
 
 $ignorar_todas = false; // altere para true para ignorar todas as vagas desta fonte
 
-return ["atomicsemi" => "atomicsemi", "cartesia" => "cartesia", "claylabs" => "claylabs", "cohere" => "cohere", "dash0" => "dash0", "deel" => "deel", "etched" => "etched", "everai" => "everai", "harvey" => "harvey", "hopper" => "hopper", "join9am" => "join9am", "kota" => "kota", "niramedical" => "niramedical", "onebrief" => "onebrief", "permitflow" => "permitflow", "perplexity" => "perplexity", "ridealso" => "ridealso", "riveron" => "riveron", "savvy" => "savvy", "sesame" => "sesame", "skelar" => "skelar", "suno" => "suno", "withpulley" => "withpulley"];
+return [
+    "1password" => "1password",
+    "atomicsemi" => "atomicsemi",
+    "cartesia" => "cartesia",
+    "claylabs" => "claylabs",
+    "cohere" => "cohere",
+    "dash0" => "dash0",
+    "deel" => "deel",
+    "docker" => "docker",
+    "etched" => "etched",
+    "everai" => "everai",
+    "harvey" => "harvey",
+    "hcompany" => "hcompany",
+    "hopper" => "hopper",
+    "join9am" => "join9am",
+    "kota" => "kota",
+    "niramedical" => "niramedical",
+    "onebrief" => "onebrief",
+    "openai" => "openai",
+    "permitflow" => "permitflow",
+    "perplexity" => "perplexity",
+    "publiccloudgroup" => "publiccloudgroup",
+    "ridealso" => "ridealso",
+    "riveron" => "riveron",
+    "savvy" => "savvy",
+    "sentry" => "sentry",
+    "sesame" => "sesame",
+    "silver" => "silver",
+    "skelar" => "skelar",
+    "suno" => "suno",
+    "withpulley" => "withpulley",
+];
