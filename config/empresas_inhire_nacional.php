@@ -36,7 +36,6 @@ return [
     "dock" => "dock",
     "dtlabs" => "dtlabs",
     "ecore" => "ecore",
-    "essencialnutricao" => "essencialnutricao",
     "eurosolucoes" => "eurosolucoes",
     "evolutionmobility" => "evolutionmobility",
     "facitsolucoes" => "facitsolucoes",
