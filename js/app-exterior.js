@@ -29,6 +29,7 @@
     let loading = false;
     let currentQuery = '';
     let debounceTimer = null;
+    var vagasCache = {};
 
     function resetAndFetch() {
         container.innerHTML = '';
@@ -36,6 +37,7 @@
         vagasTotal.textContent = '';
         searchCorrection.classList.add('hidden');
         loadingEl.classList.add('hidden');
+        vagasCache = {};
         page = 0;
         hasMore = true;
         loading = false;
@@ -151,12 +153,15 @@
 
     function renderCard(v) {
         const rawModelo = normalizarModelo(v.modelo_trabalho);
-        const modelo = rawModelo ? formatModelo(rawModelo) : null;
+        const modelo = rawModelo;
         const local = v.localizacao || 'Remote';
         const resumo = v.resumo || 'This ' + v.titulo + ' position' + (modelo ? ' is ' + modelo.toLowerCase() : '') + '.';
 
+        vagasCache[v.vaga_id_externo] = v;
+
         var card = document.createElement('article');
         card.className = 'job-card';
+        card.setAttribute('data-vaga-id', v.vaga_id_externo);
 
         var modeloHtml = modelo
             ? '<span class="' + getBadgeClass(modelo) + '">' + escapeHtml(modelo) + '</span>'
@@ -171,7 +176,7 @@
 
         card.innerHTML =
             '<div>' +
-                '<h3 class="job-card-title">' + escapeHtml(v.titulo) + '</h3>' +
+                '<h3 class="job-card-title"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-link">' + escapeHtml(v.titulo) + '</a></h3>' +
                 '<p class="job-card-company">' + escapeHtml(v.empresa) + '</p>' +
             '</div>' +
             '<div class="job-card-info">' +
@@ -180,16 +185,9 @@
                 dateHtml +
             '</div>' +
             '<p class="job-card-resumo line-clamp-2">' + escapeHtml(resumo) + '</p>' +
-            '<div class="job-card-footer"><button class="job-card-btn btn-open-desc">View Details</button></div>';
-
-        var openBtn = card.querySelector('.btn-open-desc');
-        openBtn.addEventListener('click', function() { openModal(v); });
+            '<div class="job-card-footer"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">View Details</a></div>';
 
         container.appendChild(card);
-    }
-
-    function formatModelo(modelo) {
-        return modelo;
     }
 
     function escapeHtml(str) {
@@ -271,6 +269,35 @@
     }
 
     if (container) {
+        container.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-open-desc, .job-card-btn');
+            if (btn) {
+                var card = btn.closest('.job-card');
+                if (!card) return;
+                var id = card.getAttribute('data-vaga-id');
+                if (!id) return;
+                e.preventDefault();
+                var v = vagasCache[id];
+                if (v && v.descricao) {
+                    openModal(v);
+                } else if (v) {
+                    fetchVagaById(id).then(function(vaga) {
+                        if (vaga && vaga.vaga_id_externo) {
+                            vagasCache[id] = vaga;
+                            openModal(vaga);
+                        }
+                    });
+                } else {
+                    fetchVagaById(id).then(function(vaga) {
+                        if (vaga && vaga.vaga_id_externo) {
+                            vagasCache[id] = vaga;
+                            openModal(vaga);
+                        }
+                    });
+                }
+            }
+        });
+
         const observer = new IntersectionObserver(function(entries) {
             if (entries[0].isIntersecting) {
                 fetchVagas();
@@ -308,18 +335,28 @@
         function handleHash() {
             if (location.hash) {
                 var id = decodeURIComponent(location.hash.substring(1));
-                fetchVagaById(id).then(function(vaga) {
-                    if (vaga && vaga.vaga_id_externo) openModal(vaga);
-                });
+                var v = vagasCache[id];
+                if (v) {
+                    openModal(v);
+                } else {
+                    fetchVagaById(id).then(function(vaga) {
+                        if (vaga && vaga.vaga_id_externo) openModal(vaga);
+                    });
+                }
             }
         }
 
         window.addEventListener('hashchange', function() {
             if (location.hash) {
                 var id = decodeURIComponent(location.hash.substring(1));
-                fetchVagaById(id).then(function(vaga) {
-                    if (vaga && vaga.vaga_id_externo) openModal(vaga);
-                });
+                var v = vagasCache[id];
+                if (v) {
+                    openModal(v);
+                } else {
+                    fetchVagaById(id).then(function(vaga) {
+                        if (vaga && vaga.vaga_id_externo) openModal(vaga);
+                    });
+                }
             } else {
                 if (!modalOverlay.classList.contains('hidden')) closeModal();
             }
@@ -327,19 +364,26 @@
 
         handleHash();
 
-        fetchVagas();
-
-        document.querySelectorAll('#vagas-container .job-card[data-vaga-id]').forEach(function(card) {
-            var btn = card.querySelector('.btn-open-desc');
-            if (btn) {
-                btn.addEventListener('click', function() {
-                    var id = card.getAttribute('data-vaga-id');
-                    fetchVagaById(id).then(function(vaga) {
-                        if (vaga && vaga.vaga_id_externo) openModal(vaga);
-                    });
-                });
+        var vagasDataEl = document.getElementById('vagas-data');
+        if (vagasDataEl) {
+            try {
+                var initialData = JSON.parse(vagasDataEl.textContent);
+                if (initialData && initialData.vagas && initialData.vagas.length > 0) {
+                    initialData.vagas.forEach(function(v) { renderCard(v); });
+                    hasMore = initialData.has_more;
+                    page = 1;
+                    if (vagasTotal && !currentQuery) {
+                        vagasTotal.textContent = initialData.total + ' international jobs';
+                    }
+                } else {
+                    fetchVagas();
+                }
+            } catch(e) {
+                fetchVagas();
             }
-        });
+        } else {
+            fetchVagas();
+        }
 
         window.addEventListener('scroll', function() {
             if (window.scrollY > 400) {

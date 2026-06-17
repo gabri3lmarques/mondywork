@@ -1,6 +1,12 @@
 RewriteEngine On
 
-# Redirecionar api.php sem precisar da extensão
+# Pagina individual de vaga
+RewriteRule ^vaga/(.+)$ vaga.php?id=$1 [L,QSA]
+
+# Sitemap dinamico
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+# Redirecionar api.php sem precisar da extensao
 RewriteRule ^api$ api.php [L,QSA]
 
 # Cache de imagens e fontes (sem CSS/JS para evitar cache agressivo)
@@ -8,7 +14,7 @@ RewriteRule ^api$ api.php [L,QSA]
     Header set Cache-Control "public, max-age=604800, immutable"
 </FilesMatch>
 
-# Segurança básica
+# Seguranca basica
 <FilesMatch "^\.|config\.php$">
     Deny from all
 </FilesMatch>
