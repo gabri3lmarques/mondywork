@@ -18,7 +18,7 @@ try {
     $totalStmt->execute();
     $total = (int)$totalStmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT $campos FROM vagas WHERE status = 'ativa' AND origem = 'nacional' ORDER BY publicado_em DESC, data_coleta DESC LIMIT 10");
+    $stmt = $pdo->prepare("SELECT $campos FROM vagas WHERE status = 'ativa' AND origem = 'nacional' ORDER BY vagas.publicado_em DESC, data_coleta DESC LIMIT 10");
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $hasMore = $total > 10;
