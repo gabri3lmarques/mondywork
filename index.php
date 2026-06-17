@@ -182,19 +182,10 @@ gtag('config', 'G-RPQ9FFFNP1');
         </div>
         <div class="hero-filters" id="hero-filters">
           <div class="filter-group">
-            <label for="filter-categoria" class="filter-label">Área</label>
             <select id="filter-categoria" class="hero-select">
               <option value="">Todas as áreas</option>
 <?php foreach ($categorias as $cat): ?>
               <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_pt']) ?></option>
-<?php endforeach; ?>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="filter-modelo" class="filter-label">Modelo</label>
-            <select id="filter-modelo" class="hero-select">
-<?php foreach ($modelosPT as $m): ?>
-              <option value="<?= esc($m['value']) ?>"<?= $filterModelo === $m['value'] ? ' selected' : '' ?>><?= esc($m['label']) ?></option>
 <?php endforeach; ?>
             </select>
           </div>

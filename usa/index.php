@@ -171,21 +171,11 @@ gtag('config', 'G-RPQ9FFFNP1');
         <div id="search-correction" class="search-correction hidden"></div>
         <div class="hero-filters" id="hero-filters">
           <div class="filter-group">
-            <label for="filter-categoria" class="filter-label">Category</label>
             <select id="filter-categoria" class="hero-select">
               <option value="">All categories</option>
               <?php foreach ($categorias as $cat): ?>
               <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_en']) ?></option>
               <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="filter-modelo" class="filter-label">Work Model</label>
-            <select id="filter-modelo" class="hero-select">
-              <option value="">All models</option>
-              <option value="Remote"<?= $filterModelo === 'Remote' ? ' selected' : '' ?>>Remote</option>
-              <option value="Hybrid"<?= $filterModelo === 'Hybrid' ? ' selected' : '' ?>>Hybrid</option>
-              <option value="On-site"<?= $filterModelo === 'On-site' ? ' selected' : '' ?>>On-site</option>
             </select>
           </div>
         </div>
