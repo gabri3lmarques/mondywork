@@ -9,14 +9,41 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L]
 # Redirecionar api.php sem precisar da extensao
 RewriteRule ^api$ api.php [L,QSA]
 
-# Cache de imagens e fontes (sem CSS/JS para evitar cache agressivo)
+# Compressao Gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+    Header append Vary User-Agent
+</IfModule>
+
+# Compressao Brotli (prioritario se disponivel)
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# Cache de assets estaticos com versionamento
+<FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
 <FilesMatch "\.(jpe?g|png|gif|ico|svg|woff2?)$">
     Header set Cache-Control "public, max-age=604800, immutable"
+</FilesMatch>
+
+# Cache de paginas HTML (curto)
+<FilesMatch "\.(php|html)$">
+    Header set Cache-Control "public, max-age=600, must-revalidate"
 </FilesMatch>
 
 # Seguranca basica
 <FilesMatch "^\.|config\.php$">
     Deny from all
 </FilesMatch>
+
+# Desabilitar ETags (usamos Cache-Control)
+Header unset ETag
+FileETag None
 
 DirectoryIndex index.php index.html

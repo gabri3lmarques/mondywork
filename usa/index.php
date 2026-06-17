@@ -2,6 +2,9 @@
 $configFile = file_exists(__DIR__ . '/../config.local.php') ? __DIR__ . '/../config.local.php' : __DIR__ . '/../config.php';
 $config = require $configFile;
 
+$filterCategoria = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
+$filterModelo = isset($_GET['modelo']) ? trim($_GET['modelo']) : '';
+
 try {
     $pdo = new PDO(
         "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
@@ -12,17 +15,32 @@ try {
     require_once __DIR__ . '/../lib/Database.php';
     setupSchema($pdo);
 
-    $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em";
+    $categorias = $pdo->query("SELECT slug, nome_en FROM categorias ORDER BY nome_en")->fetchAll(PDO::FETCH_ASSOC);
 
-    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = 'exterior'");
-    $totalStmt->execute();
-    $total = (int)$totalStmt->fetchColumn();
+    $where = "WHERE v.status = 'ativa' AND v.origem = 'exterior'";
+    $params = [];
+    if ($filterCategoria) {
+        $where .= " AND v.id IN (SELECT vaga_id FROM vaga_categorias vc JOIN categorias c2 ON vc.categoria_id = c2.id WHERE c2.slug = :categoria)";
+        $params[':categoria'] = $filterCategoria;
+    }
+    if ($filterModelo) {
+        $where .= " AND v.modelo_trabalho = :modelo";
+        $params[':modelo'] = $filterModelo;
+    }
 
-    $stmt = $pdo->prepare("SELECT $campos FROM vagas WHERE status = 'ativa' AND origem = 'exterior' ORDER BY vagas.publicado_em DESC, data_coleta DESC LIMIT 10");
+    $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM vagas v {$where}");
+    foreach ($params as $k => $v) $stmtCount->bindValue($k, $v, PDO::PARAM_STR);
+    $stmtCount->execute();
+    $total = (int)$stmtCount->fetchColumn();
+
+    $campos = "v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.url_vaga, v.resumo, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em";
+    $stmt = $pdo->prepare("SELECT {$campos} FROM vagas v {$where} ORDER BY v.publicado_em DESC, v.data_coleta DESC LIMIT 10");
+    foreach ($params as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $hasMore = $total > 10;
 } catch (Exception $e) {
+    $categorias = [];
     $vagas = [];
     $total = 0;
     $hasMore = false;
@@ -46,6 +64,9 @@ function esc($s) {
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Mondywork | Tech, Design & Marketing Jobs in USA & worldwide (Remote & On-site)</title>
 <meta name="description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
+<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/">
+<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/">
+<link rel="canonical" href="https://mondywork.com.br/usa/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mondywork.com.br/usa/">
 <meta property="og:title" content="Mondywork | Tech, Design & Marketing Jobs in USA">
@@ -56,6 +77,16 @@ function esc($s) {
 <meta property="twitter:title" content="Mondywork | Tech, Design & Marketing Jobs in USA">
 <meta property="twitter:description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
 <meta property="twitter:image" content="https://mondywork.com.br/img/og-image-usa.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Mondywork",
+  "url": "https://mondywork.com.br/usa/",
+  "description": "Tech, design, marketing and product job board.",
+  "inLanguage": "en"
+}
+</script>
 <link rel="stylesheet" href="/css/style.css?v=1.0.5">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
@@ -176,6 +207,27 @@ gtag('config', 'G-RPQ9FFFNP1');
       </div>
       <aside class="sidebar">
         <div class="sidebar-card">
+          <h3 class="sidebar-title">Filter Jobs</h3>
+          <div class="filter-group">
+            <label for="filter-categoria" class="filter-label">Category</label>
+            <select id="filter-categoria" class="sidebar-select">
+              <option value="">All categories</option>
+              <?php foreach ($categorias as $cat): ?>
+              <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_en']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-modelo" class="filter-label">Work Model</label>
+            <select id="filter-modelo" class="sidebar-select">
+              <option value="">All models</option>
+              <option value="Remote"<?= $filterModelo === 'Remote' ? ' selected' : '' ?>>Remote</option>
+              <option value="Hybrid"<?= $filterModelo === 'Hybrid' ? ' selected' : '' ?>>Hybrid</option>
+              <option value="On-site"<?= $filterModelo === 'On-site' ? ' selected' : '' ?>>On-site</option>
+            </select>
+          </div>
+        </div>
+        <div class="sidebar-card">
           <div class="sidebar-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
           </div>
@@ -255,7 +307,15 @@ gtag('config', 'G-RPQ9FFFNP1');
   <button id="cookie-accept" class="cookie-btn">Accept</button>
 </div>
 
-<script id="vagas-data" type="application/json"><?= json_encode(['vagas' => $vagas, 'total' => $total, 'has_more' => $hasMore, 'query' => '', 'modo' => 'titulo'], JSON_UNESCAPED_UNICODE) ?></script>
+<script id="vagas-data" type="application/json"><?= json_encode([
+    'vagas' => $vagas,
+    'total' => $total,
+    'has_more' => $hasMore,
+    'query' => '',
+    'modo' => 'titulo',
+    'categoria' => $filterCategoria,
+    'modelo' => $filterModelo,
+], JSON_UNESCAPED_UNICODE) ?></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

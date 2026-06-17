@@ -117,10 +117,24 @@ if ($vaga) {
 <meta property="twitter:description" content="<?= esc($pageDesc) ?>">
 <meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
 <script type="application/ld+json"><?= json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
+<?php if ($vaga): ?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Mondywork", "item": "https://mondywork.com.br/" },
+    { "@type": "ListItem", "position": 2, "name": "<?= esc($vaga['titulo']) ?>", "item": "<?= esc($ogUrl) ?>" }
+  ]
+}
+</script>
+<?php endif; ?>
 <?php else: ?>
 <title>Vaga não encontrada | Mondywork</title>
 <meta name="robots" content="noindex">
 <?php endif; ?>
+<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/<?= $isExterior ? 'usa/' : '' ?>vaga/<?= esc($vaga ? $vaga['vaga_id_externo'] : '') ?>">
+<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/vaga/<?= esc($vaga ? $vaga['vaga_id_externo'] : '') ?>">
 <link rel="stylesheet" href="/css/style.css?v=1.0.5">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">

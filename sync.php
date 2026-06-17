@@ -4,6 +4,7 @@
  */
 require __DIR__ . '/lib/Database.php';
 require __DIR__ . '/lib/VagaRepository.php';
+require __DIR__ . '/lib/Log.php';
 
 $configFile = __DIR__ . '/config.local.php';
 $dbConfig = require file_exists($configFile) ? $configFile : __DIR__ . '/config.php';
@@ -46,6 +47,7 @@ try {
     ]);
 
     echo "[" . date('Y-m-d H:i:s') . "] Iniciando sincronizacao...\n";
+    logMsg("Sync iniciado");
 
     // ── Orphan cleanup ──
     $todasEmpresas = array_merge(
@@ -115,9 +117,11 @@ try {
 
     curl_close($ch);
     echo "\n[" . date('Y-m-d H:i:s') . "] Sincronizacao finalizada.\n";
+    logMsg("Sync finalizado");
 
 } catch (Exception $e) {
     echo "\n[ERRO FATAL] " . $e->getMessage() . "\n";
+    logError("Sync falhou", ['error' => $e->getMessage()]);
 }
 
 // ─────────────────────────────────────────────

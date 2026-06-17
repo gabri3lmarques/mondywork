@@ -10,6 +10,8 @@
     const vagasTotal  = document.getElementById('vagas-total');
     const backToTop   = document.getElementById('back-to-top');
     const newsletterForm = document.getElementById('newsletter-form');
+    const filterCategoria = document.getElementById('filter-categoria');
+    const filterModelo = document.getElementById('filter-modelo');
 
     const modalOverlay = document.getElementById('modal-overlay');
     const modalTitle = document.getElementById('modal-title');
@@ -30,6 +32,8 @@
     let currentQuery = '';
     let debounceTimer = null;
     var vagasCache = {};
+    var currentCategoria = '';
+    var currentModelo = '';
 
     function resetAndFetch() {
         container.innerHTML = '';
@@ -220,7 +224,7 @@
         page++;
 
         var modo = getSearchMode();
-        var url = '/api.php?page=' + page + '&limit=' + LIMIT + '&origem=exterior' + (currentQuery ? '&q=' + encodeURIComponent(currentQuery) + '&modo=' + modo : '');
+        var url = '/api.php?page=' + page + '&limit=' + LIMIT + '&origem=exterior' + (currentQuery ? '&q=' + encodeURIComponent(currentQuery) + '&modo=' + modo : '') + (currentCategoria ? '&categoria=' + encodeURIComponent(currentCategoria) : '') + (currentModelo ? '&modelo=' + encodeURIComponent(currentModelo) : '');
         let hasError = false;
 
         fetch(url)
@@ -364,6 +368,15 @@
 
         handleHash();
 
+        function updateUrl() {
+            var params = new URLSearchParams();
+            if (currentQuery) params.set('q', currentQuery);
+            if (currentCategoria) params.set('categoria', currentCategoria);
+            if (currentModelo) params.set('modelo', currentModelo);
+            var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+            history.replaceState(null, '', newUrl);
+        }
+
         var vagasDataEl = document.getElementById('vagas-data');
         if (vagasDataEl) {
             try {
@@ -372,6 +385,8 @@
                     initialData.vagas.forEach(function(v) { renderCard(v); });
                     hasMore = initialData.has_more;
                     page = 1;
+                    if (initialData.categoria) currentCategoria = initialData.categoria;
+                    if (initialData.modelo) currentModelo = initialData.modelo;
                     if (vagasTotal && !currentQuery) {
                         vagasTotal.textContent = initialData.total + ' international jobs';
                     }
@@ -383,6 +398,21 @@
             }
         } else {
             fetchVagas();
+        }
+
+        if (filterCategoria) {
+            filterCategoria.addEventListener('change', function() {
+                currentCategoria = this.value;
+                updateUrl();
+                resetAndFetch();
+            });
+        }
+        if (filterModelo) {
+            filterModelo.addEventListener('change', function() {
+                currentModelo = this.value;
+                updateUrl();
+                resetAndFetch();
+            });
         }
 
         window.addEventListener('scroll', function() {

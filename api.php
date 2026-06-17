@@ -12,6 +12,8 @@ $origem = isset($_GET['origem']) ? trim($_GET['origem']) : 'nacional';
 $area = isset($_GET['area']) ? trim($_GET['area']) : '';
 $vagaId = isset($_GET['vaga_id']) ? trim($_GET['vaga_id']) : '';
 $modo = isset($_GET['modo']) && $_GET['modo'] === 'descricao' ? 'descricao' : 'titulo';
+$categoria = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
+$modelo = isset($_GET['modelo']) ? trim($_GET['modelo']) : '';
 
 function removerAcentos($str) {
     $acentos = [
@@ -101,6 +103,21 @@ function corrigirQueryFuzzy($query, $pdo) {
 }
 
 try {
+    require_once __DIR__ . '/lib/Cache.php';
+    require_once __DIR__ . '/lib/Log.php';
+
+    // Tenta cache para requests de listagem (GET sem vaga_id)
+    $isReadRequest = $_SERVER['REQUEST_METHOD'] === 'GET' && $vagaId === '';
+    $cacheKey = '';
+    if ($isReadRequest) {
+        $cacheKey = 'api_' . md5($_SERVER['QUERY_STRING'] ?? '');
+        $cached = cacheGet($cacheKey, 300);
+        if ($cached) {
+            echo json_encode($cached);
+            return;
+        }
+    }
+
     $pdo = new PDO(
         "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
         $config['user'],
@@ -112,6 +129,7 @@ try {
 
     $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, descricao, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em, area";
 
+    // --- Vaga individual (sem cache) ---
     if ($vagaId !== '') {
         $stmt = $pdo->prepare("SELECT $campos FROM vagas WHERE vaga_id_externo = :id AND status = 'ativa' LIMIT 1");
         $stmt->execute([':id' => $vagaId]);
@@ -120,11 +138,25 @@ try {
         return;
     }
 
-    $areaCondicao = '';
-    $areaParams = [];
+    // --- Filtros adicionais ---
+    $extraJoins = '';
+    $extraWhere = '';
+    $extraParams = [];
+
+    if ($categoria !== '') {
+        $extraJoins = " JOIN vaga_categorias vc ON v.id = vc.vaga_id JOIN categorias c ON vc.categoria_id = c.id";
+        $extraWhere .= " AND c.slug = :categoria";
+        $extraParams[':categoria'] = $categoria;
+    }
+
+    if ($modelo !== '') {
+        $extraWhere .= " AND vagas.modelo_trabalho = :modelo";
+        $extraParams[':modelo'] = $modelo;
+    }
+
     if ($area !== '') {
-        $areaCondicao = ' AND area = :area';
-        $areaParams[':area'] = $area;
+        $extraWhere .= " AND vagas.area = :area";
+        $extraParams[':area'] = $area;
     }
 
     $queryCorrigida = null;
@@ -142,23 +174,24 @@ try {
         }
     }
 
+    $fromBase = "FROM vagas{$extraJoins}";
+    $whereBase = "WHERE vagas.status = 'ativa' AND vagas.origem = :origem{$extraWhere}";
+
     if ($q !== '') {
         if ($modo === 'descricao') {
             $likeQ = '%' . $q . '%';
 
-            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND (descricao LIKE :like_q OR resumo LIKE :like_q)");
+            $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase} AND (vagas.descricao LIKE :like_q OR vagas.resumo LIKE :like_q)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-            foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
             $totalStmt->bindValue(':like_q', $likeQ, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
 
-            $sql = "SELECT $campos
-                    FROM vagas
-                    WHERE status = 'ativa'
-                    AND origem = :origem
-                    $areaCondicao
-                    AND (descricao LIKE :like_q OR resumo LIKE :like_q)
+            $sql = "SELECT DISTINCT {$campos}
+                    {$fromBase}
+                    {$whereBase}
+                    AND (vagas.descricao LIKE :like_q OR vagas.resumo LIKE :like_q)
                     ORDER BY vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         } elseif ($shortTerms) {
@@ -169,30 +202,28 @@ try {
                 $t = trim($t);
                 if ($t === '') continue;
                 $pn = ":w_{$i}";
-                $conds[] = "CONCAT(' ',COALESCE(titulo,''),' ') LIKE CONCAT('% ',{$pn},' %')";
+                $conds[] = "CONCAT(' ',COALESCE(vagas.titulo,''),' ') LIKE CONCAT('% ',{$pn},' %')";
                 $wordParams[$pn] = $t;
             }
             $wordCond = implode(' AND ', $conds);
 
-            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND {$wordCond}");
+            $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase} AND {$wordCond}");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-            foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
             foreach ($wordParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
 
-            $sql = "SELECT $campos
-                    FROM vagas
-                    WHERE status = 'ativa'
-                    AND origem = :origem
-                    $areaCondicao
+            $sql = "SELECT DISTINCT {$campos}
+                    {$fromBase}
+                    {$whereBase}
                     AND {$wordCond}
                     ORDER BY vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         } else {
-            $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo) AGAINST(:search_q IN BOOLEAN MODE)");
+            $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase} AND MATCH(vagas.titulo) AGAINST(:search_q IN BOOLEAN MODE)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-            foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
             $totalStmt->bindValue(':search_q', $q, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
@@ -202,9 +233,9 @@ try {
                 if ($houveCorrecao) {
                     $queryCorrigida = $corrigida;
 
-                    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao . " AND MATCH(titulo) AGAINST(:search_q IN BOOLEAN MODE)");
+                    $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase} AND MATCH(vagas.titulo) AGAINST(:search_q IN BOOLEAN MODE)");
                     $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-                    foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+                    foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
                     $totalStmt->bindValue(':search_q', $corrigida, PDO::PARAM_STR);
                     $totalStmt->execute();
                     $total = (int)$totalStmt->fetchColumn();
@@ -213,35 +244,31 @@ try {
 
             $searchQ = $queryCorrigida ?? $q;
 
-            $sql = "SELECT $campos,
-                    MATCH(titulo) AGAINST(:search_q) AS score
-                    FROM vagas
-                    WHERE status = 'ativa'
-                    AND origem = :origem
-                    $areaCondicao
-                    AND MATCH(titulo) AGAINST(:search_q IN BOOLEAN MODE)
+            $sql = "SELECT DISTINCT {$campos},
+                    MATCH(vagas.titulo) AGAINST(:search_q) AS score
+                    {$fromBase}
+                    {$whereBase}
+                    AND MATCH(vagas.titulo) AGAINST(:search_q IN BOOLEAN MODE)
                     ORDER BY score DESC, vagas.publicado_em DESC
                     LIMIT :limit OFFSET :offset";
         }
     } else {
-        $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem" . $areaCondicao);
+        $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase}");
         $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-        foreach ($areaParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+        foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
         $totalStmt->execute();
         $total = (int)$totalStmt->fetchColumn();
 
-        $sql = "SELECT $campos
-                FROM vagas
-                WHERE status = 'ativa'
-                AND origem = :origem
-                $areaCondicao
+        $sql = "SELECT DISTINCT {$campos}
+                {$fromBase}
+                {$whereBase}
                 ORDER BY vagas.publicado_em DESC, data_coleta DESC
                 LIMIT :limit OFFSET :offset";
     }
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-    foreach ($areaParams as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
+    foreach ($extraParams as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     if ($q !== '') {
@@ -256,7 +283,7 @@ try {
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode([
+    $result = [
         'query'           => $q,
         'query_corrigida' => $queryCorrigida,
         'data'            => $vagas,
@@ -264,11 +291,24 @@ try {
         'limit'           => $limit,
         'total'           => $total,
         'area'            => $area,
+        'categoria'       => $categoria,
+        'modelo'          => $modelo,
         'modo'            => $modo,
         'has_more'        => ($offset + $limit) < $total,
-    ]);
+    ];
+
+    // Salva cache para requests de listagem
+    if ($isReadRequest && $cacheKey) {
+        cacheSet($cacheKey, $result);
+    }
+
+    echo json_encode($result);
 
 } catch (Exception $e) {
+    logError('API error', [
+        'query' => $_SERVER['QUERY_STRING'] ?? '',
+        'error' => $e->getMessage(),
+    ]);
     http_response_code(500);
-    echo json_encode(['error' => 'Erro ao buscar vagas', 'detail' => $e->getMessage()]);
+    echo json_encode(['error' => 'Erro ao buscar vagas']);
 }

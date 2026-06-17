@@ -55,6 +55,9 @@ try {
     $stmt = $pdo->prepare("INSERT INTO newsletters (nome, email, area, origem) VALUES (:nome, :email, :area, :origem)");
     $stmt->execute([':nome' => $nome, ':email' => $email, ':area' => $area, ':origem' => $origem]);
 
+    require_once __DIR__ . '/lib/Log.php';
+    logMsg("Novo inscrito: {$email} ({$area}/{$origem})");
+
     json_safe(['success' => true]);
 
 } catch (PDOException $e) {
