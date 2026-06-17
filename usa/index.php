@@ -169,6 +169,26 @@ gtag('config', 'G-RPQ9FFFNP1');
           </label>
         </div>
         <div id="search-correction" class="search-correction hidden"></div>
+        <div class="hero-filters" id="hero-filters">
+          <div class="filter-group">
+            <label for="filter-categoria" class="filter-label">Category</label>
+            <select id="filter-categoria" class="hero-select">
+              <option value="">All categories</option>
+              <?php foreach ($categorias as $cat): ?>
+              <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_en']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-modelo" class="filter-label">Work Model</label>
+            <select id="filter-modelo" class="hero-select">
+              <option value="">All models</option>
+              <option value="Remote"<?= $filterModelo === 'Remote' ? ' selected' : '' ?>>Remote</option>
+              <option value="Hybrid"<?= $filterModelo === 'Hybrid' ? ' selected' : '' ?>>Hybrid</option>
+              <option value="On-site"<?= $filterModelo === 'On-site' ? ' selected' : '' ?>>On-site</option>
+            </select>
+          </div>
+        </div>
         <div id="vagas-total" class="search-info"><?= $total ?> international jobs</div>
       </div>
     </div>
@@ -206,27 +226,6 @@ gtag('config', 'G-RPQ9FFFNP1');
 <?php endforeach; ?>
       </div>
       <aside class="sidebar">
-        <div class="sidebar-card">
-          <h3 class="sidebar-title">Filter Jobs</h3>
-          <div class="filter-group">
-            <label for="filter-categoria" class="filter-label">Category</label>
-            <select id="filter-categoria" class="sidebar-select">
-              <option value="">All categories</option>
-              <?php foreach ($categorias as $cat): ?>
-              <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_en']) ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="filter-modelo" class="filter-label">Work Model</label>
-            <select id="filter-modelo" class="sidebar-select">
-              <option value="">All models</option>
-              <option value="Remote"<?= $filterModelo === 'Remote' ? ' selected' : '' ?>>Remote</option>
-              <option value="Hybrid"<?= $filterModelo === 'Hybrid' ? ' selected' : '' ?>>Hybrid</option>
-              <option value="On-site"<?= $filterModelo === 'On-site' ? ' selected' : '' ?>>On-site</option>
-            </select>
-          </div>
-        </div>
         <div class="sidebar-card">
           <div class="sidebar-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>

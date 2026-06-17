@@ -144,7 +144,7 @@ try {
     $extraParams = [];
 
     if ($categoria !== '') {
-        $extraJoins = " JOIN vaga_categorias vc ON v.id = vc.vaga_id JOIN categorias c ON vc.categoria_id = c.id";
+        $extraJoins = " JOIN vaga_categorias vc ON vagas.id = vc.vaga_id JOIN categorias c ON vc.categoria_id = c.id";
         $extraWhere .= " AND c.slug = :categoria";
         $extraParams[':categoria'] = $categoria;
     }

@@ -17,14 +17,14 @@ try {
 
     $categorias = $pdo->query("SELECT slug, nome_pt FROM categorias ORDER BY nome_pt")->fetchAll(PDO::FETCH_ASSOC);
 
-    $where = "WHERE vagas.status = 'ativa' AND vagas.origem = 'nacional'";
+    $where = "WHERE v.status = 'ativa' AND v.origem = 'nacional'";
     $params = [];
     if ($filterCategoria) {
         $where .= " AND v.id IN (SELECT vaga_id FROM vaga_categorias vc JOIN categorias c2 ON vc.categoria_id = c2.id WHERE c2.slug = :categoria)";
         $params[':categoria'] = $filterCategoria;
     }
     if ($filterModelo) {
-        $where .= " AND vagas.modelo_trabalho = :modelo";
+        $where .= " AND v.modelo_trabalho = :modelo";
         $params[':modelo'] = $filterModelo;
     }
 
@@ -174,6 +174,26 @@ gtag('config', 'G-RPQ9FFFNP1');
           <svg class="loading-icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
           <span>Buscando...</span>
         </div>
+        <div class="hero-filters" id="hero-filters">
+          <div class="filter-group">
+            <label for="filter-categoria" class="filter-label">Área</label>
+            <select id="filter-categoria" class="hero-select">
+              <option value="">Todas as áreas</option>
+              <?php foreach ($categorias as $cat): ?>
+              <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_pt']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-modelo" class="filter-label">Modelo</label>
+            <select id="filter-modelo" class="hero-select">
+              <option value="">Todos os modelos</option>
+              <option value="Remoto"<?= $filterModelo === 'Remoto' ? ' selected' : '' ?>>Remoto</option>
+              <option value="Híbrido"<?= $filterModelo === 'Híbrido' ? ' selected' : '' ?>>Híbrido</option>
+              <option value="Presencial"<?= $filterModelo === 'Presencial' ? ' selected' : '' ?>>Presencial</option>
+            </select>
+          </div>
+        </div>
         <div id="vagas-total" class="search-info"><?= $total ?> vagas ativas</div>
       </div>
     </div>
@@ -212,27 +232,6 @@ gtag('config', 'G-RPQ9FFFNP1');
 <?php endforeach; ?>
       </div>
       <aside class="sidebar">
-        <div class="sidebar-card">
-          <h3 class="sidebar-title">Filtrar Vagas</h3>
-          <div class="filter-group">
-            <label for="filter-categoria" class="filter-label">Área</label>
-            <select id="filter-categoria" class="sidebar-select">
-              <option value="">Todas as áreas</option>
-              <?php foreach ($categorias as $cat): ?>
-              <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_pt']) ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="filter-modelo" class="filter-label">Modelo</label>
-            <select id="filter-modelo" class="sidebar-select">
-              <option value="">Todos os modelos</option>
-              <option value="Remoto"<?= $filterModelo === 'Remoto' ? ' selected' : '' ?>>Remoto</option>
-              <option value="Híbrido"<?= $filterModelo === 'Híbrido' ? ' selected' : '' ?>>Híbrido</option>
-              <option value="Presencial"<?= $filterModelo === 'Presencial' ? ' selected' : '' ?>>Presencial</option>
-            </select>
-          </div>
-        </div>
         <div class="sidebar-card">
           <div class="sidebar-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
