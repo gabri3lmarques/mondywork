@@ -176,24 +176,32 @@ try {
 
     $fromBase = "FROM vagas{$extraJoins}";
     $whereBase = "WHERE vagas.status = 'ativa' AND vagas.origem = :origem{$extraWhere}";
+    $useSubquery = $categoria !== '' || $modelo !== '' || $area !== '';
+
+    // Helper: build a subquery that finds matching vagas.id when JOINs are needed
+    // This avoids DISTINCT + ORDER BY issues with MySQL
+    $idSubquery = $useSubquery
+        ? "SELECT DISTINCT vagas.id FROM vagas{$extraJoins} {$whereBase}"
+        : '';
 
     if ($q !== '') {
         if ($modo === 'descricao') {
             $likeQ = '%' . $q . '%';
+            $searchCond = " AND (vagas.descricao LIKE :like_q OR vagas.resumo LIKE :like_q)";
 
-            $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase} AND (vagas.descricao LIKE :like_q OR vagas.resumo LIKE :like_q)");
-            $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-            foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            $totalFrom = $useSubquery ? "FROM vagas WHERE vagas.id IN ({$idSubquery} {$searchCond})" : "{$fromBase} {$whereBase}{$searchCond}";
+            $totalStmt = $pdo->prepare("SELECT COUNT(*) {$totalFrom}");
+            if (!$useSubquery) {
+                $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+                foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            }
             $totalStmt->bindValue(':like_q', $likeQ, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
 
-            $sql = "SELECT DISTINCT {$campos}
-                    {$fromBase}
-                    {$whereBase}
-                    AND (vagas.descricao LIKE :like_q OR vagas.resumo LIKE :like_q)
-                    ORDER BY vagas.publicado_em DESC
-                    LIMIT :limit OFFSET :offset";
+            $sql = $useSubquery
+                ? "SELECT {$campos} FROM vagas WHERE vagas.id IN ({$idSubquery} {$searchCond}) ORDER BY vagas.publicado_em DESC LIMIT :limit OFFSET :offset"
+                : "SELECT {$campos} {$fromBase} {$whereBase}{$searchCond} ORDER BY vagas.publicado_em DESC LIMIT :limit OFFSET :offset";
         } elseif ($shortTerms) {
             $termos = preg_split('/\s+/', trim($q));
             $conds = [];
@@ -206,20 +214,21 @@ try {
                 $wordParams[$pn] = $t;
             }
             $wordCond = implode(' AND ', $conds);
+            $searchCond = " AND {$wordCond}";
 
-            $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase} AND {$wordCond}");
-            $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-            foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            $totalFrom = $useSubquery ? "FROM vagas WHERE vagas.id IN ({$idSubquery} {$searchCond})" : "{$fromBase} {$whereBase}{$searchCond}";
+            $totalStmt = $pdo->prepare("SELECT COUNT(*) {$totalFrom}");
+            if (!$useSubquery) {
+                $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+                foreach ($extraParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
+            }
             foreach ($wordParams as $k => $v) $totalStmt->bindValue($k, $v, PDO::PARAM_STR);
             $totalStmt->execute();
             $total = (int)$totalStmt->fetchColumn();
 
-            $sql = "SELECT DISTINCT {$campos}
-                    {$fromBase}
-                    {$whereBase}
-                    AND {$wordCond}
-                    ORDER BY vagas.publicado_em DESC
-                    LIMIT :limit OFFSET :offset";
+            $sql = $useSubquery
+                ? "SELECT {$campos} FROM vagas WHERE vagas.id IN ({$idSubquery} {$searchCond}) ORDER BY vagas.publicado_em DESC LIMIT :limit OFFSET :offset"
+                : "SELECT {$campos} {$fromBase} {$whereBase}{$searchCond} ORDER BY vagas.publicado_em DESC LIMIT :limit OFFSET :offset";
         } else {
             $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase} AND MATCH(vagas.titulo) AGAINST(:search_q IN BOOLEAN MODE)");
             $totalStmt->bindValue(':origem', $origem, PDO::PARAM_STR);
@@ -244,13 +253,9 @@ try {
 
             $searchQ = $queryCorrigida ?? $q;
 
-            $sql = "SELECT DISTINCT {$campos},
-                    MATCH(vagas.titulo) AGAINST(:search_q) AS score
-                    {$fromBase}
-                    {$whereBase}
-                    AND MATCH(vagas.titulo) AGAINST(:search_q IN BOOLEAN MODE)
-                    ORDER BY score DESC, vagas.publicado_em DESC
-                    LIMIT :limit OFFSET :offset";
+            $sql = $useSubquery
+                ? "SELECT {$campos}, MATCH(vagas.titulo) AGAINST(:search_q) AS score FROM vagas WHERE vagas.id IN ({$idSubquery} AND MATCH(vagas.titulo) AGAINST(:search_q IN BOOLEAN MODE)) ORDER BY score DESC, vagas.publicado_em DESC LIMIT :limit OFFSET :offset"
+                : "SELECT DISTINCT {$campos}, MATCH(vagas.titulo) AGAINST(:search_q) AS score {$fromBase} {$whereBase} AND MATCH(vagas.titulo) AGAINST(:search_q IN BOOLEAN MODE) ORDER BY score DESC, vagas.publicado_em DESC LIMIT :limit OFFSET :offset";
         }
     } else {
         $totalStmt = $pdo->prepare("SELECT COUNT(DISTINCT vagas.id) {$fromBase} {$whereBase}");
@@ -259,16 +264,20 @@ try {
         $totalStmt->execute();
         $total = (int)$totalStmt->fetchColumn();
 
-        $sql = "SELECT DISTINCT {$campos}
-                {$fromBase}
-                {$whereBase}
-                ORDER BY vagas.publicado_em DESC, data_coleta DESC
-                LIMIT :limit OFFSET :offset";
+        $sql = $useSubquery
+            ? "SELECT {$campos} FROM vagas WHERE vagas.id IN ({$idSubquery}) ORDER BY vagas.publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset"
+            : "SELECT {$campos} FROM vagas {$whereBase} ORDER BY vagas.publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset";
     }
 
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':origem', $origem, PDO::PARAM_STR);
-    foreach ($extraParams as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
+    if ($useSubquery) {
+        // Bind params only for the inner subquery (they don't appear in outer)
+        foreach ($extraParams as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
+        $stmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+    } else {
+        $stmt->bindValue(':origem', $origem, PDO::PARAM_STR);
+        foreach ($extraParams as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
+    }
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     if ($q !== '') {

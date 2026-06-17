@@ -1226,26 +1226,31 @@ input { font-family: inherit; }
   justify-content: center;
 }
 .hero-select {
-  padding: 8px 32px 8px 14px;
-  border: 1px solid rgba(255,255,255,0.2);
+  padding: 10px 36px 10px 14px;
+  border: 1px solid rgba(255,255,255,0.35);
   border-radius: 8px;
   font-family: inherit;
   font-size: 13px;
-  background: rgba(255,255,255,0.08);
+  font-weight: 500;
+  background: rgba(0,0,0,0.3);
   color: #fff;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
   -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.9)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 8px center;
+  background-position: right 10px center;
   background-size: 14px;
-  min-width: 160px;
+  min-width: 170px;
+}
+.hero-select:hover {
+  background: rgba(0,0,0,0.45);
+  border-color: rgba(255,255,255,0.5);
 }
 .hero-select:focus {
-  border-color: #4b41e1;
-  background: rgba(255,255,255,0.15);
+  border-color: #7c73ff;
+  background: rgba(0,0,0,0.5);
   outline: none;
 }
 .hero-select option {
@@ -1253,7 +1258,8 @@ input { font-family: inherit; }
   background: #fff;
 }
 .hero-filters .filter-label {
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 4px;
 }
 
 @media (max-width: 600px) {
