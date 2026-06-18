@@ -23,6 +23,7 @@ try {
     $vaga = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($vaga) {
+        $vaga['titulo'] = capitalizeTitle($vaga['titulo']);
         $stmtCat = $pdo->prepare("SELECT c.slug, c.nome_pt, c.nome_en FROM categorias c JOIN vaga_categorias vc ON c.id = vc.categoria_id WHERE vc.vaga_id = :id");
         $stmtCat->execute([':id' => $vaga['id']]);
         $categorias = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
@@ -38,6 +39,10 @@ if (!$vaga) {
 
 function esc($s) {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+}
+
+function capitalizeTitle($str) {
+    return mb_convert_case($str, MB_CASE_TITLE, 'UTF-8');
 }
 
 function badgeClass($modelo) {

@@ -15,6 +15,10 @@ $modo = isset($_GET['modo']) && $_GET['modo'] === 'descricao' ? 'descricao' : 't
 $categoria = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
 $modelo = isset($_GET['modelo']) ? trim($_GET['modelo']) : '';
 
+function capitalizeTitle($str) {
+    return mb_convert_case($str, MB_CASE_TITLE, 'UTF-8');
+}
+
 function removerAcentos($str) {
     $acentos = [
         'á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'ae',
@@ -134,6 +138,7 @@ try {
         $stmt = $pdo->prepare("SELECT $campos FROM vagas WHERE vaga_id_externo = :id AND status = 'ativa' LIMIT 1");
         $stmt->execute([':id' => $vagaId]);
         $vaga = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($vaga) $vaga['titulo'] = capitalizeTitle($vaga['titulo']);
         echo json_encode($vaga);
         return;
     }
@@ -291,6 +296,8 @@ try {
     }
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($vagas as &$v) { $v['titulo'] = capitalizeTitle($v['titulo']); }
+    unset($v);
 
     $result = [
         'query'           => $q,

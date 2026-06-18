@@ -38,6 +38,8 @@ try {
     foreach ($params as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($vagas as &$v) { $v['titulo'] = capitalizeTitle($v['titulo']); }
+    unset($v);
     $hasMore = $total > 10;
 } catch (Exception $e) {
     $categorias = [];
@@ -61,6 +63,10 @@ function formatModelo($modelo) {
 
 function esc($s) {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+}
+
+function capitalizeTitle($str) {
+    return mb_convert_case($str, MB_CASE_TITLE, 'UTF-8');
 }
 
 $modelosPT = [

@@ -54,7 +54,7 @@
     }
 
     function openModal(v) {
-        modalTitle.textContent = v.titulo;
+        modalTitle.textContent = capitalizeTitle(v.titulo);
         modalSubtitle.textContent = v.empresa + ' • ' + (v.localizacao || 'Remote');
         modalBody.innerHTML = v.descricao || '<p>Description not available.</p>';
         modalApply.href = v.url_vaga;
@@ -154,6 +154,7 @@
     }
 
     function renderCard(v) {
+        v.titulo = capitalizeTitle(v.titulo);
         const rawModelo = normalizarModelo(v.modelo_trabalho);
         const modelo = rawModelo;
         const local = v.localizacao || 'Remote';
@@ -190,6 +191,12 @@
             '<div class="job-card-footer"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">View Details</a></div>';
 
         container.appendChild(card);
+    }
+
+    function capitalizeTitle(str) {
+        return str.replace(/\w\S*/g, function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
     }
 
     function escapeHtml(str) {
