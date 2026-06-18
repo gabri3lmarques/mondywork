@@ -73,7 +73,7 @@ endif;
 <title>Mondywork DEV | Vagas de Tecnologia, Design e Marketing</title>
 <meta name="description" content="[DEV] Ambiente de desenvolvimento para testar novas funcionalidades.">
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="../css/style.css?v=1.0.5">
+<link rel="stylesheet" href="../css/style.css?v=1.0.6">
 <link rel="icon" href="../img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="../img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../img/favicon/apple-touch-icon.png">
