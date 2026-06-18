@@ -34,13 +34,13 @@ try {
     $total = (int)$stmtCount->fetchColumn();
 
     $campos = "v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.url_vaga, v.resumo, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em";
-    $stmt = $pdo->prepare("SELECT {$campos} FROM vagas v {$where} ORDER BY v.publicado_em DESC, v.data_coleta DESC LIMIT 10");
+    $stmt = $pdo->prepare("SELECT {$campos} FROM vagas v {$where} ORDER BY v.publicado_em DESC, v.data_coleta DESC LIMIT 50");
     foreach ($params as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     foreach ($vagas as &$v) { $v['titulo'] = capitalizeTitle($v['titulo']); }
     unset($v);
-    $hasMore = $total > 10;
+    $hasMore = $total > 50;
 } catch (Exception $e) {
     $categorias = [];
     $vagas = [];

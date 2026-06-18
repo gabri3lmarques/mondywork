@@ -451,9 +451,9 @@
             try {
                 var initialData = JSON.parse(vagasDataEl.textContent);
                 if (initialData && initialData.vagas && initialData.vagas.length > 0) {
-                    initialData.vagas.forEach(function(v) { renderCard(v); });
+                    initialData.vagas.forEach(function(v) { vagasCache[v.vaga_id_externo] = v; });
                     hasMore = initialData.has_more;
-                    page = 1;
+                    page = initialData.vagas.length / LIMIT;
                     if (initialData.categoria) currentCategoria = initialData.categoria;
                     if (vagasTotal && !currentQuery) {
                         vagasTotal.textContent = initialData.total + ' vagas ativas';
