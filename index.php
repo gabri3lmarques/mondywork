@@ -82,6 +82,7 @@ $modelosPT = [
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Mondywork | Vagas de Tecnologia, Design e Marketing (Remoto e Presencial)</title>
 <meta name="description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto. Oportunidades atualizadas diariamente em todo o Brasil.">
+<?php if ($filterCategoria || $filterModelo): ?><meta name="robots" content="noindex,follow"><?php endif; ?>
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/">
 <link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/">
 <link rel="canonical" href="https://mondywork.com.br/">
@@ -264,6 +265,15 @@ gtag('config', 'G-RPQ9FFFNP1');
             </select>
             <button class="sidebar-btn" type="submit">Cadastrar Agora</button>
           </form>
+        </div>
+        <div class="sidebar-card" style="margin-top: 16px;">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-8069032517043297"
+               data-ad-slot="2519706373"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
       </aside>
     </div>

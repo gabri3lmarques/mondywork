@@ -89,11 +89,15 @@ if ($vaga) {
         ],
         'url' => $ogUrl,
         'directApply' => true,
+        'applicantLocationRequirements' => [
+            '@type' => 'Country',
+            'name' => $isExterior ? 'US' : 'BR',
+        ],
     ];
+    $jsonLd['employmentType'] = 'FULL_TIME';
     if ($vaga['modelo_trabalho']) {
-        $employmentType = $vaga['modelo_trabalho'];
-        if (in_array(mb_strtolower($employmentType), ['remote', 'remoto'])) {
-            $jsonLd['employmentType'] = 'REMOTE';
+        $modeloLower = mb_strtolower($vaga['modelo_trabalho']);
+        if (in_array($modeloLower, ['remote', 'remoto'])) {
             $jsonLd['jobLocationType'] = 'TELECOMMUTE';
         }
     }
@@ -116,11 +120,19 @@ if ($vaga) {
 <meta property="og:title" content="<?= esc($pageTitle) ?>">
 <meta property="og:description" content="<?= esc($pageDesc) ?>">
 <meta property="og:image" content="https://mondywork.com.br/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="<?= esc($ogUrl) ?>">
 <meta property="twitter:title" content="<?= esc($pageTitle) ?>">
 <meta property="twitter:description" content="<?= esc($pageDesc) ?>">
 <meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
+<?php if ($vaga): ?>
+<meta property="article:published_time" content="<?= esc(date('c', strtotime($vaga['publicado_em']))) ?>">
+<?php if (!empty($categorias)): ?>
+<meta property="article:section" content="<?= esc($categorias[0]['nome_pt'] ?? $categorias[0]['nome_en']) ?>">
+<?php endif; ?>
+<?php endif; ?>
 <script type="application/ld+json"><?= json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
 <?php if ($vaga): ?>
 <script type="application/ld+json">
@@ -138,12 +150,23 @@ if ($vaga) {
 <title>Vaga não encontrada | Mondywork</title>
 <meta name="robots" content="noindex">
 <?php endif; ?>
-<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/<?= $isExterior ? 'usa/' : '' ?>vaga/<?= esc($vaga ? $vaga['vaga_id_externo'] : '') ?>">
-<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/vaga/<?= esc($vaga ? $vaga['vaga_id_externo'] : '') ?>">
+<?php if ($vaga): ?>
+<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
+<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
+<?php endif; ?>
 <link rel="stylesheet" href="/css/style.css?v=1.0.6">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RPQ9FFFNP1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-RPQ9FFFNP1');
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8069032517043297"
+     crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -186,7 +209,7 @@ if ($vaga) {
 <?php if ($vaga['publicado_em']): ?>
           <span class="job-card-info-text job-card-date">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <?= date($isExterior ? 'M d, Y' : 'd/m/Y', strtotime($vaga['publicado_em'])) ?>
+            <time datetime="<?= date('Y-m-d', strtotime($vaga['publicado_em'])) ?>"><?= date($isExterior ? 'M d, Y' : 'd/m/Y', strtotime($vaga['publicado_em'])) ?></time>
           </span>
 <?php endif; ?>
         </div>
@@ -201,6 +224,16 @@ if ($vaga) {
 
       <div class="vaga-page-body">
         <?= $vaga['descricao'] ?: '<p>' . ($isExterior ? 'Description not available.' : 'Descrição não disponível.') . '</p>' ?>
+      </div>
+
+      <div style="margin: 32px 0;">
+        <ins class="adsbygoogle"
+             style="display:block; text-align:center;"
+             data-ad-layout="in-article"
+             data-ad-format="fluid"
+             data-ad-client="ca-pub-8069032517043297"
+             data-ad-slot="2519706373"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
 
       <div class="vaga-page-footer">

@@ -70,6 +70,7 @@ function capitalizeTitle($str) {
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Mondywork | Tech, Design & Marketing Jobs in USA & worldwide (Remote & On-site)</title>
 <meta name="description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
+<?php if ($filterCategoria || $filterModelo): ?><meta name="robots" content="noindex,follow"><?php endif; ?>
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/">
 <link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/">
 <link rel="canonical" href="https://mondywork.com.br/usa/">
@@ -251,6 +252,15 @@ gtag('config', 'G-RPQ9FFFNP1');
             </select>
             <button class="sidebar-btn" type="submit">Subscribe Now</button>
           </form>
+        </div>
+        <div class="sidebar-card" style="margin-top: 16px;">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-8069032517043297"
+               data-ad-slot="2519706373"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
       </aside>
     </div>
