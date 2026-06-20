@@ -14,8 +14,12 @@ try {
 
     $stmt = $pdo->query("SELECT vaga_id_externo, publicado_em, origem FROM vagas WHERE status = 'ativa' ORDER BY publicado_em DESC");
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmtBlog = $pdo->query("SELECT slug, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC");
+    $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $vagas = [];
+    $blogPosts = [];
 }
 
 function getLastmod($file) {
@@ -93,6 +97,34 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
+  <url>
+    <loc>https://mondywork.com.br/blog/</loc>
+    <lastmod><?= getLastmod('blog/index.php') ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mondywork.com.br/usa/blog/</loc>
+    <lastmod><?= getLastmod('usa/blog/index.php') ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+<?php foreach ($blogPosts as $b):
+    $blogLastmod = $b['published_at'] ? date('Y-m-d', strtotime($b['published_at'])) : date('Y-m-d');
+?>
+  <url>
+    <loc>https://mondywork.com.br/blog/<?= htmlspecialchars($b['slug'], ENT_XML1, 'UTF-8') ?></loc>
+    <lastmod><?= $blogLastmod ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mondywork.com.br/usa/blog/<?= htmlspecialchars($b['slug'], ENT_XML1, 'UTF-8') ?></loc>
+    <lastmod><?= $blogLastmod ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+<?php endforeach; ?>
 <?php foreach ($vagas as $v):
     $lastmod = $v['publicado_em'] ? date('Y-m-d', strtotime($v['publicado_em'])) : date('Y-m-d');
     $baseUrl = $v['origem'] === 'exterior' ? 'https://mondywork.com.br/usa/vaga/' : 'https://mondywork.com.br/vaga/';

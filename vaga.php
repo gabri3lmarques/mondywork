@@ -179,9 +179,11 @@ gtag('config', 'G-RPQ9FFFNP1');
 <?php if ($isExterior): ?>
       <a class="nav-link" href="/usa/privacy.html">Privacy</a>
       <a class="nav-link" href="/usa/terms.html">Terms</a>
+      <a class="nav-link" href="/usa/blog/">Blog</a>
 <?php else: ?>
       <a class="nav-link" href="/privacidade.html">Privacidade</a>
       <a class="nav-link" href="/termos-de-uso.html">Termos</a>
+      <a class="nav-link" href="/blog/">Blog</a>
 <?php endif; ?>
     </div>
   </div>

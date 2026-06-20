@@ -6,6 +6,12 @@ RewriteRule ^vaga/(.+)$ vaga.php?id=$1 [L,QSA]
 # Pagina individual de vaga (exterior)
 RewriteRule ^usa/vaga/(.+)$ vaga.php?id=$1 [L,QSA]
 
+# Pagina individual de blog
+RewriteRule ^blog/(.+)$ blog.php?slug=$1&lang=pt [L,QSA]
+
+# Pagina individual de blog (ingles)
+RewriteRule ^usa/blog/(.+)$ blog.php?slug=$1&lang=en [L,QSA]
+
 # Sitemap dinamico
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
 

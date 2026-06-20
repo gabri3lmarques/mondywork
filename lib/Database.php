@@ -148,4 +148,21 @@ function setupSchema(PDO $pdo): void
     if (!in_array('origem', $nomesColNews)) {
         $pdo->exec("ALTER TABLE newsletters ADD COLUMN origem VARCHAR(20) NOT NULL DEFAULT 'brasil' AFTER area");
     }
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS blog_posts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        slug VARCHAR(255) NOT NULL UNIQUE,
+        title_pt VARCHAR(255) NOT NULL,
+        title_en VARCHAR(255) NOT NULL,
+        content_pt TEXT NOT NULL,
+        content_en TEXT NOT NULL,
+        excerpt_pt TEXT,
+        excerpt_en TEXT,
+        image VARCHAR(500),
+        author VARCHAR(100) DEFAULT 'Mondywork',
+        published_at DATETIME,
+        status VARCHAR(20) DEFAULT 'rascunho',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 }
