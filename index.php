@@ -2,7 +2,6 @@
 $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
 $config = require $configFile;
 
-$filterCategoria = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
 $filterModelo = isset($_GET['modelo']) ? trim($_GET['modelo']) : '';
 
 try {
@@ -15,14 +14,8 @@ try {
     require_once __DIR__ . '/lib/Database.php';
     setupSchema($pdo);
 
-    $categorias = $pdo->query("SELECT slug, nome_pt FROM categorias ORDER BY nome_pt")->fetchAll(PDO::FETCH_ASSOC);
-
     $where = "WHERE v.status = 'ativa' AND v.origem = 'nacional'";
     $params = [];
-    if ($filterCategoria) {
-        $where .= " AND v.id IN (SELECT vaga_id FROM vaga_categorias vc JOIN categorias c2 ON vc.categoria_id = c2.id WHERE c2.slug = :categoria)";
-        $params[':categoria'] = $filterCategoria;
-    }
     if ($filterModelo) {
         $where .= " AND v.modelo_trabalho = :modelo";
         $params[':modelo'] = $filterModelo;
@@ -42,7 +35,6 @@ try {
     unset($v);
     $hasMore = $total > 50;
 } catch (Exception $e) {
-    $categorias = [];
     $vagas = [];
     $total = 0;
     $hasMore = false;
@@ -69,12 +61,6 @@ function capitalizeTitle($str) {
     return mb_convert_case($str, MB_CASE_TITLE, 'UTF-8');
 }
 
-$modelosPT = [
-    ['value' => '', 'label' => 'Todos os modelos'],
-    ['value' => 'Remote', 'label' => 'Remoto'],
-    ['value' => 'Hybrid', 'label' => 'Híbrido'],
-    ['value' => 'On-site', 'label' => 'Presencial'],
-];
 ?><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -82,7 +68,7 @@ $modelosPT = [
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Mondywork | Vagas de Tecnologia, Design e Marketing (Remoto e Presencial)</title>
 <meta name="description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto. Oportunidades atualizadas diariamente em todo o Brasil.">
-<?php if ($filterCategoria || $filterModelo): ?><meta name="robots" content="noindex,follow"><?php endif; ?>
+<?php if ($filterModelo): ?><meta name="robots" content="noindex,follow"><?php endif; ?>
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/">
 <link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/">
 <link rel="canonical" href="https://mondywork.com.br/">
@@ -190,21 +176,10 @@ gtag('config', 'G-RPQ9FFFNP1');
           </label>
         </div>
         <div class="hero-filters" id="hero-filters">
-          <div class="filter-group">
-            <select id="filter-categoria" class="hero-select">
-              <option value="">Todas as áreas</option>
-<?php foreach ($categorias as $cat): ?>
-              <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_pt']) ?></option>
-<?php endforeach; ?>
-            </select>
-          </div>
-          <div class="filter-group">
-            <select id="filter-modelo" class="hero-select">
-<?php foreach ($modelosPT as $m): ?>
-              <option value="<?= esc($m['value']) ?>"<?= $filterModelo === $m['value'] ? ' selected' : '' ?>><?= esc($m['label']) ?></option>
-<?php endforeach; ?>
-            </select>
-          </div>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filter-remoto"<?= $filterModelo === 'Remote' ? ' checked' : '' ?>>
+            <span>Apenas vagas remotas</span>
+          </label>
         </div>
         <div id="search-correction" class="search-correction hidden"></div>
         <div id="vagas-total" class="search-info"><?= $total ?> vagas ativas</div>
@@ -331,7 +306,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     'has_more' => $hasMore,
     'query' => '',
     'modo' => 'titulo',
-    'categoria' => $filterCategoria,
     'modelo' => $filterModelo,
 ], JSON_UNESCAPED_UNICODE) ?></script>
 

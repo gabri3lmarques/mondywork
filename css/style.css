@@ -1429,6 +1429,34 @@ input { font-family: inherit; }
   background: #fff;
 }
 
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  font-size: 13px;
+  font-weight: 500;
+  color: #0b1c30;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  user-select: none;
+}
+.filter-checkbox:hover {
+  border-color: #c6c6cd;
+  background: rgba(255,255,255,0.95);
+}
+.filter-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4b41e1;
+  cursor: pointer;
+}
+
 @media (max-width: 600px) {
   .hero-filters {
     flex-direction: column;
