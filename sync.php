@@ -1,6 +1,6 @@
 <?php
 /**
- * Worker de Sincronização - InHire + Ashby + Greenhouse
+ * Worker de Sincronização - InHire + Ashby + Greenhouse + Senior
  */
 require __DIR__ . '/lib/Database.php';
 require __DIR__ . '/lib/VagaRepository.php';
@@ -33,6 +33,14 @@ $ignorar_todas = false;
 $empresasGreenhouseExterior = require __DIR__ . '/config/empresas_greenhouse_exterior.php';
 $ignorarGreenhouseExterior = $ignorar_todas;
 
+$ignorar_todas = false;
+$empresasSeniorNacional   = require __DIR__ . '/config/empresas_senior_nacional.php';
+$ignorarSeniorNacional = $ignorar_todas;
+
+$ignorar_todas = false;
+$empresasSeniorExterior    = require __DIR__ . '/config/empresas_senior_exterior.php';
+$ignorarSeniorExterior = $ignorar_todas;
+
 $empresasIgnorar          = require __DIR__ . '/config/empresas_ignorar.php';
 
 try {
@@ -57,6 +65,8 @@ try {
         array_values($empresasAshbyExterior),
         array_values($empresasGreenhouseNacional),
         array_values($empresasGreenhouseExterior),
+        array_values($empresasSeniorNacional),
+        array_values($empresasSeniorExterior),
         array_values($empresasIgnorar)
     );
     if (!empty($todasEmpresas)) {
@@ -76,6 +86,8 @@ try {
     $empresasAshbyExterior  = array_filter($empresasAshbyExterior,  fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasGreenhouseNacional = array_filter($empresasGreenhouseNacional, fn($nome) => !in_array($nome, $empresasIgnorar));
     $empresasGreenhouseExterior = array_filter($empresasGreenhouseExterior, fn($nome) => !in_array($nome, $empresasIgnorar));
+    $empresasSeniorNacional  = array_filter($empresasSeniorNacional,  fn($nome) => !in_array($nome, $empresasIgnorar));
+    $empresasSeniorExterior  = array_filter($empresasSeniorExterior,  fn($nome) => !in_array($nome, $empresasIgnorar));
 
     // ── Aplicar ignorar_todas ──
     if ($ignorarInhireNacional)       { $empresasInhireNacional = [];       echo "[CONFIG] InHire Nacional ignorado.\n"; }
@@ -84,6 +96,8 @@ try {
     if ($ignorarAshbyExterior)        { $empresasAshbyExterior = [];        echo "[CONFIG] Ashby Exterior ignorado.\n"; }
     if ($ignorarGreenhouseNacional)   { $empresasGreenhouseNacional = [];   echo "[CONFIG] Greenhouse Nacional ignorado.\n"; }
     if ($ignorarGreenhouseExterior)   { $empresasGreenhouseExterior = [];   echo "[CONFIG] Greenhouse Exterior ignorado.\n"; }
+    if ($ignorarSeniorNacional)       { $empresasSeniorNacional = [];       echo "[CONFIG] Senior Nacional ignorado.\n"; }
+    if ($ignorarSeniorExterior)       { $empresasSeniorExterior = [];       echo "[CONFIG] Senior Exterior ignorado.\n"; }
 
     // ── InHire Nacional ──
     if (!empty($empresasInhireNacional)) {
@@ -113,6 +127,16 @@ try {
     // ── Greenhouse Exterior ──
     if (!empty($empresasGreenhouseExterior)) {
         sincronizarGreenhouse($pdo, $ch, $empresasGreenhouseExterior, $dbConfig, 'exterior');
+    }
+
+    // ── Senior Nacional ──
+    if (!empty($empresasSeniorNacional)) {
+        sincronizarSenior($pdo, $ch, $empresasSeniorNacional, $dbConfig, 'nacional');
+    }
+
+    // ── Senior Exterior ──
+    if (!empty($empresasSeniorExterior)) {
+        sincronizarSenior($pdo, $ch, $empresasSeniorExterior, $dbConfig, 'exterior');
     }
 
     curl_close($ch);
@@ -455,6 +479,155 @@ function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string
                 'localizacao'     => $vaga['location']['name'] ?? null,
                 'modelo_trabalho' => null,
                 'url_vaga'        => $vaga['absolute_url'] ?? "https://job-boards.greenhouse.io/{$boardToken}/jobs/{$vaga['id']}",
+                'descricao'       => $descricao,
+                'resumo'          => $resumo,
+                'publicado_em'    => $publicadoEm,
+                'origem'          => $origem,
+            ]);
+
+            echo " - [NOVA] $titulo\n";
+            usleep(200000);
+        }
+    }
+}
+
+// ─────────────────────────────────────────────
+// Senior (Portal de Talentos)
+// ─────────────────────────────────────────────
+
+function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'nacional'): void
+{
+    $urlApi = "https://platform.senior.com.br/t/senior.com.br/bridge/1.0/anonymous/rest/hcm/careersmanagercandidate";
+
+    foreach ($empresas as $tenant => $nomeReal) {
+        echo "\n[Senior] Buscando: $nomeReal...\n";
+        manterConexao($pdo, $dbConfig);
+
+        $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
+        $stmtCheck->execute([':empresa' => $nomeReal]);
+        $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
+
+        $page = 0;
+        $size = 50;
+        $vagasDaEmpresa = [];
+
+        do {
+            $payload = json_encode([
+                'page' => $page,
+                'size' => $size,
+                'filter' => (object)[],
+                'match' => ['localizations' => [], 'companies' => []],
+            ]);
+
+            curl_setopt_array($ch, [
+                CURLOPT_URL => "$urlApi/queries/searchVacancies",
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                ],
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $payload,
+            ]);
+
+            $res = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if ($httpCode !== 200) {
+                echo " - [ERRO HTTP $httpCode] Falha ao buscar vagas. Pulando...\n";
+                break;
+            }
+
+            $dados = json_decode($res, true);
+            $totalPages = $dados['totalPages'] ?? 0;
+            $conteudo = $dados['contents'] ?? [];
+
+            foreach ($conteudo as $item) {
+                if (($item['company']['name'] ?? '') === $nomeReal) {
+                    $vagasDaEmpresa[] = $item;
+                }
+            }
+
+            $page++;
+            usleep(300000);
+
+        } while ($page < $totalPages);
+
+        $idsNaAPI = [];
+        foreach ($vagasDaEmpresa as $vaga) {
+            $vagaId = 'senior-' . $vaga['vacancy']['id'];
+            $idsNaAPI[] = $vagaId;
+        }
+
+        $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
+        if (!empty($idsParaInativar)) {
+            $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
+            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa'");
+            $stmtInativar->execute(array_values($idsParaInativar));
+            echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
+        }
+
+        if (empty($vagasDaEmpresa)) {
+            echo " - Nenhuma vaga ativa encontrada para $nomeReal.\n";
+            continue;
+        }
+
+        foreach ($vagasDaEmpresa as $vaga) {
+            $vagaId = 'senior-' . $vaga['vacancy']['id'];
+            $titulo = $vaga['vacancy']['title'];
+
+            if (in_array($vagaId, $idsNoBanco)) {
+                echo " - [MANTIDA] $titulo\n";
+                continue;
+            }
+
+            // Buscar detalhes completos
+            $payloadDet = json_encode(['id' => $vaga['vacancy']['id']]);
+            curl_setopt_array($ch, [
+                CURLOPT_URL => "$urlApi/queries/findVacancyById",
+                CURLOPT_POSTFIELDS => $payloadDet,
+            ]);
+
+            $resDet = curl_exec($ch);
+            $httpCodeDet = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            $descricao = 'Descricao nao fornecida.';
+            if ($httpCodeDet === 200) {
+                $detalhe = json_decode($resDet, true);
+                $descricao = $detalhe['vacancy']['about']['description']
+                    ?? $detalhe['vacancy']['duties']['description']
+                    ?? 'Descricao nao fornecida.';
+                $descricao = html_entity_decode($descricao, ENT_QUOTES, 'UTF-8');
+            }
+
+            $resumo = extrairResumo($descricao);
+            $local = $vaga['vacancy']['localization'] ?? [];
+            $localizacao = '';
+            $partes = array_filter([$local['city'] ?? '', $local['province'] ?? '', $local['country'] ?? '']);
+            if (!empty($partes)) {
+                $localizacao = implode(', ', $partes);
+            }
+
+            $publicacao = $vaga['vacancy']['publication'] ?? [];
+            $publicadoEm = isset($publicacao['startDate'])
+                ? date('Y-m-d H:i:s', strtotime($publicacao['startDate']))
+                : null;
+
+            $modelos = $vaga['vacancy']['jobModel'] ?? [];
+            $modeloTrabalho = null;
+            if (!empty($modelos)) {
+                $mapa = ['REMOTE' => 'remoto', 'HYBRID' => 'hibrido', 'IN_PERSON' => 'presencial'];
+                $modeloTrabalho = $mapa[$modelos[0]] ?? $modelos[0];
+            }
+
+            $urlVaga = "https://portaldetalentos.senior.com.br/vacancy/" . $vaga['vacancy']['id'];
+
+            upsertVaga($pdo, [
+                'vaga_id_externo' => $vagaId,
+                'titulo'          => $titulo,
+                'empresa'         => $nomeReal,
+                'localizacao'     => $localizacao,
+                'modelo_trabalho' => $modeloTrabalho,
+                'url_vaga'        => $urlVaga,
                 'descricao'       => $descricao,
                 'resumo'          => $resumo,
                 'publicado_em'    => $publicadoEm,
