@@ -63,6 +63,13 @@ function esc($s) {
 function capitalizeTitle($str) {
     return mb_convert_case($str, MB_CASE_TITLE, 'UTF-8');
 }
+
+$modelosEN = [
+    ['value' => '', 'label' => 'All work models'],
+    ['value' => 'Remote', 'label' => 'Remote'],
+    ['value' => 'Hybrid', 'label' => 'Hybrid'],
+    ['value' => 'On-site', 'label' => 'On-site'],
+];
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -185,6 +192,13 @@ gtag('config', 'G-RPQ9FFFNP1');
               <?php foreach ($categorias as $cat): ?>
               <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_en']) ?></option>
               <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select id="filter-modelo" class="hero-select">
+<?php foreach ($modelosEN as $m): ?>
+              <option value="<?= esc($m['value']) ?>"<?= $filterModelo === $m['value'] ? ' selected' : '' ?>><?= esc($m['label']) ?></option>
+<?php endforeach; ?>
             </select>
           </div>
         </div>

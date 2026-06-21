@@ -71,9 +71,9 @@ function capitalizeTitle($str) {
 
 $modelosPT = [
     ['value' => '', 'label' => 'Todos os modelos'],
-    ['value' => 'Remoto', 'label' => 'Remoto'],
-    ['value' => 'Híbrido', 'label' => 'Híbrido'],
-    ['value' => 'Presencial', 'label' => 'Presencial'],
+    ['value' => 'Remote', 'label' => 'Remoto'],
+    ['value' => 'Hybrid', 'label' => 'Híbrido'],
+    ['value' => 'On-site', 'label' => 'Presencial'],
 ];
 ?><!DOCTYPE html>
 <html lang="pt-BR">
@@ -195,6 +195,13 @@ gtag('config', 'G-RPQ9FFFNP1');
               <option value="">Todas as áreas</option>
 <?php foreach ($categorias as $cat): ?>
               <option value="<?= esc($cat['slug']) ?>"<?= $filterCategoria === $cat['slug'] ? ' selected' : '' ?>><?= esc($cat['nome_pt']) ?></option>
+<?php endforeach; ?>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select id="filter-modelo" class="hero-select">
+<?php foreach ($modelosPT as $m): ?>
+              <option value="<?= esc($m['value']) ?>"<?= $filterModelo === $m['value'] ? ' selected' : '' ?>><?= esc($m['label']) ?></option>
 <?php endforeach; ?>
             </select>
           </div>

@@ -11,6 +11,7 @@
     const backToTop   = document.getElementById('back-to-top');
     const newsletterForm = document.getElementById('newsletter-form');
     const filterCategoria = document.getElementById('filter-categoria');
+    const filterModelo = document.getElementById('filter-modelo');
 
     const modalOverlay = document.getElementById('modal-overlay');
     const modalTitle = document.getElementById('modal-title');
@@ -32,6 +33,7 @@
     let debounceTimer = null;
     var vagasCache = {};
     var currentCategoria = '';
+    var currentModelo = '';
 
     function resetAndFetch() {
         container.innerHTML = '';
@@ -229,7 +231,7 @@
         page++;
 
         var modo = getSearchMode();
-        var url = '/api.php?page=' + page + '&limit=' + LIMIT + '&origem=exterior' + (currentQuery ? '&q=' + encodeURIComponent(currentQuery) + '&modo=' + modo : '') + (currentCategoria ? '&categoria=' + encodeURIComponent(currentCategoria) : '');
+        var url = '/api.php?page=' + page + '&limit=' + LIMIT + '&origem=exterior' + (currentQuery ? '&q=' + encodeURIComponent(currentQuery) + '&modo=' + modo : '') + (currentCategoria ? '&categoria=' + encodeURIComponent(currentCategoria) : '') + (currentModelo ? '&modelo=' + encodeURIComponent(currentModelo) : '');
         let hasError = false;
 
         fetch(url)
@@ -377,6 +379,7 @@
             var params = new URLSearchParams();
             if (currentQuery) params.set('q', currentQuery);
             if (currentCategoria) params.set('categoria', currentCategoria);
+            if (currentModelo) params.set('modelo', currentModelo);
             var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
             history.replaceState(null, '', newUrl);
         }
@@ -390,6 +393,7 @@
                     hasMore = initialData.has_more;
                     page = initialData.vagas.length / LIMIT;
                     if (initialData.categoria) currentCategoria = initialData.categoria;
+                    if (initialData.modelo) currentModelo = initialData.modelo;
                     if (vagasTotal && !currentQuery) {
                         vagasTotal.textContent = initialData.total + ' international jobs';
                     }
@@ -411,6 +415,13 @@
             });
         }
 
+        if (filterModelo) {
+            filterModelo.addEventListener('change', function() {
+                currentModelo = this.value;
+                updateUrl();
+                resetAndFetch();
+            });
+        }
 
         window.addEventListener('scroll', function() {
             if (window.scrollY > 400) {
