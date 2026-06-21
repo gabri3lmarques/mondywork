@@ -542,7 +542,7 @@ function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
             $conteudo = $dados['contents'] ?? [];
 
             foreach ($conteudo as $item) {
-                if (($item['company']['name'] ?? '') === $nomeReal) {
+                if (strcasecmp($item['company']['name'] ?? '', $nomeReal) === 0) {
                     $vagasDaEmpresa[] = $item;
                 }
             }
