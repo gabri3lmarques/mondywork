@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 $isLoggedIn = !empty($_SESSION['admin_logged_in']);
 
 $redirectTab = isset($_GET['tab']) && $_GET['tab'] !== 'lista' ? '&tab=' . urlencode($_GET['tab']) : '';
+$redirectNs = isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? '&ns=' . urlencode($_GET['ns']) : '';
 
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_action'])) {
     try {
@@ -49,7 +50,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             $stmt->execute(array_merge([$targetStatus], $ids));
         }
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $origemParam . $statusParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $origemParam . $statusParam . $qParam);
     exit;
 }
 
@@ -64,7 +65,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
         $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $origemParam . $statusParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $origemParam . $statusParam . $qParam);
     exit;
 }
 
@@ -719,18 +720,26 @@ try {
 
   <?php elseif ($tab === 'novas'):
 
-  $stmtNovas = $pdo->query("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, publicado_em, created_at, DATE_FORMAT(created_at, '%d/%m/%Y %H:%i') as created_at_fmt FROM vagas WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY created_at DESC");
+  $novasStatusFilter = isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? $_GET['ns'] : '';
+  $novasWhere = "created_at >= NOW() - INTERVAL 24 HOUR";
+  if ($novasStatusFilter !== '') {
+      $novasWhere .= " AND status = " . $pdo->quote($novasStatusFilter);
+  }
+
+  $stmtNovas = $pdo->query("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, publicado_em, created_at, DATE_FORMAT(created_at, '%d/%m/%Y %H:%i') as created_at_fmt FROM vagas WHERE {$novasWhere} ORDER BY created_at DESC");
   $novasVagas = $stmtNovas->fetchAll(PDO::FETCH_ASSOC);
 
   $totalNovas = count($novasVagas);
   $novasAtivas = count(array_filter($novasVagas, fn($v) => $v['status'] === 'ativa'));
   $novasInativas = count(array_filter($novasVagas, fn($v) => $v['status'] === 'inativa'));
+
+  $nsParam = $novasStatusFilter !== '' ? '&ns=' . $novasStatusFilter : '';
   ?>
 
   <div class="admin-header">
     <div>
       <h1>Vagas Recentes (últimas 24h)</h1>
-      <span><?php echo $totalNovas ?> vagas cadastradas nas últimas 24 horas</span>
+      <span><?php echo $totalNovas ?> vagas encontradas</span>
     </div>
   </div>
 
@@ -740,12 +749,23 @@ try {
     <div class="stat">Inativas: <strong style="color:#ba1a1a"><?php echo $novasInativas ?></strong></div>
   </div>
 
+  <div class="admin-tabs" style="margin-bottom:16px">
+    <a class="admin-tab <?php echo $novasStatusFilter === '' ? 'active' : '' ?>" href="?tab=novas">Todas</a>
+    <a class="admin-tab <?php echo $novasStatusFilter === 'ativa' ? 'active' : '' ?>" href="?tab=novas&ns=ativa">Ativas</a>
+    <a class="admin-tab <?php echo $novasStatusFilter === 'inativa' ? 'active' : '' ?>" href="?tab=novas&ns=inativa">Inativas</a>
+  </div>
+
+  <div class="batch-bar" id="batch-bar-top"></div>
+
   <?php if (empty($novasVagas)): ?>
     <div class="admin-empty">Nenhuma vaga nova nas últimas 24 horas.</div>
   <?php else:
     foreach ($novasVagas as $v): ?>
       <div class="admin-card" style="margin-bottom:12px">
         <div class="admin-card-header">
+          <label class="admin-check-wrap">
+            <input type="checkbox" class="batch-check" value="<?php echo (int)$v['id'] ?>" data-status="<?php echo $v['status'] ?>">
+          </label>
           <div style="flex:1">
             <div class="admin-card-title"><?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?></div>
             <div class="admin-card-company"><?php echo htmlspecialchars($v['empresa'], ENT_QUOTES, 'UTF-8') ?><?php echo $v['localizacao'] ? ' • ' . htmlspecialchars($v['localizacao'], ENT_QUOTES, 'UTF-8') : '' ?></div>
@@ -772,6 +792,8 @@ try {
       </div>
     <?php endforeach; ?>
   <?php endif; ?>
+
+  <div class="batch-bar" id="batch-bar-bottom"></div>
 
   <?php elseif ($tab === 'blog'): ?>
 
