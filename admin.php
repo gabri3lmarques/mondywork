@@ -1075,6 +1075,8 @@ try {
 
   <div class="batch-bar" id="batch-bar-bottom"></div>
 
+  <?php endif; ?>
+
   <template id="batch-bar-tpl">
     <label class="batch-select-all"><input type="checkbox" class="select-all"> Selecionar todas</label>
     <span class="batch-count">0 selecionadas</span>
@@ -1086,8 +1088,6 @@ try {
     <input type="hidden" name="batch_ids" id="batch-ids">
     <input type="hidden" name="batch_action" id="batch-action">
   </form>
-
-  <?php endif; ?>
 </main>
 
 <script>
