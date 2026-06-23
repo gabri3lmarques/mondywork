@@ -719,10 +719,7 @@ try {
 
   <?php elseif ($tab === 'novas'):
 
-  $novasLimit = 50;
-  $stmtNovas = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, publicado_em, created_at, DATE_FORMAT(created_at, '%d/%m/%Y %H:%i') as created_at_fmt FROM vagas WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY created_at DESC LIMIT :lim");
-  $stmtNovas->bindValue(':lim', $novasLimit, PDO::PARAM_INT);
-  $stmtNovas->execute();
+  $stmtNovas = $pdo->query("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, publicado_em, created_at, DATE_FORMAT(created_at, '%d/%m/%Y %H:%i') as created_at_fmt FROM vagas WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY created_at DESC");
   $novasVagas = $stmtNovas->fetchAll(PDO::FETCH_ASSOC);
 
   $totalNovas = count($novasVagas);
