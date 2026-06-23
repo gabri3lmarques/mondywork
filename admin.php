@@ -31,6 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 
 $isLoggedIn = !empty($_SESSION['admin_logged_in']);
 
+$redirectTab = isset($_GET['tab']) && $_GET['tab'] !== 'lista' ? '&tab=' . urlencode($_GET['tab']) : '';
+
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_action'])) {
     try {
         $pdo = new PDO(
@@ -47,7 +49,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             $stmt->execute(array_merge([$targetStatus], $ids));
         }
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $statusParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $origemParam . $statusParam . $qParam);
     exit;
 }
 
@@ -62,7 +64,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
         $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $origemParam . $statusParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $origemParam . $statusParam . $qParam);
     exit;
 }
 
@@ -90,7 +92,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadast
 
         $primeiraArea = !empty($categoriasSlugs) ? $categoriasSlugs[0] : null;
 
-        $stmt = $pdo->prepare("INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, area) VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'ativa', :origem, :area)");
+        $stmt = $pdo->prepare("INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, area) VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'inativa', :origem, :area)");
         $stmt->execute([
             ':id'        => $vagaId,
             ':titulo'    => $titulo,
@@ -135,7 +137,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
         $descricao = trim($_POST['descricao'] ?? '');
         $resumo = trim($_POST['resumo'] ?? '');
         $origem = $_POST['origem'] ?? 'nacional';
-        $status = $_POST['status'] ?? 'ativa';
+        $status = $_POST['status'] ?? 'inativa';
         $categoriasSlugs = $_POST['categorias'] ?? [];
 
         $primeiraArea = !empty($categoriasSlugs) ? $categoriasSlugs[0] : null;
@@ -173,7 +175,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
     }
 }
 
-$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog']) ? $_GET['tab'] : 'lista';
+$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas']) ? $_GET['tab'] : 'lista';
 
 $blogMsg = '';
 if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_blog'])) {
@@ -227,6 +229,7 @@ $catFilter = isset($_GET['categorias']) && is_array($_GET['categorias']) ? $_GET
 $semCategoria = in_array('sem-categoria', $catFilter);
 $catSlugs = array_values(array_filter($catFilter, fn($s) => $s !== 'sem-categoria'));
 
+$tabParam = $tab !== 'lista' ? '&tab=' . $tab : '';
 $qParam = $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '';
 $origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : '';
 $statusParam = $statusFilter !== '' ? '&status=' . urlencode($statusFilter) : '';
@@ -481,6 +484,7 @@ try {
     <a class="admin-tab <?php echo $statusFilter === 'inativa' ? 'active' : '' ?>" href="admin.php?status=inativa<?php echo $origemParam . $qParam ?>">Inativas</a>
     <span style="flex:1"></span>
     <a class="admin-tab <?php echo $tab === 'emails' ? 'active' : '' ?>" href="admin.php?tab=emails">Emails</a>
+    <a class="admin-tab <?php echo $tab === 'novas' ? 'active' : '' ?>" href="admin.php?tab=novas">Novas (24h)</a>
     <a class="admin-tab <?php echo $tab === 'blog' ? 'active' : '' ?>" href="admin.php?tab=blog">Blog</a>
   </div>
 
@@ -711,6 +715,65 @@ try {
         <?php endif; ?>
       </div>
     <?php endif; ?>
+  <?php endif; ?>
+
+  <?php elseif ($tab === 'novas'):
+
+  $novasLimit = 50;
+  $stmtNovas = $pdo->prepare("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, publicado_em, created_at, DATE_FORMAT(created_at, '%d/%m/%Y %H:%i') as created_at_fmt FROM vagas WHERE created_at >= NOW() - INTERVAL 24 HOUR ORDER BY created_at DESC LIMIT :lim");
+  $stmtNovas->bindValue(':lim', $novasLimit, PDO::PARAM_INT);
+  $stmtNovas->execute();
+  $novasVagas = $stmtNovas->fetchAll(PDO::FETCH_ASSOC);
+
+  $totalNovas = count($novasVagas);
+  $novasAtivas = count(array_filter($novasVagas, fn($v) => $v['status'] === 'ativa'));
+  $novasInativas = count(array_filter($novasVagas, fn($v) => $v['status'] === 'inativa'));
+  ?>
+
+  <div class="admin-header">
+    <div>
+      <h1>Vagas Recentes (últimas 24h)</h1>
+      <span><?php echo $totalNovas ?> vagas cadastradas nas últimas 24 horas</span>
+    </div>
+  </div>
+
+  <div class="admin-stats">
+    <div class="stat">Novas: <strong><?php echo $totalNovas ?></strong></div>
+    <div class="stat">Ativas: <strong style="color:#1a7d1a"><?php echo $novasAtivas ?></strong></div>
+    <div class="stat">Inativas: <strong style="color:#ba1a1a"><?php echo $novasInativas ?></strong></div>
+  </div>
+
+  <?php if (empty($novasVagas)): ?>
+    <div class="admin-empty">Nenhuma vaga nova nas últimas 24 horas.</div>
+  <?php else:
+    foreach ($novasVagas as $v): ?>
+      <div class="admin-card" style="margin-bottom:12px">
+        <div class="admin-card-header">
+          <div style="flex:1">
+            <div class="admin-card-title"><?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="admin-card-company"><?php echo htmlspecialchars($v['empresa'], ENT_QUOTES, 'UTF-8') ?><?php echo $v['localizacao'] ? ' • ' . htmlspecialchars($v['localizacao'], ENT_QUOTES, 'UTF-8') : '' ?></div>
+          </div>
+        </div>
+        <div class="admin-card-meta">
+          <span class="<?php echo $v['origem'] === 'exterior' ? 'badge-origem exterior' : 'badge-origem' ?>"><?php echo $v['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span>
+          <?php if ($v['modelo_trabalho']): ?>
+            <span><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
+          <?php endif; ?>
+          <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
+          <span style="font-size:12px;color:#45464d">Inserida: <?php echo htmlspecialchars($v['created_at_fmt'], ENT_QUOTES, 'UTF-8') ?></span>
+        </div>
+        <div class="admin-card-actions">
+          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
+          <form method="post" style="margin:0">
+            <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
+            <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
+          </form>
+          <?php if ($v['vaga_id_externo']): ?>
+            <a href="/#<?php echo urlencode($v['vaga_id_externo']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver no site</a>
+          <?php endif; ?>
+        </div>
+      </div>
+    <?php endforeach; ?>
   <?php endif; ?>
 
   <?php elseif ($tab === 'blog'): ?>

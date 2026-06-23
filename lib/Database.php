@@ -26,10 +26,11 @@ function setupSchema(PDO $pdo): void
         resumo TEXT,
         data_coleta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         publicado_em DATETIME,
-        status VARCHAR(20) DEFAULT 'ativa'
+        status VARCHAR(20) DEFAULT 'inativa',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-    $pdo->exec("ALTER TABLE vagas MODIFY COLUMN status VARCHAR(20) DEFAULT 'ativa'");
+    $pdo->exec("ALTER TABLE vagas MODIFY COLUMN status VARCHAR(20) DEFAULT 'inativa'");
 
     $colunas = $pdo->query("SHOW COLUMNS FROM vagas")->fetchAll(PDO::FETCH_ASSOC);
     $nomesColunas = array_column($colunas, 'Field');
@@ -48,6 +49,9 @@ function setupSchema(PDO $pdo): void
     }
     if (!in_array('area', $nomesColunas)) {
         $pdo->exec("ALTER TABLE vagas ADD COLUMN area VARCHAR(20) DEFAULT NULL AFTER origem");
+    }
+    if (!in_array('created_at', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER area");
     }
 
     $indexExists = $pdo->query("SHOW INDEX FROM vagas WHERE Key_name = 'idx_busca'")->fetchAll();
