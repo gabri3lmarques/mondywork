@@ -52,6 +52,7 @@ function setupSchema(PDO $pdo): void
     }
     if (!in_array('created_at', $nomesColunas)) {
         $pdo->exec("ALTER TABLE vagas ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER area");
+        $pdo->exec("UPDATE vagas SET created_at = '2020-01-01 00:00:00'");
     }
 
     $indexExists = $pdo->query("SHOW INDEX FROM vagas WHERE Key_name = 'idx_busca'")->fetchAll();
