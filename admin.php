@@ -33,6 +33,7 @@ $isLoggedIn = !empty($_SESSION['admin_logged_in']);
 
 $redirectTab = isset($_GET['tab']) && $_GET['tab'] !== 'lista' ? '&tab=' . urlencode($_GET['tab']) : '';
 $redirectNs = isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? '&ns=' . urlencode($_GET['ns']) : '';
+$redirectMostrar = isset($_GET['mostrar']) && $_GET['mostrar'] === 'todas' ? '&mostrar=todas' : '';
 
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_action'])) {
     try {
@@ -50,7 +51,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             $stmt->execute(array_merge([$targetStatus], $ids));
         }
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $origemParam . $statusParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
     exit;
 }
 
@@ -65,7 +66,22 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
         $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
     } catch (Exception $e) {}
-    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $origemParam . $statusParam . $qParam);
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
+    exit;
+}
+
+$mensagemNovas = '';
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['limpar_revisao'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $pdo->exec("UPDATE vagas SET revisada_em = NOW() WHERE created_at >= NOW() - INTERVAL 24 HOUR AND revisada_em IS NULL");
+    } catch (Exception $e) {}
+    header('Location: admin.php?tab=novas');
     exit;
 }
 
@@ -721,7 +737,11 @@ try {
   <?php elseif ($tab === 'novas'):
 
   $novasStatusFilter = isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? $_GET['ns'] : '';
+  $mostrarTodas = isset($_GET['mostrar']) && $_GET['mostrar'] === 'todas';
   $novasWhere = "created_at >= NOW() - INTERVAL 24 HOUR";
+  if (!$mostrarTodas) {
+      $novasWhere .= " AND revisada_em IS NULL";
+  }
   if ($novasStatusFilter !== '') {
       $novasWhere .= " AND status = " . $pdo->quote($novasStatusFilter);
   }
@@ -734,6 +754,7 @@ try {
   $novasInativas = count(array_filter($novasVagas, fn($v) => $v['status'] === 'inativa'));
 
   $nsParam = $novasStatusFilter !== '' ? '&ns=' . $novasStatusFilter : '';
+  $mostrarParam = !$mostrarTodas ? '' : '&mostrar=todas';
   ?>
 
   <div class="admin-header">
@@ -741,7 +762,14 @@ try {
       <h1>Vagas Recentes (últimas 24h)</h1>
       <span><?php echo $totalNovas ?> vagas encontradas</span>
     </div>
+    <form method="post" style="margin:0" onsubmit="return confirm('Limpar a lista atual? As vagas desta leva serão marcadas como revisadas e não aparecerão mais aqui.')">
+      <button type="submit" name="limpar_revisao" class="btn-toggle inativar" style="padding:10px 24px">Limpar lista</button>
+    </form>
   </div>
+
+  <?php if ($mensagemNovas): ?>
+    <div style="background:#e6f7e6;border:1px solid #b3e6b3;border-radius:0.5rem;padding:12px 16px;margin-bottom:16px;font-size:14px;font-weight:500;color:#1a7d1a"><?php echo htmlspecialchars($mensagemNovas, ENT_QUOTES, 'UTF-8') ?></div>
+  <?php endif; ?>
 
   <div class="admin-stats">
     <div class="stat">Novas: <strong><?php echo $totalNovas ?></strong></div>
@@ -750,15 +778,18 @@ try {
   </div>
 
   <div class="admin-tabs" style="margin-bottom:16px">
-    <a class="admin-tab <?php echo $novasStatusFilter === '' ? 'active' : '' ?>" href="?tab=novas">Todas</a>
-    <a class="admin-tab <?php echo $novasStatusFilter === 'ativa' ? 'active' : '' ?>" href="?tab=novas&ns=ativa">Ativas</a>
-    <a class="admin-tab <?php echo $novasStatusFilter === 'inativa' ? 'active' : '' ?>" href="?tab=novas&ns=inativa">Inativas</a>
+    <a class="admin-tab <?php echo !$mostrarTodas ? 'active' : '' ?>" href="?tab=novas<?php echo $nsParam ?>">Não revisadas</a>
+    <a class="admin-tab <?php echo $mostrarTodas ? 'active' : '' ?>" href="?tab=novas&mostrar=todas<?php echo $nsParam ?>">Todas</a>
+    <span style="flex:1"></span>
+    <a class="admin-tab <?php echo $novasStatusFilter === '' ? 'active' : '' ?>" href="?tab=novas<?php echo $mostrarParam ?>">Status: Todas</a>
+    <a class="admin-tab <?php echo $novasStatusFilter === 'ativa' ? 'active' : '' ?>" href="?tab=novas&ns=ativa<?php echo $mostrarParam ?>">Ativas</a>
+    <a class="admin-tab <?php echo $novasStatusFilter === 'inativa' ? 'active' : '' ?>" href="?tab=novas&ns=inativa<?php echo $mostrarParam ?>">Inativas</a>
   </div>
 
   <div class="batch-bar" id="batch-bar-top"></div>
 
   <?php if (empty($novasVagas)): ?>
-    <div class="admin-empty">Nenhuma vaga nova nas últimas 24 horas.</div>
+    <div class="admin-empty"><?php echo $mostrarTodas ? 'Nenhuma vaga nova nas últimas 24 horas.' : 'Lista vazia! Todas as vagas recentes foram revisadas. As próximas vagas do sync.php aparecerão aqui automaticamente.' ?></div>
   <?php else:
     foreach ($novasVagas as $v): ?>
       <div class="admin-card" style="margin-bottom:12px">
