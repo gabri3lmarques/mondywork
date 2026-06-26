@@ -46,9 +46,14 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
         $ids = array_map('intval', explode(',', $_POST['batch_ids']));
         if (!empty($ids)) {
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $targetStatus = $_POST['batch_action'] === 'ativar' ? 'ativa' : 'inativa';
-            $stmt = $pdo->prepare("UPDATE vagas SET status = ? WHERE id IN ($placeholders)");
-            $stmt->execute(array_merge([$targetStatus], $ids));
+            if ($_POST['batch_action'] === 'remover') {
+                $stmt = $pdo->prepare("UPDATE vagas SET revisada_em = NOW() WHERE id IN ($placeholders) AND revisada_em IS NULL");
+                $stmt->execute($ids);
+            } else {
+                $targetStatus = $_POST['batch_action'] === 'ativar' ? 'ativa' : 'inativa';
+                $stmt = $pdo->prepare("UPDATE vagas SET status = ? WHERE id IN ($placeholders)");
+                $stmt->execute(array_merge([$targetStatus], $ids));
+            }
         }
     } catch (Exception $e) {}
     header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
@@ -1132,6 +1137,7 @@ try {
     <span class="batch-count">0 selecionadas</span>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
     <button type="button" class="btn-toggle ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
+    <button type="button" class="btn-toggle inativar" onclick="batchToggle('remover')">Remover Selecionadas</button>
   </template>
 
   <form id="batch-form" method="post" style="display:none">
@@ -1185,8 +1191,9 @@ try {
       ids.push(cb.value);
     });
     if (!ids.length) return;
-    var msg = action === 'inativar' ? 'Inativar ' + ids.length + ' vaga(s)?' : 'Ativar ' + ids.length + ' vaga(s)?';
-    if (!confirm(msg)) return;
+    var msgs = { inativar: 'Inativar', ativar: 'Ativar', remover: 'Remover da lista de novas' };
+    var msg = msgs[action] || action;
+    if (!confirm(msg + ' ' + ids.length + ' vaga(s)?')) return;
     document.getElementById('batch-ids').value = ids.join(',');
     document.getElementById('batch-action').value = action;
     document.getElementById('batch-form').submit();
