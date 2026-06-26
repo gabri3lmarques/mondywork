@@ -309,7 +309,7 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Mondywork</title>
-<link rel="stylesheet" href="/css/style.css?v=1.0.7">
+<link rel="stylesheet" href="/css/style.css?v=1.0.8">
 <style>
 .admin-nav { background: #0b1c30; height: 64px; }
 .admin-nav .nav-inner { height: 64px; }
@@ -337,8 +337,8 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 .admin-card { background: #fff; border-radius: 0.75rem; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #c6c6cd; transition: box-shadow 0.3s; }
 .admin-card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 .admin-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.admin-card-title { font-size: 18px; line-height: 24px; font-weight: 600; color: #0b1c30; }
-.admin-card-company { font-size: 13px; line-height: 18px; font-weight: 500; color: #45464d; margin-top: 2px; }
+.admin-card-title { font-size: 18px; line-height: 24px; font-weight: 600; color: #0b1c30; word-break: break-word; }
+.admin-card-company { font-size: 13px; line-height: 18px; font-weight: 500; color: #45464d; margin-top: 2px; word-break: break-word; }
 .admin-card-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
 .admin-card-meta span { font-size: 12px; line-height: 16px; font-weight: 600; color: #45464d; display: inline-flex; align-items: center; gap: 4px; }
 .badge-origem { background: #e5eeff; color: #0b1c30; border: 1px solid #c6c6cd; border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
@@ -357,7 +357,7 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 .admin-pagination a:hover { border-color: #4b41e1; color: #4b41e1; }
 .admin-pagination .current { background: #4b41e1; color: #fff; border-color: #4b41e1; }
 .admin-empty { text-align: center; padding: 64px 16px; color: #45464d; }
-.admin-tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid #c6c6cd; padding-bottom: 0; }
+.admin-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 24px; border-bottom: 1px solid #c6c6cd; padding-bottom: 0; }
 .admin-tab { padding: 10px 20px; font-size: 14px; font-weight: 600; color: #45464d; border: 1px solid transparent; border-bottom: none; border-radius: 0.5rem 0.5rem 0 0; transition: all 0.2s; margin-bottom: -1px; }
 .admin-tab:hover { color: #4b41e1; }
 .admin-tab.active { color: #4b41e1; background: #fff; border-color: #c6c6cd; }

@@ -493,6 +493,7 @@ input { font-family: inherit; }
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
 /* ===== JOB CARDS ===== */
@@ -516,6 +517,8 @@ input { font-family: inherit; }
   font-weight: 600;
   color: #0b1c30;
   transition: color 0.3s;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .job-card:hover .job-card-title { color: #4b41e1; }
@@ -787,6 +790,7 @@ input { font-family: inherit; }
 /* ===== SIDEBAR ===== */
 .sidebar {
   display: none;
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
