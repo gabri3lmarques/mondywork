@@ -70,6 +70,21 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
     exit;
 }
 
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remover_vaga_id'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $stmt = $pdo->prepare("UPDATE vagas SET revisada_em = NOW() WHERE id = :id AND revisada_em IS NULL");
+        $stmt->execute([':id' => (int)$_POST['remover_vaga_id']]);
+    } catch (Exception $e) {}
+    header('Location: admin.php?tab=novas' . (isset($_GET['mostrar']) && $_GET['mostrar'] === 'todas' ? '&mostrar=todas' : '') . (isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? '&ns=' . $_GET['ns'] : ''));
+    exit;
+}
+
 $mensagemNovas = '';
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['limpar_revisao'])) {
     try {
@@ -819,6 +834,10 @@ try {
           <?php if ($v['vaga_id_externo']): ?>
             <a href="/#<?php echo urlencode($v['vaga_id_externo']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver no site</a>
           <?php endif; ?>
+          <form method="post" style="margin:0" onsubmit="return confirm('Remover esta vaga da lista de novas?')">
+            <input type="hidden" name="remover_vaga_id" value="<?php echo (int)$v['id'] ?>">
+            <button type="submit" class="btn-toggle inativar" style="font-size:13px">Remover</button>
+          </form>
         </div>
       </div>
     <?php endforeach; ?>
