@@ -47,17 +47,6 @@ if (!$authenticated):
 </style>
 </head>
 <body>
-<script>
-  atOptions = {
-    'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
-    'format' : 'iframe',
-    'height' : 90,
-    'width' : 728,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-
   <div class="login">
     <h1>Mondywork <span style="color:#ffd43b">DEV</span></h1>
     <span class="dev-label">Ambiente de Desenvolvimento</span>
@@ -248,17 +237,6 @@ endif;
 </style>
 </head>
 <body>
-<script>
-  atOptions = {
-    'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
-    'format' : 'iframe',
-    'height' : 90,
-    'width' : 728,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-
 
 <div class="dev-banner" style="background:#ffd43b;color:#1a1a2e;text-align:center;padding:6px 16px;font-size:14px;font-weight:600;position:sticky;top:0;z-index:999">
   ⚡ Ambiente de Desenvolvimento &mdash; <a href="?logout" style="color:#1a1a2e;text-decoration:underline">Sair</a>
@@ -381,6 +359,19 @@ endif;
       </article>
     </div>
   </section>
+
+  <div style="text-align:center;margin:24px 0">
+<script>
+  atOptions = {
+    'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
+</div>
 
   <section class="section">
     <div class="section-header">

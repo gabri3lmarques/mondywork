@@ -100,17 +100,6 @@ gtag('config', 'G-RPQ9FFFNP1');
 </script>
 </head>
 <body>
-<script>
-  atOptions = {
-    'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
-    'format' : 'iframe',
-    'height' : 90,
-    'width' : 728,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-
 
 <nav class="nav">
   <div class="nav-inner">
@@ -190,6 +179,19 @@ gtag('config', 'G-RPQ9FFFNP1');
       </div>
     </div>
   </section>
+
+  <div style="text-align:center;margin:24px 0">
+<script>
+  atOptions = {
+    'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
+</div>
 
   <section class="section">
     <div class="section-header">
