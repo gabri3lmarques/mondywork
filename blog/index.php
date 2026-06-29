@@ -68,6 +68,7 @@ gtag('js', new Date());
 gtag('config', 'G-RPQ9FFFNP1');
 </script>
 
+<script src="https://pl30128931.effectivecpmnetwork.com/9d/3d/c1/9d3dc118632d00f2766c5abe1264df6f.js"></script>
 </head>
 <body>
 
