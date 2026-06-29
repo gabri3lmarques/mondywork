@@ -92,7 +92,6 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-RPQ9FFFNP1');
 </script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8069032517043297" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -150,16 +149,6 @@ gtag('config', 'G-RPQ9FFFNP1');
 
       <div class="vaga-page-body blog-content">
         <?= $content ?>
-      </div>
-
-      <div style="margin:32px 0">
-        <ins class="adsbygoogle"
-             style="display:block; text-align:center;"
-             data-ad-layout="in-article"
-             data-ad-format="fluid"
-             data-ad-client="ca-pub-8069032517043297"
-             data-ad-slot="2519706373"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
 
       <div class="vaga-page-footer" style="justify-content:flex-start">
