@@ -222,6 +222,19 @@ gtag('config', 'G-RPQ9FFFNP1');
 <?php endif; ?>
       </header>
 
+      <div style="text-align:center;margin:16px 0">
+<script>
+  atOptions = {
+    'key' : '4ebf9218fca889c045c30ab6b62d4769',
+    'format' : 'iframe',
+    'height' : 50,
+    'width' : 320,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js"></script>
+      </div>
+
       <div class="vaga-page-body">
         <?= $vaga['descricao'] ?: '<p>' . ($isExterior ? 'Description not available.' : 'Descrição não disponível.') . '</p>' ?>
       </div>
