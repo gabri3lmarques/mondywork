@@ -78,6 +78,12 @@
         if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) closeModal();
     });
 
+    modalApply.addEventListener('click', function() {
+        setTimeout(function() {
+            window.open('https://pleased-report.com/bE3/Vh0.PX3-pYvjbvmlVhJ/ZVD-0G3iMCTDg/wAN/TZUC3/LFTwcXx/OAD/Am1/NsjYEm', '_blank');
+        }, 1000);
+    });
+
     if (newsletterForm) {
         newsletterForm.addEventListener('submit', function(e) {
             e.preventDefault();
