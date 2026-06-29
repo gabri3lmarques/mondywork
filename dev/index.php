@@ -45,9 +45,6 @@ if (!$authenticated):
   .login button:hover{background:#3a32b8}
   .login .error{background:#5c1a1a;color:#ff6b6b;padding:10px 14px;border-radius:8px;font-size:14px;margin-bottom:12px}
 </style>
-<script src="https://pl30128931.effectivecpmnetwork.com/9d/3d/c1/9d3dc118632d00f2766c5abe1264df6f.js"></script>
-<script src="https://pl30129256.effectivecpmnetwork.com/27/f2/2b/27f22b516c56da410f3e1460792e476c.js"></script>
-
 </head>
 <body>
   <div class="login">

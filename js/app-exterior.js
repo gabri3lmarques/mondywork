@@ -78,6 +78,11 @@
         if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) closeModal();
     });
 
+    modalApply.addEventListener('click', function() {
+        window.open('https://pleased-report.com/bE3/Vh0.PX3-pYvjbvmlVhJ/ZVD-0G3iMCTDg/wAN/TZUC3/LFTwcXx/OAD/Am1/NsjYEm', '_blank');
+        window.open('https://www.effectivecpmnetwork.com/a6riiebvx?key=6d474f928643679d7d0ffd96e1acacfc', '_blank');
+    });
+
     if (newsletterForm) {
         newsletterForm.addEventListener('submit', function(e) {
             e.preventDefault();
