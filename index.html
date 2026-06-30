@@ -15,7 +15,7 @@
 <meta property="twitter:title" content="Mondywork | Vagas de Tecnologia, Design e Marketing">
 <meta property="twitter:description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto em todo o Brasil.">
 <meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
-<link rel="stylesheet" href="/css/style.css?v=1.0.6">
+<link rel="stylesheet" href="/css/style.css?v=1.0.9">
 <link rel="icon" href="./img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="./img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./img/favicon/apple-touch-icon.png">
@@ -100,10 +100,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
-  <div class="support-banner">
-    <strong class="support-banner-title">Ajude a manter o site</strong>
-    <p class="support-banner-text">Colabore com a sustentabilidade do projeto e clique em uma propaganda. Assim você nos ajuda a manter esse projeto.</p>
-  </div>
   <div style="text-align:center;margin:24px 0">
 <script>
   atOptions = {
@@ -212,6 +208,17 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </div>
 
+<div id="support-modal" class="support-modal-overlay hidden">
+  <div class="support-modal">
+    <button id="support-modal-close" class="support-modal-close" aria-label="Fechar">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="support-modal-icon">💜</div>
+    <h2 class="support-modal-title">Ajude a manter esse projeto vivo</h2>
+    <p class="support-modal-text">Sempre que você acessar o site clique em uma propaganda. Não custa nada e nos ajuda a custear a estrutura que mantém esse projeto no ar.</p>
+  </div>
+</div>
+
 <div id="cookie-banner" class="cookie-banner">
   <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="privacidade.html">Política de Privacidade</a>.</p>
   <button id="cookie-accept" class="cookie-btn">Aceitar</button>
@@ -226,9 +233,21 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('cookie_consent', 'true');
     document.getElementById('cookie-banner').classList.remove('visible');
   });
+
+  var supportModal = document.getElementById('support-modal');
+  var supportClose = document.getElementById('support-modal-close');
+  var dismissed = localStorage.getItem('support_modal_dismissed');
+  var now = Date.now();
+  if (!dismissed || (now - parseInt(dismissed, 10)) > 86400000) {
+    supportModal.classList.remove('hidden');
+  }
+  supportClose.addEventListener('click', function() {
+    supportModal.classList.add('hidden');
+    localStorage.setItem('support_modal_dismissed', Date.now().toString());
+  });
 });
 </script>
 
-<script src="/js/app.js?v=1.0.4"></script>
+<script src="/js/app.js?v=1.0.9"></script>
 </body>
 </html>

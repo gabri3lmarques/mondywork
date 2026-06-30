@@ -87,7 +87,7 @@ function capitalizeTitle($str) {
   "inLanguage": "en"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.0.8">
+<link rel="stylesheet" href="/css/style.css?v=1.0.9">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -180,10 +180,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
-  <div class="support-banner">
-    <strong class="support-banner-title">Help keep the site running</strong>
-    <p class="support-banner-text">Support the sustainability of this project by clicking on an ad. This helps us keep the site alive.</p>
-  </div>
   <div style="text-align:center;margin:24px 0">
 <script>
   atOptions = {
@@ -316,6 +312,17 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </div>
 
+<div id="support-modal" class="support-modal-overlay hidden">
+  <div class="support-modal">
+    <button id="support-modal-close" class="support-modal-close" aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="support-modal-icon">💜</div>
+    <h2 class="support-modal-title">Help keep this project alive</h2>
+    <p class="support-modal-text">Every time you visit the site, click on an ad. It costs nothing and helps us cover the costs of keeping this project online.</p>
+  </div>
+</div>
+
 <div id="cookie-banner" class="cookie-banner">
   <p class="cookie-text">We use cookies to improve your experience and analyze site traffic. By continuing to browse, you agree to our <a href="privacy.html">Privacy Policy</a>.</p>
   <button id="cookie-accept" class="cookie-btn">Accept</button>
@@ -339,9 +346,21 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('cookie_consent', 'true');
     document.getElementById('cookie-banner').classList.remove('visible');
   });
+
+  var supportModal = document.getElementById('support-modal');
+  var supportClose = document.getElementById('support-modal-close');
+  var dismissed = localStorage.getItem('support_modal_dismissed');
+  var now = Date.now();
+  if (!dismissed || (now - parseInt(dismissed, 10)) > 86400000) {
+    supportModal.classList.remove('hidden');
+  }
+  supportClose.addEventListener('click', function() {
+    supportModal.classList.add('hidden');
+    localStorage.setItem('support_modal_dismissed', Date.now().toString());
+  });
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.0.8"></script>
+<script src="/js/app-exterior.js?v=1.0.9"></script>
 </body>
 </html>

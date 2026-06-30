@@ -81,7 +81,7 @@ $isoDate = $publishedAt ? date('Y-m-d', strtotime($publishedAt)) : '';
 <title>Post não encontrado | Mondywork</title>
 <meta name="robots" content="noindex">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.0.8">
+<link rel="stylesheet" href="/css/style.css?v=1.0.9">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
