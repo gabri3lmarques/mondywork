@@ -180,6 +180,10 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
+  <div class="support-banner">
+    <strong class="support-banner-title">Help keep the site running</strong>
+    <p class="support-banner-text">Support the sustainability of this project by clicking on an ad. This helps us keep the site alive.</p>
+  </div>
   <div style="text-align:center;margin:24px 0">
 <script>
   atOptions = {

@@ -175,6 +175,10 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
+  <div class="support-banner">
+    <strong class="support-banner-title">Ajude a manter o site</strong>
+    <p class="support-banner-text">Colabore com a sustentabilidade do projeto e clique em uma propaganda. Assim você nos ajuda a manter esse projeto.</p>
+  </div>
   <div style="text-align:center;margin:24px 0">
 <script>
   atOptions = {
