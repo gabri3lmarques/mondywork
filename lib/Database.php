@@ -160,12 +160,9 @@ function setupSchema(PDO $pdo): void
     $pdo->exec("CREATE TABLE IF NOT EXISTS blog_posts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         slug VARCHAR(255) NOT NULL UNIQUE,
-        title_pt VARCHAR(255) NOT NULL,
-        title_en VARCHAR(255) NOT NULL,
-        content_pt TEXT NOT NULL,
-        content_en TEXT NOT NULL,
-        excerpt_pt TEXT,
-        excerpt_en TEXT,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        excerpt TEXT,
         image VARCHAR(500),
         author VARCHAR(100) DEFAULT 'Mondywork',
         published_at DATETIME,
@@ -173,4 +170,19 @@ function setupSchema(PDO $pdo): void
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $blogCols = $pdo->query("SHOW COLUMNS FROM blog_posts")->fetchAll(PDO::FETCH_ASSOC);
+    $blogColNames = array_column($blogCols, 'Field');
+    if (in_array('title_pt', $blogColNames)) {
+        $pdo->exec("ALTER TABLE blog_posts ADD COLUMN title VARCHAR(255) NOT NULL AFTER slug");
+        $pdo->exec("ALTER TABLE blog_posts ADD COLUMN content TEXT NOT NULL AFTER title");
+        $pdo->exec("ALTER TABLE blog_posts ADD COLUMN excerpt TEXT AFTER content");
+        $pdo->exec("UPDATE blog_posts SET title = title_pt, content = content_pt, excerpt = COALESCE(excerpt_pt, '')");
+        $pdo->exec("ALTER TABLE blog_posts DROP COLUMN title_pt");
+        $pdo->exec("ALTER TABLE blog_posts DROP COLUMN title_en");
+        $pdo->exec("ALTER TABLE blog_posts DROP COLUMN content_pt");
+        $pdo->exec("ALTER TABLE blog_posts DROP COLUMN content_en");
+        $pdo->exec("ALTER TABLE blog_posts DROP COLUMN excerpt_pt");
+        $pdo->exec("ALTER TABLE blog_posts DROP COLUMN excerpt_en");
+    }
 }

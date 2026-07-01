@@ -87,7 +87,7 @@ function capitalizeTitle($str) {
   "inLanguage": "en"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.1.0">
+<link rel="stylesheet" href="/css/style.css?v=1.2.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -109,7 +109,6 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="nav-link" href="contact.html">Contact</a>
       <a class="nav-link" href="privacy.html">Privacy</a>
       <a class="nav-link" href="terms.html">Terms</a>
-      <a class="nav-link" href="/usa/blog/">Blog</a>
       <a class="nav-link active" href="/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
     </div>
     <div class="nav-icon">
@@ -130,7 +129,6 @@ gtag('config', 'G-RPQ9FFFNP1');
   <a class="nav-link" href="contact.html">Contact</a>
   <a class="nav-link" href="privacy.html">Privacy</a>
   <a class="nav-link" href="terms.html">Terms</a>
-  <a class="nav-link" href="/usa/blog/">Blog</a>
   <a class="nav-link active" href="/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
   <a class="nav-icon-mobile" aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -315,6 +313,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.1.0"></script>
+<script src="/js/app-exterior.js?v=1.2.0"></script>
 </body>
 </html>

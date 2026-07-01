@@ -5,8 +5,6 @@ $config = require $configFile;
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
 if (!$slug) { header('Location: /'); exit; }
 
-$isExterior = isset($_GET['lang']) && $_GET['lang'] === 'en';
-
 try {
     $pdo = new PDO(
         "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
@@ -26,23 +24,19 @@ try {
 
 function esc($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-$title = $post ? ($isExterior ? $post['title_en'] : $post['title_pt']) : 'Post não encontrado';
-$content = $post ? ($isExterior ? $post['content_en'] : $post['content_pt']) : '';
-$excerpt = $post ? ($isExterior ? $post['excerpt_en'] : $post['excerpt_pt']) : '';
+$title = $post ? $post['title'] : 'Post não encontrado';
+$content = $post ? $post['content'] : '';
+$excerpt = $post ? $post['excerpt'] : '';
 $author = $post ? $post['author'] : '';
 $publishedAt = $post ? $post['published_at'] : '';
 $pageTitle = $title . ' | Mondywork';
 $pageDesc = $excerpt ? strip_tags($excerpt) : 'Leia o artigo: ' . $title;
-$ogUrl = $isExterior
-    ? 'https://mondywork.com.br/usa/blog/' . urlencode($slug)
-    : 'https://mondywork.com.br/blog/' . urlencode($slug);
+$ogUrl = 'https://mondywork.com.br/blog/' . urlencode($slug);
 $canonical = $ogUrl;
-$dateFormatted = $publishedAt
-    ? ($isExterior ? date('M d, Y', strtotime($publishedAt)) : date('d/m/Y', strtotime($publishedAt)))
-    : '';
+$dateFormatted = $publishedAt ? date('d/m/Y', strtotime($publishedAt)) : '';
 $isoDate = $publishedAt ? date('Y-m-d', strtotime($publishedAt)) : '';
 ?><!DOCTYPE html>
-<html lang="<?= $isExterior ? 'en' : 'pt-BR' ?>">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -50,8 +44,6 @@ $isoDate = $publishedAt ? date('Y-m-d', strtotime($publishedAt)) : '';
 <title><?= esc($pageTitle) ?></title>
 <meta name="description" content="<?= esc($pageDesc) ?>">
 <link rel="canonical" href="<?= esc($canonical) ?>">
-<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/blog/<?= esc($slug) ?>">
-<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/blog/<?= esc($slug) ?>">
 <meta property="og:type" content="article">
 <meta property="og:url" content="<?= esc($ogUrl) ?>">
 <meta property="og:title" content="<?= esc($pageTitle) ?>">
@@ -81,7 +73,7 @@ $isoDate = $publishedAt ? date('Y-m-d', strtotime($publishedAt)) : '';
 <title>Post não encontrado | Mondywork</title>
 <meta name="robots" content="noindex">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.1.0">
+<link rel="stylesheet" href="/css/style.css?v=1.2.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -100,15 +92,13 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
-      <a class="nav-link" href="<?= $isExterior ? '/usa/' : '/' ?>"><?= $isExterior ? 'Jobs' : 'Vagas' ?></a>
-      <a class="nav-link active" href="<?= $isExterior ? '/usa/blog/' : '/blog/' ?>"><?= $isExterior ? 'Blog' : 'Blog' ?></a>
-      <a class="nav-link" href="<?= $isExterior ? '/usa/about.html' : '/sobre.html' ?>"><?= $isExterior ? 'About' : 'Sobre' ?></a>
-      <a class="nav-link" href="<?= $isExterior ? '/usa/contact.html' : '/contato.html' ?>"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
-      <?php if ($isExterior): ?>
-      <a class="nav-link" href="/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
-      <?php else: ?>
+      <a class="nav-link" href="/vagas/">Vagas</a>
+      <a class="nav-link active" href="/">Blog</a>
+      <a class="nav-link" href="/sobre.html">Sobre</a>
+      <a class="nav-link" href="/contato.html">Contato</a>
+      <a class="nav-link" href="/privacidade.html">Privacidade</a>
+      <a class="nav-link" href="/termos-de-uso.html">Termos</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
-      <?php endif; ?>
     </div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -116,14 +106,13 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </nav>
 <div class="mobile-menu" id="mobile-menu">
-  <a class="nav-link" href="<?= $isExterior ? '/usa/' : '/' ?>"><?= $isExterior ? 'Jobs' : 'Vagas' ?></a>
-  <a class="nav-link active" href="<?= $isExterior ? '/usa/blog/' : '/blog/' ?>"><?= $isExterior ? 'Blog' : 'Blog' ?></a>
-  <a class="nav-link" href="<?= $isExterior ? '/usa/about.html' : '/sobre.html' ?>"><?= $isExterior ? 'About' : 'Sobre' ?></a>
-  <a class="nav-link" href="<?= $isExterior ? '/usa/contact.html' : '/contato.html' ?>"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
-  <a class="nav-link" href="<?= $isExterior ? '/usa/privacy.html' : '/privacidade.html' ?>"><?= $isExterior ? 'Privacy' : 'Privacidade' ?></a>
-  <?php if ($isExterior): ?>
-  <a class="nav-link" href="/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
-  <?php endif; ?>
+  <a class="nav-link" href="/vagas/">Vagas</a>
+  <a class="nav-link active" href="/">Blog</a>
+  <a class="nav-link" href="/sobre.html">Sobre</a>
+  <a class="nav-link" href="/contato.html">Contato</a>
+  <a class="nav-link" href="/privacidade.html">Privacidade</a>
+  <a class="nav-link" href="/termos-de-uso.html">Termos</a>
+  <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
 </div>
 
 <main class="main-content" style="padding-top:80px">
@@ -131,7 +120,7 @@ gtag('config', 'G-RPQ9FFFNP1');
 
 <?php if ($post): ?>
 
-    <a href="<?= $isExterior ? '/usa/blog/' : '/blog/' ?>" class="job-card-btn" style="display:inline-flex;margin-bottom:24px;text-decoration:none">&larr; <?= $isExterior ? 'Back to blog' : 'Voltar para blog' ?></a>
+    <a href="/" class="job-card-btn" style="display:inline-flex;margin-bottom:24px;text-decoration:none">&larr; Voltar</a>
 
     <article class="vaga-page">
       <header class="vaga-page-header">
@@ -153,15 +142,15 @@ gtag('config', 'G-RPQ9FFFNP1');
       </div>
 
       <div class="vaga-page-footer" style="justify-content:flex-start">
-        <a href="<?= $isExterior ? '/usa/blog/' : '/blog/' ?>" class="job-card-btn" style="text-decoration:none">&larr; <?= $isExterior ? 'Back to blog' : 'Voltar para blog' ?></a>
+        <a href="/" class="job-card-btn" style="text-decoration:none">&larr; Voltar</a>
       </div>
     </article>
 
 <?php else: ?>
     <div style="text-align:center;padding:80px 0">
-      <h1 style="font-size:2rem;margin-bottom:16px"><?= $isExterior ? 'Post not found' : 'Post não encontrado' ?></h1>
-      <p style="color:#666;margin-bottom:24px"><?= $isExterior ? 'This article is no longer available.' : 'Este artigo não está mais disponível.' ?></p>
-      <a href="<?= $isExterior ? '/usa/blog/' : '/blog/' ?>" class="modal-btn" style="display:inline-block;text-decoration:none">&larr; <?= $isExterior ? 'Back to blog' : 'Voltar para blog' ?></a>
+      <h1 style="font-size:2rem;margin-bottom:16px">Post não encontrado</h1>
+      <p style="color:#666;margin-bottom:24px">Este artigo não está mais disponível.</p>
+      <a href="/" class="modal-btn" style="display:inline-block;text-decoration:none">&larr; Voltar</a>
     </div>
 <?php endif; ?>
 
@@ -172,12 +161,12 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="footer-inner">
     <span class="footer-logo">Mondywork</span>
     <div class="footer-links">
-      <a class="footer-link" href="<?= $isExterior ? '/usa/contact.html' : '/contato.html' ?>"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
-      <a class="footer-link" href="<?= $isExterior ? '/usa/about.html' : '/sobre.html' ?>"><?= $isExterior ? 'About' : 'Sobre' ?></a>
-      <a class="footer-link" href="<?= $isExterior ? '/usa/privacy.html' : '/privacidade.html' ?>"><?= $isExterior ? 'Privacy' : 'Privacidade' ?></a>
-      <a class="footer-link" href="<?= $isExterior ? '/usa/terms.html' : '/termos-de-uso.html' ?>"><?= $isExterior ? 'Terms' : 'Termos' ?></a>
+      <a class="footer-link" href="/contato.html">Contato</a>
+      <a class="footer-link" href="/sobre.html">Sobre</a>
+      <a class="footer-link" href="/privacidade.html">Privacidade</a>
+      <a class="footer-link" href="/termos-de-uso.html">Termos</a>
     </div>
-    <p class="footer-text">&copy; 2026 Mondywork. <?= $isExterior ? 'All rights reserved.' : 'Todos os direitos reservados.' ?></p>
+    <p class="footer-text">&copy; 2026 Mondywork. Todos os direitos reservados.</p>
   </div>
 </footer>
 

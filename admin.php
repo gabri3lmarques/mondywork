@@ -227,21 +227,18 @@ if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && i
         $slug = $_POST['slug'] ?? '';
         $slug = preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', mb_strtolower(trim($slug))));
         if (!$slug) $slug = 'post-' . time();
-        $titlePt = trim($_POST['title_pt'] ?? '');
-        $titleEn = trim($_POST['title_en'] ?? '');
-        $contentPt = $_POST['content_pt'] ?? '';
-        $contentEn = $_POST['content_en'] ?? '';
-        $excerptPt = trim($_POST['excerpt_pt'] ?? '');
-        $excerptEn = trim($_POST['excerpt_en'] ?? '');
+        $title = trim($_POST['title'] ?? '');
+        $content = $_POST['content'] ?? '';
+        $excerpt = trim($_POST['excerpt'] ?? '');
         $author = trim($_POST['author'] ?? 'Mondywork');
         $status = $_POST['status'] ?? 'rascunho';
         if (isset($_POST['id']) && $_POST['id']) {
-            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title_pt=:tp, title_en=:te, content_pt=:cp, content_en=:ce, excerpt_pt=:ep, excerpt_en=:ee, author=:author, status=:status WHERE id=:id");
-            $stmt->execute([':slug' => $slug, ':tp' => $titlePt, ':te' => $titleEn, ':cp' => $contentPt, ':ce' => $contentEn, ':ep' => $excerptPt, ':ee' => $excerptEn, ':author' => $author, ':status' => $status, ':id' => (int)$_POST['id']]);
+            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, author=:author, status=:status WHERE id=:id");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':author' => $author, ':status' => $status, ':id' => (int)$_POST['id']]);
             $blogMsg = 'Post atualizado com sucesso!';
         } else {
-            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title_pt, title_en, content_pt, content_en, excerpt_pt, excerpt_en, author, status, published_at) VALUES (:slug, :tp, :te, :cp, :ce, :ep, :ee, :author, :status, IF(:status='publicado', NOW(), NULL))");
-            $stmt->execute([':slug' => $slug, ':tp' => $titlePt, ':te' => $titleEn, ':cp' => $contentPt, ':ce' => $contentEn, ':ep' => $excerptPt, ':ee' => $excerptEn, ':author' => $author, ':status' => $status]);
+            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, content, excerpt, author, status, published_at) VALUES (:slug, :title, :content, :excerpt, :author, :status, IF(:status='publicado', NOW(), NULL))");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':author' => $author, ':status' => $status]);
             $blogMsg = 'Post criado com sucesso!';
         }
     } catch (Exception $e) {
@@ -309,7 +306,7 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Mondywork</title>
-<link rel="stylesheet" href="/css/style.css?v=1.1.0">
+<link rel="stylesheet" href="/css/style.css?v=1.2.0">
 <style>
 .admin-nav { background: #0b1c30; height: 64px; }
 .admin-nav .nav-inner { height: 64px; }
@@ -886,12 +883,8 @@ try {
       <?php endif; ?>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div>
-          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Título (PT)</label>
-          <input type="text" name="title_pt" required class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($post['title_pt'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-        </div>
-        <div>
-          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Title (EN)</label>
-          <input type="text" name="title_en" required class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($post['title_en'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Título</label>
+          <input type="text" name="title" required class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($post['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
         </div>
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Slug (URL)</label>
@@ -909,23 +902,13 @@ try {
           </select>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div>
-          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo (PT)</label>
-          <textarea name="excerpt_pt" class="admin-search-input" style="width:100%;min-height:80px;resize:vertical" placeholder="Resumo curto em português..."><?php echo htmlspecialchars($post['excerpt_pt'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-        </div>
-        <div>
-          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Excerpt (EN)</label>
-          <textarea name="excerpt_en" class="admin-search-input" style="width:100%;min-height:80px;resize:vertical" placeholder="Short summary in English..."><?php echo htmlspecialchars($post['excerpt_en'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-        </div>
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo</label>
+        <textarea name="excerpt" class="admin-search-input" style="width:100%;min-height:80px;resize:vertical" placeholder="Resumo curto do post..."><?php echo htmlspecialchars($post['excerpt'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
       </div>
       <div>
-        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Conteúdo (PT) — HTML</label>
-        <textarea name="content_pt" class="admin-search-input" style="width:100%;min-height:300px;resize:vertical;font-family:monospace"><?php echo htmlspecialchars($post['content_pt'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-      </div>
-      <div>
-        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Content (EN) — HTML</label>
-        <textarea name="content_en" class="admin-search-input" style="width:100%;min-height:300px;resize:vertical;font-family:monospace"><?php echo htmlspecialchars($post['content_en'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Conteúdo — HTML</label>
+        <textarea name="content" class="admin-search-input" style="width:100%;min-height:300px;resize:vertical;font-family:monospace"><?php echo htmlspecialchars($post['content'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
       </div>
       <div style="display:flex;gap:12px">
         <button type="submit" name="salvar_blog" class="btn-search" style="font-size:15px;padding:12px 32px"><?php echo $post ? 'Salvar Alterações' : 'Criar Post' ?></button>
@@ -940,7 +923,7 @@ try {
     $offsetBlog = ($pageBlog - 1) * $limitBlog;
     $totalBlog = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts")->fetchColumn();
     $totalBlogPages = max(1, (int)ceil($totalBlog / $limitBlog));
-    $stmtBlog = $pdo->prepare("SELECT * FROM blog_posts ORDER BY created_at DESC LIMIT :lim OFFSET :off");
+    $stmtBlog = $pdo->prepare("SELECT id, slug, title, author, status, published_at, created_at FROM blog_posts ORDER BY created_at DESC LIMIT :lim OFFSET :off");
     $stmtBlog->bindValue(':lim', $limitBlog, PDO::PARAM_INT);
     $stmtBlog->bindValue(':off', $offsetBlog, PDO::PARAM_INT);
     $stmtBlog->execute();
@@ -954,7 +937,7 @@ try {
       <div class="admin-card" style="margin-bottom:12px">
         <div class="admin-card-header">
           <div style="flex:1">
-            <div class="admin-card-title"><?php echo htmlspecialchars($bp['title_pt'], ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="admin-card-title"><?php echo htmlspecialchars($bp['title'], ENT_QUOTES, 'UTF-8') ?></div>
             <div class="admin-card-company">/blog/<?php echo htmlspecialchars($bp['slug'], ENT_QUOTES, 'UTF-8') ?></div>
           </div>
         </div>
@@ -966,8 +949,7 @@ try {
           <a href="?tab=blog&editar=<?php echo (int)$bp['id'] ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
           <a href="?tab=blog&delete=<?php echo (int)$bp['id'] ?>" onclick="return confirm('Excluir este post?')" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #ba1a1a;color:#ba1a1a;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Excluir</a>
           <?php if ($bp['status'] === 'publicado'): ?>
-            <a href="/blog/<?php echo urlencode($bp['slug']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver PT</a>
-            <a href="/usa/blog/<?php echo urlencode($bp['slug']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver EN</a>
+            <a href="/blog/<?php echo urlencode($bp['slug']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver</a>
           <?php endif; ?>
         </div>
       </div>

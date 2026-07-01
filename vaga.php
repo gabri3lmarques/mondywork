@@ -154,7 +154,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.1.0">
+<link rel="stylesheet" href="/css/style.css?v=1.2.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -177,11 +177,10 @@ gtag('config', 'G-RPQ9FFFNP1');
 <?php if ($isExterior): ?>
       <a class="nav-link" href="/usa/privacy.html">Privacy</a>
       <a class="nav-link" href="/usa/terms.html">Terms</a>
-      <a class="nav-link" href="/usa/blog/">Blog</a>
 <?php else: ?>
+      <a class="nav-link" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/privacidade.html">Privacidade</a>
       <a class="nav-link" href="/termos-de-uso.html">Termos</a>
-      <a class="nav-link" href="/blog/">Blog</a>
 <?php endif; ?>
     </div>
   </div>
@@ -192,7 +191,7 @@ gtag('config', 'G-RPQ9FFFNP1');
 
 <?php if ($vaga): ?>
 
-    <a href="/" class="job-card-btn" style="display: inline-flex; margin-bottom: 24px; text-decoration: none;">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
+    <a href="<?= $isExterior ? '/usa/' : '/vagas/' ?>" class="job-card-btn" style="display: inline-flex; margin-bottom: 24px; text-decoration: none;">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
 
     <article class="vaga-page">
       <header class="vaga-page-header">
@@ -236,7 +235,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div style="text-align:center;padding:80px 0">
       <h1 style="font-size:2rem;margin-bottom:16px"><?= $isExterior ? 'Job not found' : 'Vaga não encontrada' ?></h1>
       <p style="color:#666;margin-bottom:24px"><?= $isExterior ? 'This job is no longer available or the link is invalid.' : 'Esta vaga não está mais disponível ou o link é inválido.' ?></p>
-      <a href="/" class="modal-btn" style="display:inline-block;text-decoration:none">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
+      <a href="<?= $isExterior ? '/usa/' : '/vagas/' ?>" class="modal-btn" style="display:inline-block;text-decoration:none">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
     </div>
 
 <?php endif; ?>
