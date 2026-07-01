@@ -185,4 +185,11 @@ function setupSchema(PDO $pdo): void
         $pdo->exec("ALTER TABLE blog_posts DROP COLUMN excerpt_pt");
         $pdo->exec("ALTER TABLE blog_posts DROP COLUMN excerpt_en");
     }
+
+    if (!in_array('image', $blogColNames)) {
+        $pdo->exec("ALTER TABLE blog_posts ADD COLUMN image VARCHAR(500) DEFAULT NULL AFTER excerpt");
+    }
+    if (!in_array('categoria', $blogColNames)) {
+        $pdo->exec("ALTER TABLE blog_posts ADD COLUMN categoria VARCHAR(100) DEFAULT NULL AFTER image");
+    }
 }

@@ -262,6 +262,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="footer-links">
       <a class="footer-link" href="/contato.html">Contato</a>
       <a class="footer-link" href="/sobre.html">Sobre</a>
+      <a class="footer-link" href="/guia-de-carreira.html">Guia de Carreira</a>
       <a class="footer-link" href="/privacidade.html">Privacidade</a>
       <a class="footer-link" href="/termos-de-uso.html">Termos</a>
     </div>

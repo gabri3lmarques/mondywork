@@ -232,13 +232,15 @@ if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && i
         $excerpt = trim($_POST['excerpt'] ?? '');
         $author = trim($_POST['author'] ?? 'Mondywork');
         $status = $_POST['status'] ?? 'rascunho';
+        $image = trim($_POST['image'] ?? '');
+        $categoria = trim($_POST['categoria'] ?? '');
         if (isset($_POST['id']) && $_POST['id']) {
-            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, author=:author, status=:status WHERE id=:id");
-            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':author' => $author, ':status' => $status, ':id' => (int)$_POST['id']]);
+            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status WHERE id=:id");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':id' => (int)$_POST['id']]);
             $blogMsg = 'Post atualizado com sucesso!';
         } else {
-            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, content, excerpt, author, status, published_at) VALUES (:slug, :title, :content, :excerpt, :author, :status, IF(:status='publicado', NOW(), NULL))");
-            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':author' => $author, ':status' => $status]);
+            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, content, excerpt, image, categoria, author, status, published_at) VALUES (:slug, :title, :content, :excerpt, :image, :categoria, :author, :status, IF(:status='publicado', NOW(), NULL))");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status]);
             $blogMsg = 'Post criado com sucesso!';
         }
     } catch (Exception $e) {
@@ -901,6 +903,19 @@ try {
             <option value="publicado" <?php echo ($post['status'] ?? '') === 'publicado' ? 'selected' : '' ?>>Publicado</option>
           </select>
         </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Imagem (URL)</label>
+          <input type="url" name="image" class="admin-search-input" style="width:100%" placeholder="https://..." value="<?php echo htmlspecialchars($post['image'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+        </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Categoria</label>
+          <select name="categoria" class="admin-search-input" style="width:100%">
+            <option value="">Sem categoria</option>
+            <?php foreach (['Carreira','Tecnologia','Design','Marketing','Produto','Mercado de Trabalho','Dicas'] as $cat): ?>
+              <option value="<?php echo $cat ?>" <?php echo ($post['categoria'] ?? '') === $cat ? 'selected' : '' ?>><?php echo $cat ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
       </div>
       <div>
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo</label>
@@ -923,7 +938,7 @@ try {
     $offsetBlog = ($pageBlog - 1) * $limitBlog;
     $totalBlog = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts")->fetchColumn();
     $totalBlogPages = max(1, (int)ceil($totalBlog / $limitBlog));
-    $stmtBlog = $pdo->prepare("SELECT id, slug, title, author, status, published_at, created_at FROM blog_posts ORDER BY created_at DESC LIMIT :lim OFFSET :off");
+    $stmtBlog = $pdo->prepare("SELECT id, slug, title, author, status, published_at, created_at, categoria FROM blog_posts ORDER BY created_at DESC LIMIT :lim OFFSET :off");
     $stmtBlog->bindValue(':lim', $limitBlog, PDO::PARAM_INT);
     $stmtBlog->bindValue(':off', $offsetBlog, PDO::PARAM_INT);
     $stmtBlog->execute();
@@ -943,6 +958,9 @@ try {
         </div>
         <div class="admin-card-meta">
           <span class="badge-status <?php echo $bp['status'] ?>"><?php echo $bp['status'] === 'publicado' ? 'Publicado' : 'Rascunho' ?></span>
+          <?php if (!empty($bp['categoria'])): ?>
+            <span style="font-size:12px;color:#4b41e1;font-weight:600"><?php echo htmlspecialchars($bp['categoria'], ENT_QUOTES, 'UTF-8') ?></span>
+          <?php endif; ?>
           <span style="font-size:12px;color:#45464d"><?php echo $bp['author'] ?> • <?php echo $bp['published_at'] ? date('d/m/Y', strtotime($bp['published_at'])) : '—' ?></span>
         </div>
         <div class="admin-card-actions">

@@ -12,29 +12,46 @@ try {
     require_once __DIR__ . '/lib/Database.php';
     setupSchema($pdo);
 
+    $categoriaFiltro = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = 12;
     $offset = ($page - 1) * $limit;
 
-    $totalStmt = $pdo->query("SELECT COUNT(*) FROM blog_posts WHERE status='publicado'");
+    $whereBlog = "status='publicado'";
+    $paramsBlog = [];
+    if ($categoriaFiltro) {
+        $whereBlog .= " AND categoria = :cat";
+        $paramsBlog[':cat'] = $categoriaFiltro;
+    }
+
+    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM blog_posts WHERE $whereBlog");
+    $totalStmt->execute($paramsBlog);
     $total = (int)$totalStmt->fetchColumn();
     $totalPages = max(1, (int)ceil($total / $limit));
 
-    $stmt = $pdo->prepare("SELECT slug, title, excerpt, author, published_at, created_at FROM blog_posts WHERE status='publicado' ORDER BY published_at DESC LIMIT :lim OFFSET :off");
+    $stmt = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at, created_at FROM blog_posts WHERE $whereBlog ORDER BY published_at DESC LIMIT :lim OFFSET :off");
+    foreach ($paramsBlog as $k => $v) $stmt->bindValue($k, $v);
     $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $todasCategorias = $pdo->query("SELECT DISTINCT categoria FROM blog_posts WHERE status='publicado' AND categoria IS NOT NULL AND categoria != '' ORDER BY categoria")->fetchAll(PDO::FETCH_COLUMN);
 } catch (Exception $e) {
     $posts = [];
     $total = 0;
     $totalPages = 1;
+    $todasCategorias = [];
 }
 
 function esc($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function excerpt($text, $max = 200) {
     if (mb_strlen($text) <= $max) return $text;
     return mb_substr($text, 0, $max) . '...';
+}
+function tempoLeitura($texto) {
+    $palavras = str_word_count(strip_tags($texto), 0, 'àáâãéêíóôõúçÀÁÂÃÉÊÍÓÔÕÚÇ');
+    return max(1, (int)ceil($palavras / 200));
 }
 ?><!DOCTYPE html>
 <html lang="pt-BR">
@@ -124,25 +141,43 @@ gtag('config', 'G-RPQ9FFFNP1');
       <h2 class="section-title">Artigos Recentes</h2>
     </div>
 
+    <?php if (!empty($todasCategorias)): ?>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+      <a href="/" class="cat-filter-checkbox" style="<?= $categoriaFiltro ? '' : 'background:#4b41e1;color:#fff;border-color:#4b41e1' ?>">Todas</a>
+      <?php foreach ($todasCategorias as $cat): ?>
+        <a href="?categoria=<?= urlencode($cat) ?>" class="cat-filter-checkbox" style="<?= $categoriaFiltro === $cat ? 'background:#4b41e1;color:#fff;border-color:#4b41e1' : '' ?>"><?= esc($cat) ?></a>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
     <div class="blog-grid">
       <?php if (empty($posts)): ?>
         <p style="color:#45464d;text-align:center;padding:48px 0;grid-column:1/-1">Nenhum artigo publicado ainda. Volte em breve!</p>
       <?php else: ?>
         <?php foreach ($posts as $p):
-          $img = '/img/og-image.jpg';
+          $img = $p['image'] ?: '';
           $date = $p['published_at'] ? date('d/m/Y', strtotime($p['published_at'])) : date('d/m/Y', strtotime($p['created_at']));
+          $leitura = tempoLeitura($p['excerpt'] ?: '');
         ?>
         <article class="blog-card">
           <a href="/blog/<?= esc($p['slug']) ?>" class="blog-card-link">
-            <div class="blog-card-image" style="background:linear-gradient(135deg,#4b41e1,#7c75ff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:700">
-              <?= esc(mb_substr($p['title'], 0, 1)) ?>
-            </div>
+            <?php if ($img): ?>
+              <div class="blog-card-image" style="background-image:url('<?= esc($img) ?>');background-size:cover;background-position:center"></div>
+            <?php else: ?>
+              <div class="blog-card-image" style="background:linear-gradient(135deg,#4b41e1,#7c75ff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:700">
+                <?= esc(mb_substr($p['title'], 0, 1)) ?>
+              </div>
+            <?php endif; ?>
             <div class="blog-card-body">
+              <?php if (!empty($p['categoria'])): ?>
+                <span style="display:inline-block;font-size:11px;font-weight:700;color:#4b41e1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px"><?= esc($p['categoria']) ?></span>
+              <?php endif; ?>
               <h3 class="blog-card-title"><?= esc($p['title']) ?></h3>
               <p class="blog-card-excerpt"><?= esc(excerpt(strip_tags($p['excerpt'] ?: ''))) ?></p>
               <div class="blog-card-meta">
                 <span><?= esc($p['author']) ?></span>
                 <span><?= $date ?></span>
+                <span><?= $leitura ?> min de leitura</span>
               </div>
             </div>
           </a>
@@ -172,6 +207,19 @@ gtag('config', 'G-RPQ9FFFNP1');
 
   <section class="section" style="padding-top:0">
     <div class="section-header">
+      <h2 class="section-title">Guias de Carreira</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px">
+      <div style="background:#f0effe;border-radius:12px;padding:32px">
+        <h3 style="font-size:18px;margin:0 0 8px;color:#1c1d21"><a href="/guia-de-carreira.html" style="text-decoration:none;color:inherit">Guia de Carreira em Tecnologia</a></h3>
+        <p style="font-size:14px;color:#45464d;margin:0 0 16px">Planejamento, habilidades, entrevistas e crescimento profissional em TI, Design, Marketing e Produto.</p>
+        <a href="/guia-de-carreira.html" style="font-size:14px;font-weight:600;color:#4b41e1;text-decoration:none">Ler guia &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="section-header">
       <h2 class="section-title">Encontre sua próxima vaga</h2>
     </div>
     <div style="text-align:center">
@@ -187,6 +235,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="footer-links">
       <a class="footer-link" href="/contato.html">Contato</a>
       <a class="footer-link" href="/sobre.html">Sobre</a>
+      <a class="footer-link" href="/guia-de-carreira.html">Guia de Carreira</a>
       <a class="footer-link" href="/privacidade.html">Privacidade</a>
       <a class="footer-link" href="/termos-de-uso.html">Termos</a>
     </div>

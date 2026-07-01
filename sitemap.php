@@ -74,6 +74,12 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://mondywork.com.br/guia-de-carreira.html</loc>
+    <lastmod><?= getLastmod('guia-de-carreira.html') ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://mondywork.com.br/usa/about.html</loc>
     <lastmod><?= getLastmod('usa/about.html') ?></lastmod>
     <changefreq>monthly</changefreq>
