@@ -233,6 +233,19 @@ if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && i
         $author = trim($_POST['author'] ?? 'Mondywork');
         $status = $_POST['status'] ?? 'rascunho';
         $image = trim($_POST['image'] ?? '');
+        if (isset($_POST['remover_imagem'])) {
+            $image = '';
+        } elseif (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','webp','gif','svg'])) {
+                $dest = __DIR__ . '/uploads/blog/' . $slug . '-' . time() . '.' . $ext;
+                $urlPath = '/uploads/blog/' . basename($dest);
+                move_uploaded_file($_FILES['image_file']['tmp_name'], $dest);
+                $image = $urlPath;
+            }
+        } elseif ($urlManual = trim($_POST['image_url'] ?? '')) {
+            $image = $urlManual;
+        }
         $categoria = trim($_POST['categoria'] ?? '');
         if (isset($_POST['id']) && $_POST['id']) {
             $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status WHERE id=:id");
@@ -879,7 +892,7 @@ try {
   ?>
 
   <div class="admin-card">
-    <form method="post" style="display:flex;flex-direction:column;gap:16px">
+    <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:16px">
       <?php if ($post): ?>
         <input type="hidden" name="id" value="<?php echo (int)$post['id'] ?>">
       <?php endif; ?>
@@ -904,8 +917,21 @@ try {
           </select>
         </div>
         <div>
-          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Imagem (URL)</label>
-          <input type="url" name="image" class="admin-search-input" style="width:100%" placeholder="https://..." value="<?php echo htmlspecialchars($post['image'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Imagem</label>
+          <?php if (!empty($post['image'])): ?>
+            <div style="margin-bottom:6px">
+              <img src="<?php echo htmlspecialchars($post['image'], ENT_QUOTES, 'UTF-8') ?>" style="max-width:200px;max-height:120px;border-radius:6px;object-fit:cover">
+            </div>
+          <?php endif; ?>
+          <input type="file" name="image_file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" class="admin-search-input" style="padding:8px">
+          <input type="hidden" name="image" value="<?php echo htmlspecialchars($post['image'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+          <span style="font-size:12px;color:#45464d">Formatos: JPG, PNG, WebP, GIF, SVG. Ou informe uma URL externa abaixo.</span>
+          <input type="url" name="image_url" class="admin-search-input" style="width:100%;margin-top:6px" placeholder="https://..." value="">
+          <?php if (!empty($post['image'])): ?>
+            <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:#ba1a1a;cursor:pointer">
+              <input type="checkbox" name="remover_imagem" value="1"> Remover imagem atual
+            </label>
+          <?php endif; ?>
         </div>
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Categoria</label>

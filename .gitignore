@@ -5,3 +5,5 @@ add_nova_api.txt
 google_adds_code.txt
 config.php
 env.txt~
+uploads/blog/*
+!uploads/blog/.gitkeep
