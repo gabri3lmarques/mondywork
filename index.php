@@ -197,7 +197,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <?php endif; ?>
   </section>
 
-  <section class="section" style="padding-top:0">
+  <section class="section" style="padding-top:32px">
     <div class="section-header">
       <h2 class="section-title">Guias de Carreira</h2>
     </div>
@@ -225,6 +225,50 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Marketing</h3>
         <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
         <a href="/guia-de-carreira-marketing.html" class="guide-card-link">Ler guia &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:32px">
+    <div class="section-header">
+      <h2 class="section-title">Quem usa recomenda</h2>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial-card">
+        <img src="/img/testimonials/nery.jpeg" alt="Nery Neto" class="testimonial-avatar">
+        <div class="testimonial-body">
+          <p class="testimonial-text">"Sem dúvidas é um dos melhores sites de vaga que já acessei. Não pede cadastro e ainda é 100% gratuito."</p>
+          <div class="testimonial-author">
+            <strong>Nery Neto</strong>
+            <a href="https://www.linkedin.com/in/nery-marques/" target="_blank" class="testimonial-linkedin" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <img src="/img/testimonials/barbara.jpeg" alt="Barbara Abrita" class="testimonial-avatar">
+        <div class="testimonial-body">
+          <p class="testimonial-text">"Tem excelentes oportunidades nas áreas de inteligência de dados e finanças."</p>
+          <div class="testimonial-author">
+            <strong>Barbara Abrita</strong>
+            <a href="https://www.linkedin.com/in/b%C3%A1rbara-abrita-4672201b4/" target="_blank" class="testimonial-linkedin" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <img src="/img/testimonials/gabriel.jpeg" alt="Gabriel Marques" class="testimonial-avatar">
+        <div class="testimonial-body">
+          <p class="testimonial-text">"Mondywork foi feito pensando em facilitar a vida de quem está buscando uma nova oportunidade e sua agilidade mostra isso."</p>
+          <div class="testimonial-author">
+            <strong>Gabriel Marques</strong>
+            <a href="https://www.linkedin.com/in/gabri3lmarques/" target="_blank" class="testimonial-linkedin" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
