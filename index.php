@@ -207,8 +207,24 @@ gtag('config', 'G-RPQ9FFFNP1');
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         </div>
         <h3>Guia de Carreira em Tecnologia</h3>
-        <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Design, Marketing e Produto.</p>
+        <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.</p>
         <a href="/guia-de-carreira.html" class="guide-card-link">Ler guia &rarr;</a>
+      </div>
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3>Guia de Carreira em Design</h3>
+        <p>UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.</p>
+        <a href="/guia-de-carreira-design.html" class="guide-card-link">Ler guia &rarr;</a>
+      </div>
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M12 6v12"/></svg>
+        </div>
+        <h3>Guia de Carreira em Marketing</h3>
+        <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
+        <a href="/guia-de-carreira-marketing.html" class="guide-card-link">Ler guia &rarr;</a>
       </div>
     </div>
   </section>
@@ -226,7 +242,9 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="footer-links">
       <a class="footer-link" href="/contato.html">Contato</a>
       <a class="footer-link" href="/sobre.html">Sobre</a>
-      <a class="footer-link" href="/guia-de-carreira.html">Guia de Carreira</a>
+      <a class="footer-link" href="/guia-de-carreira.html">Guia de Tecnologia</a>
+      <a class="footer-link" href="/guia-de-carreira-design.html">Guia de Design</a>
+      <a class="footer-link" href="/guia-de-carreira-marketing.html">Guia de Marketing</a>
       <a class="footer-link" href="/privacidade.html">Privacidade</a>
       <a class="footer-link" href="/termos-de-uso.html">Termos</a>
     </div>
