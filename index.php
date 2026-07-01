@@ -79,7 +79,7 @@ function excerpt($text, $max = 200) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.4.0">
+<link rel="stylesheet" href="/css/style.css?v=1.5.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -270,6 +270,50 @@ gtag('config', 'G-RPQ9FFFNP1');
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:32px">
+    <div class="section-header">
+      <h2 class="section-title">Perguntas Frequentes</h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary class="faq-question">O que é o Mondywork?</summary>
+        <div class="faq-answer">
+          <p>É um portal que conecta profissionais às melhores oportunidades de trabalho em Tecnologia, Design, Marketing e Produto. Combinamos um blog com conteúdo original sobre carreira com uma plataforma de vagas que reúne diariamente centenas de oportunidades em todo o Brasil.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">Precisa criar conta ou cadastrar currículo?</summary>
+        <div class="faq-answer">
+          <p>Não. O Mondywork é 100% gratuito e não exige cadastro. Você pode buscar vagas, ler o blog e acessar todos os conteúdos sem criar conta alguma.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">De onde vêm as vagas?</summary>
+        <div class="faq-answer">
+          <p>Coletamos vagas de centenas de empresas através de parcerias com as principais plataformas de recrutamento do mercado (InHire, Ashby e Greenhouse). Isso nos permite oferecer uma experiência unificada de busca de emprego.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">Como as vagas são categorizadas?</summary>
+        <div class="faq-answer">
+          <p>Classificamos automaticamente as oportunidades por área de atuação (Tecnologia, Design, Marketing, Produto) para facilitar sua busca. Você também pode pesquisar por cargo, palavra-chave ou habilidade.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">Com que frequência as vagas são atualizadas?</summary>
+        <div class="faq-answer">
+          <p>Diariamente. Novas oportunidades são adicionadas todos os dias, e vagas que não estão mais disponíveis são removidas automaticamente.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">Sou empresa. Como divulgar minhas vagas?</summary>
+        <div class="faq-answer">
+          <p>Entre em contato conosco através da página de <a href="/contato.html">Contato</a>. Estamos abertos a novas parcerias para conectar talentos às melhores oportunidades.</p>
+        </div>
+      </details>
     </div>
   </section>
 
