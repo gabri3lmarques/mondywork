@@ -49,10 +49,6 @@ function excerpt($text, $max = 200) {
     if (mb_strlen($text) <= $max) return $text;
     return mb_substr($text, 0, $max) . '...';
 }
-function tempoLeitura($texto) {
-    $palavras = str_word_count(strip_tags($texto), 0, 'àáâãéêíóôõúçÀÁÂÃÉÊÍÓÔÕÚÇ');
-    return max(1, (int)ceil($palavras / 200));
-}
 ?><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -83,7 +79,7 @@ function tempoLeitura($texto) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.3.0">
+<link rel="stylesheet" href="/css/style.css?v=1.4.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -142,10 +138,10 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
 
     <?php if (!empty($todasCategorias)): ?>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
-      <a href="/" class="cat-filter-checkbox" style="<?= $categoriaFiltro ? '' : 'background:#4b41e1;color:#fff;border-color:#4b41e1' ?>">Todas</a>
+    <div class="cat-filter">
+      <a href="/" class="<?= $categoriaFiltro ? '' : 'active' ?>">Todas</a>
       <?php foreach ($todasCategorias as $cat): ?>
-        <a href="?categoria=<?= urlencode($cat) ?>" class="cat-filter-checkbox" style="<?= $categoriaFiltro === $cat ? 'background:#4b41e1;color:#fff;border-color:#4b41e1' : '' ?>"><?= esc($cat) ?></a>
+        <a href="?categoria=<?= urlencode($cat) ?>" class="<?= $categoriaFiltro === $cat ? 'active' : '' ?>"><?= esc($cat) ?></a>
       <?php endforeach; ?>
     </div>
     <?php endif; ?>
@@ -157,27 +153,23 @@ gtag('config', 'G-RPQ9FFFNP1');
         <?php foreach ($posts as $p):
           $img = $p['image'] ?: '';
           $date = $p['published_at'] ? date('d/m/Y', strtotime($p['published_at'])) : date('d/m/Y', strtotime($p['created_at']));
-          $leitura = tempoLeitura($p['excerpt'] ?: '');
         ?>
         <article class="blog-card">
           <a href="/blog/<?= esc($p['slug']) ?>" class="blog-card-link">
             <?php if ($img): ?>
-              <div class="blog-card-image" style="background-image:url('<?= esc($img) ?>');background-size:cover;background-position:center"></div>
+              <div class="blog-card-image" style="background-image:url('<?= esc($img) ?>')"></div>
             <?php else: ?>
-              <div class="blog-card-image" style="background:linear-gradient(135deg,#4b41e1,#7c75ff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:700">
-                <?= esc(mb_substr($p['title'], 0, 1)) ?>
-              </div>
+              <div class="blog-card-image blog-card-image--empty"><?= esc(mb_substr($p['title'], 0, 1)) ?></div>
             <?php endif; ?>
             <div class="blog-card-body">
               <?php if (!empty($p['categoria'])): ?>
-                <span style="display:inline-block;font-size:11px;font-weight:700;color:#4b41e1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px"><?= esc($p['categoria']) ?></span>
+                <span class="blog-card-cat"><?= esc($p['categoria']) ?></span>
               <?php endif; ?>
               <h3 class="blog-card-title"><?= esc($p['title']) ?></h3>
               <p class="blog-card-excerpt"><?= esc(excerpt(strip_tags($p['excerpt'] ?: ''))) ?></p>
               <div class="blog-card-meta">
                 <span><?= esc($p['author']) ?></span>
                 <span><?= $date ?></span>
-                <span><?= $leitura ?> min de leitura</span>
               </div>
             </div>
           </a>
@@ -187,7 +179,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
 
     <?php if ($totalPages > 1): ?>
-    <div class="admin-pagination" style="margin-top:48px">
+    <div class="pagination">
       <?php if ($page > 1): ?>
         <a href="?page=<?= $page - 1 ?>">&laquo; Anterior</a>
       <?php endif; ?>
@@ -209,23 +201,22 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="section-header">
       <h2 class="section-title">Guias de Carreira</h2>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px">
-      <div style="background:#f0effe;border-radius:12px;padding:32px">
-        <h3 style="font-size:18px;margin:0 0 8px;color:#1c1d21"><a href="/guia-de-carreira.html" style="text-decoration:none;color:inherit">Guia de Carreira em Tecnologia</a></h3>
-        <p style="font-size:14px;color:#45464d;margin:0 0 16px">Planejamento, habilidades, entrevistas e crescimento profissional em TI, Design, Marketing e Produto.</p>
-        <a href="/guia-de-carreira.html" style="font-size:14px;font-weight:600;color:#4b41e1;text-decoration:none">Ler guia &rarr;</a>
+    <div class="guide-grid">
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <h3>Guia de Carreira em Tecnologia</h3>
+        <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Design, Marketing e Produto.</p>
+        <a href="/guia-de-carreira.html" class="guide-card-link">Ler guia &rarr;</a>
       </div>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
-    <div class="section-header">
-      <h2 class="section-title">Encontre sua próxima vaga</h2>
-    </div>
-    <div style="text-align:center">
-      <p style="color:#45464d;margin-bottom:24px;max-width:600px;margin-left:auto;margin-right:auto">Confira as vagas mais recentes em tecnologia, design, marketing e produto. Oportunidades atualizadas diariamente em todo o Brasil.</p>
-      <a href="/vagas/" class="sidebar-btn" style="display:inline-block;width:auto;padding:16px 48px;text-decoration:none">Ver Vagas</a>
-    </div>
+  <section class="section cta-section">
+    <h2 class="section-title" style="margin-bottom:16px">Encontre sua próxima vaga</h2>
+    <p>Confira as vagas mais recentes em tecnologia, design, marketing e produto. Oportunidades atualizadas diariamente em todo o Brasil.</p>
+    <a href="/vagas/" class="cta-btn">Ver Vagas</a>
   </section>
 </main>
 
