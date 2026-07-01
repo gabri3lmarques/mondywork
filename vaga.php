@@ -174,13 +174,8 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="nav-links">
       <a class="nav-link" href="/sobre.html"><?= $isExterior ? 'About' : 'Sobre' ?></a>
       <a class="nav-link" href="/contato.html"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
-<?php if ($isExterior): ?>
-      <a class="nav-link" href="/usa/privacy.html">Privacy</a>
-      <a class="nav-link" href="/usa/terms.html">Terms</a>
 <?php else: ?>
       <a class="nav-link" href="/vagas/">Vagas</a>
-      <a class="nav-link" href="/privacidade.html">Privacidade</a>
-      <a class="nav-link" href="/termos-de-uso.html">Termos</a>
 <?php endif; ?>
     </div>
   </div>

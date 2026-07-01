@@ -96,8 +96,6 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="nav-link active" href="/">Blog</a>
       <a class="nav-link" href="/sobre.html">Sobre</a>
       <a class="nav-link" href="/contato.html">Contato</a>
-      <a class="nav-link" href="/privacidade.html">Privacidade</a>
-      <a class="nav-link" href="/termos-de-uso.html">Termos</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
     </div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
@@ -110,8 +108,6 @@ gtag('config', 'G-RPQ9FFFNP1');
   <a class="nav-link active" href="/">Blog</a>
   <a class="nav-link" href="/sobre.html">Sobre</a>
   <a class="nav-link" href="/contato.html">Contato</a>
-  <a class="nav-link" href="/privacidade.html">Privacidade</a>
-  <a class="nav-link" href="/termos-de-uso.html">Termos</a>
   <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
 </div>
 
