@@ -66,7 +66,7 @@ function excerpt($text, $max = 200) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.2.0">
+<link rel="stylesheet" href="/css/style.css?v=1.3.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">

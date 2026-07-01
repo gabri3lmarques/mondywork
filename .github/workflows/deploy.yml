@@ -40,3 +40,5 @@ jobs:
           README.md
           env.txt
           config.local.php
+          br/
+          dev/
