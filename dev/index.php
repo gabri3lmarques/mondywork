@@ -73,7 +73,7 @@ endif;
 <title>Mondywork DEV | Vagas de Tecnologia, Design e Marketing</title>
 <meta name="description" content="[DEV] Ambiente de desenvolvimento para testar novas funcionalidades.">
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="../css/style.css?v=1.0.9">
+<link rel="stylesheet" href="../css/style.css?v=1.1.0">
 <link rel="icon" href="../img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="../img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../img/favicon/apple-touch-icon.png">
@@ -235,6 +235,13 @@ endif;
   gap: 24px;
 }
 </style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RPQ9FFFNP1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-RPQ9FFFNP1');
+</script>
 </head>
 <body>
 
@@ -360,19 +367,6 @@ endif;
     </div>
   </section>
 
-  <div style="text-align:center;margin:24px 0">
-<script>
-  atOptions = {
-    'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
-    'format' : 'iframe',
-    'height' : 90,
-    'width' : 728,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-</div>
-
   <section class="section">
     <div class="section-header">
       <h2 class="section-title">Vagas Recentes</h2>
@@ -450,32 +444,9 @@ endif;
       </button>
     </div>
     <div id="modal-body" class="modal-body"></div>
-    <div style="text-align:center;margin:12px 0;padding:0 16px">
-<script>
-  atOptions = {
-    'key' : '4ebf9218fca889c045c30ab6b62d4769',
-    'format' : 'iframe',
-    'height' : 50,
-    'width' : 320,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js"></script>
-    </div>
     <div class="modal-footer" id="modal-footer">
       <a id="modal-apply" href="#" target="_blank" class="modal-btn">Aplicar na Vaga</a>
     </div>
-  </div>
-</div>
-
-<div id="support-modal" class="support-modal-overlay hidden">
-  <div class="support-modal">
-    <button id="support-modal-close" class="support-modal-close" aria-label="Fechar">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <div class="support-modal-icon">💜</div>
-    <h2 class="support-modal-title">Ajude a manter esse projeto vivo</h2>
-    <p class="support-modal-text">Sempre que você acessar o site clique em uma propaganda. Não custa nada e nos ajuda a custear a estrutura que mantém esse projeto no ar.</p>
   </div>
 </div>
 
@@ -494,20 +465,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('cookie-banner').classList.remove('visible');
   });
 
-  var supportModal = document.getElementById('support-modal');
-  var supportClose = document.getElementById('support-modal-close');
-  var dismissed = localStorage.getItem('support_modal_dismissed');
-  var now = Date.now();
-  if (!dismissed || (now - parseInt(dismissed, 10)) > 86400000) {
-    supportModal.classList.remove('hidden');
-  }
-  supportClose.addEventListener('click', function() {
-    supportModal.classList.add('hidden');
-    localStorage.setItem('support_modal_dismissed', Date.now().toString());
-  });
+
 });
 </script>
 
-<script src="../js/app-dev.js?v=1.0.9"></script>
+<script src="../js/app-dev.js?v=1.1.0"></script>
 </body>
 </html>

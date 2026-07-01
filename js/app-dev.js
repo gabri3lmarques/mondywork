@@ -139,9 +139,7 @@
     });
 
     modalApply.addEventListener('click', function() {
-        setTimeout(function() {
-            window.open('https://www.effectivecpmnetwork.com/a6riiebvx?key=6d474f928643679d7d0ffd96e1acacfc', '_blank');
-        }, 1000);
+        // normal link behavior
     });
 
     if (newsletterForm) {

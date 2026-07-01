@@ -56,10 +56,11 @@ function excerpt($text, $max = 200) {
 <meta property="twitter:title" content="Blog | Mondywork — Career in Tech, Design & Marketing">
 <meta property="twitter:description" content="Articles about career, job market, interview tips and guides for Tech, Design, Marketing and Product professionals.">
 <meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
-<link rel="stylesheet" href="/css/style.css?v=1.0.9">
+<link rel="stylesheet" href="/css/style.css?v=1.1.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RPQ9FFFNP1"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
