@@ -226,6 +226,14 @@ gtag('config', 'G-RPQ9FFFNP1');
         <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
         <a href="/guia-de-carreira-marketing.html" class="guide-card-link">Ler guia &rarr;</a>
       </div>
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Guia de Carreira em Finanças</h3>
+        <p>Mercado financeiro, investimentos, finanças corporativas, certificações e estratégias para crescer na área financeira.</p>
+        <a href="/guia-de-carreira-financas.html" class="guide-card-link">Ler guia &rarr;</a>
+      </div>
     </div>
   </section>
 
@@ -333,6 +341,7 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="footer-link" href="/guia-de-carreira.html">Guia de Tecnologia</a>
       <a class="footer-link" href="/guia-de-carreira-design.html">Guia de Design</a>
       <a class="footer-link" href="/guia-de-carreira-marketing.html">Guia de Marketing</a>
+      <a class="footer-link" href="/guia-de-carreira-financas.html">Guia de Finanças</a>
       <a class="footer-link" href="/privacidade.html">Privacidade</a>
       <a class="footer-link" href="/termos-de-uso.html">Termos</a>
     </div>

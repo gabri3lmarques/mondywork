@@ -265,6 +265,7 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="footer-link" href="/guia-de-carreira.html">Guia de Tecnologia</a>
       <a class="footer-link" href="/guia-de-carreira-design.html">Guia de Design</a>
       <a class="footer-link" href="/guia-de-carreira-marketing.html">Guia de Marketing</a>
+      <a class="footer-link" href="/guia-de-carreira-financas.html">Guia de Finanças</a>
       <a class="footer-link" href="/privacidade.html">Privacidade</a>
       <a class="footer-link" href="/termos-de-uso.html">Termos</a>
     </div>
