@@ -37,15 +37,22 @@ try {
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $todasCategorias = $pdo->query("SELECT DISTINCT categoria FROM blog_posts WHERE status='publicado' AND categoria IS NOT NULL AND categoria != '' ORDER BY categoria")->fetchAll(PDO::FETCH_COLUMN);
+
+    $totalVagas = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE status='ativa'")->fetchColumn();
+    $totalArtigos = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts WHERE status='publicado'")->fetchColumn();
+    $empresas = (int)$pdo->query("SELECT COUNT(DISTINCT empresa) FROM vagas WHERE status='ativa'")->fetchColumn();
 } catch (Exception $e) {
     $posts = [];
     $total = 0;
     $totalPages = 1;
     $todasCategorias = [];
+    $totalVagas = 0;
+    $totalArtigos = 0;
+    $empresas = 0;
 }
 
 function esc($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
-function excerpt($text, $max = 200) {
+function excerpt($text, $max = 350) {
     if (mb_strlen($text) <= $max) return $text;
     return mb_substr($text, 0, $max) . '...';
 }
@@ -129,6 +136,31 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="hero-content">
       <h1 class="hero-title">Conteúdo para sua carreira</h1>
       <p class="hero-subtitle">Artigos, guias e dicas sobre carreira, mercado de trabalho e desenvolvimento profissional em Tecnologia, Design, Marketing e Produto.</p>
+      <div class="hero-description">
+        <p>O <strong>Mondywork</strong> é um portal independente que ajuda profissionais de tecnologia, design, marketing e produto a construírem carreiras de sucesso. Publicamos semanalmente artigos originais sobre planejamento profissional, preparação para entrevistas, desenvolvimento de habilidades, tendências do mercado e estratégias de crescimento.</p>
+        <p>Nosso compromisso é oferecer conteúdo prático e relevante, escrito por profissionais que vivem o dia a dia do mercado. Aqui você encontra desde guias completos sobre cada área de atuação até dicas objetivas para acelerar sua trajetória profissional.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-number"><?= number_format($totalVagas) ?>+</span>
+        <span class="stat-label">Vagas de emprego</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number"><?= $totalArtigos ?>+</span>
+        <span class="stat-label">Artigos publicados</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number"><?= number_format($empresas) ?>+</span>
+        <span class="stat-label">Empresas parceiras</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">4</span>
+        <span class="stat-label">Guias de carreira</span>
+      </div>
     </div>
   </section>
 
@@ -136,6 +168,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="section-header">
       <h2 class="section-title">Artigos Recentes</h2>
     </div>
+    <p class="section-description">Confira os artigos mais recentes do nosso blog. Abordamos carreira, mercado de trabalho, entrevistas, desenvolvimento profissional e tendências em tecnologia, design, marketing e produto.</p>
 
     <?php if (!empty($todasCategorias)): ?>
     <div class="cat-filter">
@@ -197,6 +230,34 @@ gtag('config', 'G-RPQ9FFFNP1');
     <?php endif; ?>
   </section>
 
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Como funciona</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3 class="step-title">Busque vagas</h3>
+        <p class="step-text">Pesquise por cargo, palavra-chave ou habilidade. Nossa busca inteligente encontra as melhores oportunidades para você em segundos, com correção ortográfica integrada.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3 class="step-title">Explore conteúdos</h3>
+        <p class="step-text">Leia artigos e guias sobre carreira, entrevistas e desenvolvimento profissional. Conteúdo original escrito por profissionais que entendem do mercado.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3 class="step-title">Candidate-se</h3>
+        <p class="step-text">Sem cadastro, sem burocracia. Clique na vaga e candidate-se diretamente no site da empresa. O Mondywork é 100% gratuito e não exige criação de conta.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <h3 class="step-title">Receba alertas</h3>
+        <p class="step-text">Cadastre seu e-mail na newsletter e receba as melhores oportunidades diretamente na sua caixa de entrada, filtradas pela sua área de interesse.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="section" style="padding-top:32px">
     <div class="section-header">
       <h2 class="section-title">Guias de Carreira</h2>
@@ -208,7 +269,9 @@ gtag('config', 'G-RPQ9FFFNP1');
         </div>
         <h3>Guia de Carreira em Tecnologia</h3>
         <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.</p>
-        <a href="/guia-de-carreira.html" class="guide-card-link">Ler guia &rarr;</a>
+        <p class="guide-card-desc">O guia mais completo para profissionais de tecnologia. Aborda desde a escolha da área de atuação (desenvolvimento, dados, infraestrutura, QA) até a preparação para entrevistas técnicas e planejamento de carreira a longo prazo. Inclui dicas de portfólio, LinkedIn e desenvolvimento de soft skills essenciais para o mercado de tecnologia.</p>
+        <a href="/guia-de-carreira.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div></a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
@@ -216,7 +279,9 @@ gtag('config', 'G-RPQ9FFFNP1');
         </div>
         <h3>Guia de Carreira em Design</h3>
         <p>UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.</p>
-        <a href="/guia-de-carreira-design.html" class="guide-card-link">Ler guia &rarr;</a>
+        <p class="guide-card-desc">Um guia completo para profissionais de design que desejam se destacar no mercado. Aborda UX/UI, Design Gráfico, Design de Produto e muito mais. Inclui dicas de construção de portfólio, ferramentas essenciais, preparação para entrevistas de design e estratégias de crescimento profissional na área criativa.</p>
+        <a href="/guia-de-carreira-design.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div></a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
@@ -224,7 +289,9 @@ gtag('config', 'G-RPQ9FFFNP1');
         </div>
         <h3>Guia de Carreira em Marketing</h3>
         <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
-        <a href="/guia-de-carreira-marketing.html" class="guide-card-link">Ler guia &rarr;</a>
+        <p class="guide-card-desc">O guia definitivo para profissionais de marketing digital. Cobre desde os fundamentos de SEO e Marketing de Conteúdo até estratégias avançadas de Mídia Paga e Growth. Inclui certificações recomendadas, ferramentas indispensáveis e um plano de carreira para cada etapa da sua jornada no marketing.</p>
+        <a href="/guia-de-carreira-marketing.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div></a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
@@ -232,7 +299,44 @@ gtag('config', 'G-RPQ9FFFNP1');
         </div>
         <h3>Guia de Carreira em Finanças</h3>
         <p>Mercado financeiro, investimentos, finanças corporativas, certificações e estratégias para crescer na área financeira.</p>
-        <a href="/guia-de-carreira-financas.html" class="guide-card-link">Ler guia &rarr;</a>
+        <p class="guide-card-desc">Aprenda tudo sobre carreira no mercado financeiro. Do currículo ideal às certificações mais valorizadas (CFA, CPA, ANCORD), passando por dicas de entrevistas em bancos e funds. Aborda finanças corporativas, investimentos, private equity e as tendências do setor financeiro no Brasil.</p>
+        <a href="/guia-de-carreira-financas.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Áreas que cobrimos</h2>
+    </div>
+    <div class="areas-grid">
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#4b41e1,#7c73f0)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <h3 class="area-title">Tecnologia</h3>
+        <p class="area-text">Desenvolvimento de software, ciência de dados, inteligência artificial, infraestrutura cloud, DevOps, cibersegurança e engenharia. A área com maior demanda e salários mais competitivos do mercado.</p>
+      </div>
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3 class="area-title">Design</h3>
+        <p class="area-text">UX/UI, Product Design, Design Gráfico, Motion Design e Design Thinking. Profissionais criativos que transformam ideias em experiências digitais memoráveis e funcionais.</p>
+      </div>
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M12 6v12"/></svg>
+        </div>
+        <h3 class="area-title">Marketing</h3>
+        <p class="area-text">Marketing Digital, SEO, Mídia Paga, Growth Hacking, Marketing de Conteúdo, Social Media e Branding. Estratégias baseadas em dados para impulsionar resultados e construir marcas.</p>
+      </div>
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3 class="area-title">Produto</h3>
+        <p class="area-text">Product Management, Product Ownership, Agile, Scrum e OKRs. Profissionais que conectam estratégia de negócios com execução técnica para entregar produtos digitais de alto valor.</p>
       </div>
     </div>
   </section>
@@ -320,6 +424,24 @@ gtag('config', 'G-RPQ9FFFNP1');
         <summary class="faq-question">Sou empresa. Como divulgar minhas vagas?</summary>
         <div class="faq-answer">
           <p>Entre em contato conosco através da página de <a href="/contato.html">Contato</a>. Estamos abertos a novas parcerias para conectar talentos às melhores oportunidades.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">O conteúdo do blog é gratuito?</summary>
+        <div class="faq-answer">
+          <p>Sim! Todo o conteúdo do blog Mondywork é 100% gratuito. Acreditamos que informação de qualidade sobre carreira e mercado de trabalho deve ser acessível a todos os profissionais.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">Como recebo notificações de novas vagas?</summary>
+        <div class="faq-answer">
+          <p>Cadastre seu nome, e-mail e área de interesse no formulário de newsletter disponível na página de vagas. Passaremos a enviar as melhores oportunidades diretamente para sua caixa de entrada.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question">Posso contribuir com o blog?</summary>
+        <div class="faq-answer">
+          <p>Sim! Aceitamos contribuições de profissionais que desejam compartilhar conhecimento sobre carreira, mercado de trabalho e desenvolvimento profissional. Entre em contato pela página de Contato para saber mais.</p>
         </div>
       </details>
     </div>

@@ -281,10 +281,197 @@ input { font-family: inherit; }
   text-wrap: balance;
 }
 
+.hero-description {
+  max-width: 40rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hero-description p {
+  font-size: 15px;
+  line-height: 24px;
+  color: #45464d;
+}
+
+.hero-description strong {
+  color: #4b41e1;
+}
+
+.section-description {
+  font-size: 15px;
+  line-height: 24px;
+  color: #45464d;
+  text-align: center;
+  max-width: 40rem;
+  margin: 0 auto 12px;
+}
+
 .hero-search {
   width: 100%;
   max-width: 64rem;
   margin-top: 16px;
+}
+
+/* ===== STATS SECTION ===== */
+.stats-section {
+  padding: 0 16px 48px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #f0eeff, #e8e6ff);
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: 800;
+  color: #4b41e1;
+  line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+  .stat-number { font-size: 36px; }
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #45464d;
+  font-weight: 500;
+}
+
+/* ===== STEPS / COMO FUNCIONA ===== */
+.steps-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    max-width: 56rem;
+  }
+}
+
+.step-card {
+  background: #fff;
+  border: 1px solid #e2e2ea;
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-number {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #4b41e1, #7c73f0);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.step-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.step-text {
+  font-size: 14px;
+  line-height: 22px;
+  color: #45464d;
+}
+
+/* ===== GUIDE CARDS ===== */
+.guide-card-desc {
+  font-size: 13px;
+  line-height: 20px;
+  color: #45464d;
+}
+
+/* ===== AREAS QUE COBRIMOS ===== */
+.areas-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .areas-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 56rem;
+  }
+}
+
+.area-card {
+  background: #fff;
+  border: 1px solid #e2e2ea;
+  border-radius: 16px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.area-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.area-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.area-text {
+  font-size: 14px;
+  line-height: 22px;
+  color: #45464d;
 }
 
 /* ===== SEARCH MODE TOGGLE (radio buttons) ===== */
@@ -1505,6 +1692,12 @@ input { font-family: inherit; }
   .hero-title { font-size: 28px; line-height: 36px; }
   .hero { padding: 48px 16px; margin-bottom: 48px; }
   .hero-content { gap: 24px; }
+  .hero-description p { font-size: 14px; line-height: 22px; }
+  .section-description { font-size: 14px; line-height: 22px; }
+  .stat-number { font-size: 24px; }
+  .stats-section { padding: 0 16px 32px; }
+  .step-card { padding: 24px 20px; }
+  .area-card { padding: 24px 20px; }
   .section-title { font-size: 24px; line-height: 32px; }
   .job-card { padding: 20px; }
   .job-card-title { font-size: 20px; line-height: 28px; }
