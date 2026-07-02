@@ -62,19 +62,19 @@ function excerpt($text, $max = 350) {
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Mondywork | Carreira em Tecnologia, Design e Marketing</title>
-<meta name="description" content="Artigos e guias sobre carreira, mercado de trabalho, dicas de entrevista e desenvolvimento profissional para quem trabalha com Tecnologia, Design, Marketing e Produto.">
+<meta name="description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
 <link rel="canonical" href="https://mondywork.com/">
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mondywork.com/">
 <meta property="og:title" content="Mondywork | Carreira em Tecnologia, Design e Marketing">
-<meta property="og:description" content="Artigos e guias sobre carreira, mercado de trabalho, dicas de entrevista e desenvolvimento profissional para quem trabalha com Tecnologia, Design, Marketing e Produto.">
+<meta property="og:description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
 <meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://mondywork.com/">
 <meta property="twitter:title" content="Mondywork | Carreira em Tecnologia, Design e Marketing">
-<meta property="twitter:description" content="Artigos e guias sobre carreira, mercado de trabalho, dicas de entrevista e desenvolvimento profissional para quem trabalha com Tecnologia, Design, Marketing e Produto.">
+<meta property="twitter:description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
 <script type="application/ld+json">
 {
@@ -135,7 +135,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="hero-decor hero-decor-2"></div>
     <div class="hero-content">
       <h1 class="hero-title">Conteúdo para sua carreira</h1>
-      <p class="hero-subtitle">Artigos, guias e dicas sobre carreira, mercado de trabalho e desenvolvimento profissional em Tecnologia, Design, Marketing e Produto.</p>
+      <p class="hero-subtitle">Artigos, guias e dicas sobre carreira, mercado de trabalho e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.</p>
           </div>
   </section>
 
@@ -456,7 +456,7 @@ gtag('config', 'G-RPQ9FFFNP1');
       <details class="faq-item">
         <summary class="faq-question">O que é o Mondywork?</summary>
         <div class="faq-answer">
-          <p>É um portal que conecta profissionais às melhores oportunidades de trabalho em Tecnologia, Design, Marketing e Produto. Combinamos um blog com conteúdo original sobre carreira com uma plataforma de vagas que reúne diariamente centenas de oportunidades em todo o Brasil.</p>
+          <p>É um portal que conecta profissionais às melhores oportunidades de trabalho em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto. Combinamos um blog com conteúdo original sobre carreira com uma plataforma de vagas que reúne diariamente centenas de oportunidades em todo o Brasil.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -474,7 +474,7 @@ gtag('config', 'G-RPQ9FFFNP1');
       <details class="faq-item">
         <summary class="faq-question">Como as vagas são categorizadas?</summary>
         <div class="faq-answer">
-          <p>Classificamos automaticamente as oportunidades por área de atuação (Tecnologia, Design, Marketing, Produto) para facilitar sua busca. Você também pode pesquisar por cargo, palavra-chave ou habilidade.</p>
+          <p>Classificamos automaticamente as oportunidades por área de atuação (Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados, Produto) para facilitar sua busca. Você também pode pesquisar por cargo, palavra-chave ou habilidade.</p>
         </div>
       </details>
       <details class="faq-item">
