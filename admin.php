@@ -945,7 +945,8 @@ try {
       </div>
       <div>
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo</label>
-        <textarea name="excerpt" class="admin-search-input" style="width:100%;min-height:80px;resize:vertical" placeholder="Resumo curto do post..."><?php echo htmlspecialchars($post['excerpt'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+        <textarea name="excerpt" class="admin-search-input" id="excerpt-counter" style="width:100%;min-height:80px;resize:vertical" placeholder="Resumo curto do post..." oninput="document.getElementById('excerpt-count').textContent=this.value.length"><?php echo htmlspecialchars($post['excerpt'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+        <div style="font-size:12px;color:#76777d;margin-top:4px;text-align:right"><span id="excerpt-count"><?php echo mb_strlen($post['excerpt'] ?? '') ?></span> caracteres</div>
       </div>
       <div>
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Conteúdo — HTML</label>
