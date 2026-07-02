@@ -61,19 +61,19 @@ function excerpt($text, $max = 350) {
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Mondywork | Carreira em Tecnologia, Design e Marketing</title>
+<title>Mondywork | Carreira em Tecnologia, Design, Marketing e mais</title>
 <meta name="description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
 <link rel="canonical" href="https://mondywork.com/">
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mondywork.com/">
-<meta property="og:title" content="Mondywork | Carreira em Tecnologia, Design e Marketing">
+<meta property="og:title" content="Mondywork | Carreira em Tecnologia, Design, Marketing e mais">
 <meta property="og:description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
 <meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://mondywork.com/">
-<meta property="twitter:title" content="Mondywork | Carreira em Tecnologia, Design e Marketing">
+<meta property="twitter:title" content="Mondywork | Carreira em Tecnologia, Design, Marketing e mais">
 <meta property="twitter:description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
 <script type="application/ld+json">

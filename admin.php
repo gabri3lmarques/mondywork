@@ -899,12 +899,29 @@ try {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Título</label>
-          <input type="text" name="title" required class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($post['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+          <input type="text" name="title" id="post-title" required class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($post['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" oninput="autoSlug(this.value)">
         </div>
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Slug (URL)</label>
-          <input type="text" name="slug" class="admin-search-input" style="width:100%" placeholder="ex: como-conseguir-emprego" value="<?php echo htmlspecialchars($post['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+          <input type="text" name="slug" id="post-slug" class="admin-search-input" style="width:100%" placeholder="ex: como-conseguir-emprego" value="<?php echo htmlspecialchars($post['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
         </div>
+        <script>
+        var slugEdited = false;
+        document.getElementById('post-slug').addEventListener('input', function() { slugEdited = true; });
+        function autoSlug(title) {
+          if (slugEdited) return;
+          document.getElementById('post-slug').value = title
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        }
+        <?php if (empty($post['slug'])): ?>
+        slugEdited = false;
+        <?php else: ?>
+        slugEdited = true;
+        <?php endif; ?>
+        </script>
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Autor</label>
           <input type="text" name="author" class="admin-search-input" style="width:100%" value="<?php echo htmlspecialchars($post['author'] ?? 'Mondywork', ENT_QUOTES, 'UTF-8') ?>">
@@ -937,7 +954,7 @@ try {
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Categoria</label>
           <select name="categoria" class="admin-search-input" style="width:100%">
             <option value="">Sem categoria</option>
-            <?php foreach (['Carreira','Tecnologia','Design','Marketing','Produto','Mercado de Trabalho','Dicas'] as $cat): ?>
+            <?php foreach (['Carreira','Tecnologia','Design','Marketing','Produto','Comunicacao','Administracao','Financas','Dados','Mercado de Trabalho','Dicas'] as $cat): ?>
               <option value="<?php echo $cat ?>" <?php echo ($post['categoria'] ?? '') === $cat ? 'selected' : '' ?>><?php echo $cat ?></option>
             <?php endforeach; ?>
           </select>
