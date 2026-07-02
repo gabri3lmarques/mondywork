@@ -161,7 +161,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <span class="stat-label">Empresas parceiras</span>
       </div>
       <div class="stat-card">
-        <span class="stat-number">7</span>
+        <span class="stat-number">8</span>
         <span class="stat-label">Guias de carreira</span>
       </div>
     </div>
@@ -328,6 +328,15 @@ gtag('config', 'G-RPQ9FFFNP1');
         <p>Ciencia de Dados, Engenharia de Dados, BI, Machine Learning e IA. Da formacao ao mercado.</p>
         <p class="guide-card-desc">O guia completo para profissionais de dados. Aborda Ciencia de Dados, Engenharia de Dados, Analise de Dados, Business Intelligence, Machine Learning e Inteligencia Artificial. Inclui roadmap de aprendizagem, ferramentas essenciais (Python, SQL, Spark), portfolios de dados, preparacao para entrevistas tecnicas e plano de carreira na area de dados.</p>
         <a href="/guia-de-carreira-dados.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div>
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Guia de Carreira em Produto</h3>
+        <p>Product Management, Product Ownership, Agile, Scrum e OKRs. Da estrategia a execucao.</p>
+        <p class="guide-card-desc">O guia essencial para profissionais de produto. Aborda Product Management, Product Ownership, metodologias Ageis (Scrum, Kanban), OKRs, descoberta de produto, priorizacao, analise de metricas e lideranca de produto. Inclui certificacoes (CSPO, PSPO), ferramentas (Jira, Notion, Amplitude) e plano de carreira de PM a CPO.</p>
+        <a href="/guia-de-carreira-produto.html" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
   </section>
 
