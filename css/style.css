@@ -1132,10 +1132,22 @@ input { font-family: inherit; }
 
 .testimonial-author {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
   font-size: 13px;
   color: #0b1c30;
+}
+
+.testimonial-author-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.testimonial-role {
+  color: #4b41e1;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .testimonial-linkedin {
