@@ -82,7 +82,7 @@ function excerpt($text, $max = 350) {
   "@type": "WebSite",
   "name": "Mondywork",
   "url": "https://mondywork.com/",
-  "description": "Conteúdo sobre carreira em tecnologia, design, marketing e produto.",
+  "description": "Conteúdo sobre carreira em tecnologia, design, marketing, comunicacao, administracao, financas, dados e produto.",
   "inLanguage": "pt-BR"
 }
 </script>
@@ -171,7 +171,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="section-header">
       <h2 class="section-title">Artigos Recentes</h2>
     </div>
-    <p class="section-description">Confira os artigos mais recentes do nosso blog. Abordamos carreira, mercado de trabalho, entrevistas, desenvolvimento profissional e tendências em tecnologia, design, marketing e produto.</p>
+    <p class="section-description">Confira os artigos mais recentes do nosso blog. Abordamos carreira, mercado de trabalho, entrevistas, desenvolvimento profissional e tendências em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.</p>
 
     <?php if (!empty($todasCategorias)): ?>
     <div class="cat-filter">
