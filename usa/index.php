@@ -64,25 +64,25 @@ function capitalizeTitle($str) {
 <title>Mondywork | Tech, Design & Marketing Jobs in USA & worldwide (Remote & On-site)</title>
 <meta name="description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
 <?php if ($filterModelo): ?><meta name="robots" content="noindex,follow"><?php endif; ?>
-<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/">
-<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/">
-<link rel="canonical" href="https://mondywork.com.br/usa/">
+<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/">
+<link rel="alternate" hreflang="en" href="https://mondywork.com/usa/">
+<link rel="canonical" href="https://mondywork.com/usa/">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://mondywork.com.br/usa/">
+<meta property="og:url" content="https://mondywork.com/usa/">
 <meta property="og:title" content="Mondywork | Tech, Design & Marketing Jobs in USA">
 <meta property="og:description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
-<meta property="og:image" content="https://mondywork.com.br/img/og-image-usa.jpg">
+<meta property="og:image" content="https://mondywork.com/img/og-image-usa.jpg">
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://mondywork.com.br/usa/">
+<meta property="twitter:url" content="https://mondywork.com/usa/">
 <meta property="twitter:title" content="Mondywork | Tech, Design & Marketing Jobs in USA">
 <meta property="twitter:description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
-<meta property="twitter:image" content="https://mondywork.com.br/img/og-image-usa.jpg">
+<meta property="twitter:image" content="https://mondywork.com/img/og-image-usa.jpg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Mondywork",
-  "url": "https://mondywork.com.br/usa/",
+  "url": "https://mondywork.com/usa/",
   "description": "Tech, design, marketing and product job board.",
   "inLanguage": "en"
 }

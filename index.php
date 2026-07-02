@@ -56,25 +56,25 @@ function excerpt($text, $max = 200) {
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Mondywork | Carreira em Tecnologia, Design e Marketing</title>
 <meta name="description" content="Artigos e guias sobre carreira, mercado de trabalho, dicas de entrevista e desenvolvimento profissional para quem trabalha com Tecnologia, Design, Marketing e Produto.">
-<link rel="canonical" href="https://mondywork.com.br/">
-<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/">
-<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/">
+<link rel="canonical" href="https://mondywork.com/">
+<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/">
+<link rel="alternate" hreflang="en" href="https://mondywork.com/usa/">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://mondywork.com.br/">
+<meta property="og:url" content="https://mondywork.com/">
 <meta property="og:title" content="Mondywork | Carreira em Tecnologia, Design e Marketing">
 <meta property="og:description" content="Artigos e guias sobre carreira, mercado de trabalho, dicas de entrevista e desenvolvimento profissional para quem trabalha com Tecnologia, Design, Marketing e Produto.">
-<meta property="og:image" content="https://mondywork.com.br/img/og-image.jpg">
+<meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://mondywork.com.br/">
+<meta property="twitter:url" content="https://mondywork.com/">
 <meta property="twitter:title" content="Mondywork | Carreira em Tecnologia, Design e Marketing">
 <meta property="twitter:description" content="Artigos e guias sobre carreira, mercado de trabalho, dicas de entrevista e desenvolvimento profissional para quem trabalha com Tecnologia, Design, Marketing e Produto.">
-<meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
+<meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Mondywork",
-  "url": "https://mondywork.com.br/",
+  "url": "https://mondywork.com/",
   "description": "Conteúdo sobre carreira em tecnologia, design, marketing e produto.",
   "inLanguage": "pt-BR"
 }

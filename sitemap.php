@@ -32,91 +32,91 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://mondywork.com.br/</loc>
+    <loc>https://mondywork.com/</loc>
     <lastmod><?= getLastmod('index.php') ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/vagas/</loc>
+    <loc>https://mondywork.com/vagas/</loc>
     <lastmod><?= getLastmod('vagas/index.php') ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/usa/</loc>
+    <loc>https://mondywork.com/usa/</loc>
     <lastmod><?= getLastmod('usa/index.php') ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/sobre.html</loc>
+    <loc>https://mondywork.com/sobre.html</loc>
     <lastmod><?= getLastmod('sobre.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/contato.html</loc>
+    <loc>https://mondywork.com/contato.html</loc>
     <lastmod><?= getLastmod('contato.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/privacidade.html</loc>
+    <loc>https://mondywork.com/privacidade.html</loc>
     <lastmod><?= getLastmod('privacidade.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/termos-de-uso.html</loc>
+    <loc>https://mondywork.com/termos-de-uso.html</loc>
     <lastmod><?= getLastmod('termos-de-uso.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/guia-de-carreira.html</loc>
+    <loc>https://mondywork.com/guia-de-carreira.html</loc>
     <lastmod><?= getLastmod('guia-de-carreira.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/guia-de-carreira-design.html</loc>
+    <loc>https://mondywork.com/guia-de-carreira-design.html</loc>
     <lastmod><?= getLastmod('guia-de-carreira-design.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/guia-de-carreira-marketing.html</loc>
+    <loc>https://mondywork.com/guia-de-carreira-marketing.html</loc>
     <lastmod><?= getLastmod('guia-de-carreira-marketing.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/guia-de-carreira-financas.html</loc>
+    <loc>https://mondywork.com/guia-de-carreira-financas.html</loc>
     <lastmod><?= getLastmod('guia-de-carreira-financas.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/usa/about.html</loc>
+    <loc>https://mondywork.com/usa/about.html</loc>
     <lastmod><?= getLastmod('usa/about.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/usa/contact.html</loc>
+    <loc>https://mondywork.com/usa/contact.html</loc>
     <lastmod><?= getLastmod('usa/contact.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/usa/privacy.html</loc>
+    <loc>https://mondywork.com/usa/privacy.html</loc>
     <lastmod><?= getLastmod('usa/privacy.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mondywork.com.br/usa/terms.html</loc>
+    <loc>https://mondywork.com/usa/terms.html</loc>
     <lastmod><?= getLastmod('usa/terms.html') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
@@ -125,7 +125,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $blogLastmod = $b['published_at'] ? date('Y-m-d', strtotime($b['published_at'])) : date('Y-m-d');
 ?>
   <url>
-    <loc>https://mondywork.com.br/blog/<?= htmlspecialchars($b['slug'], ENT_XML1, 'UTF-8') ?></loc>
+    <loc>https://mondywork.com/blog/<?= htmlspecialchars($b['slug'], ENT_XML1, 'UTF-8') ?></loc>
     <lastmod><?= $blogLastmod ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -133,7 +133,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 <?php endforeach; ?>
 <?php foreach ($vagas as $v):
     $lastmod = $v['publicado_em'] ? date('Y-m-d', strtotime($v['publicado_em'])) : date('Y-m-d');
-    $baseUrl = $v['origem'] === 'exterior' ? 'https://mondywork.com.br/usa/vaga/' : 'https://mondywork.com.br/vaga/';
+    $baseUrl = $v['origem'] === 'exterior' ? 'https://mondywork.com/usa/vaga/' : 'https://mondywork.com/vaga/';
 ?>
   <url>
     <loc><?= $baseUrl . htmlspecialchars($v['vaga_id_externo'], ENT_XML1, 'UTF-8') ?></loc>

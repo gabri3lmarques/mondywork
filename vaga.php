@@ -63,7 +63,7 @@ $isExterior = ($vaga ? $vaga['origem'] : 'nacional') === 'exterior';
 if ($vaga) {
     $pageTitle = $vaga['titulo'] . ' na ' . $vaga['empresa'] . ' | Mondywork';
     $pageDesc = $vaga['resumo'] ?: 'Vaga de ' . $vaga['titulo'] . ' na ' . $vaga['empresa'] . '. ' . ($vaga['localizacao'] ?: 'Remoto') . '.';
-    $ogUrl = 'https://mondywork.com.br/vaga/' . urlencode($vaga['vaga_id_externo']);
+    $ogUrl = 'https://mondywork.com/vaga/' . urlencode($vaga['vaga_id_externo']);
     $canonical = $ogUrl;
 
     $modeloLabel = $vaga['modelo_trabalho'] ? formatModelo($vaga['modelo_trabalho']) : null;
@@ -119,14 +119,14 @@ if ($vaga) {
 <meta property="og:url" content="<?= esc($ogUrl) ?>">
 <meta property="og:title" content="<?= esc($pageTitle) ?>">
 <meta property="og:description" content="<?= esc($pageDesc) ?>">
-<meta property="og:image" content="https://mondywork.com.br/img/og-image.jpg">
+<meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="<?= esc($ogUrl) ?>">
 <meta property="twitter:title" content="<?= esc($pageTitle) ?>">
 <meta property="twitter:description" content="<?= esc($pageDesc) ?>">
-<meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
+<meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
 <?php if ($vaga): ?>
 <meta property="article:published_time" content="<?= esc(date('c', strtotime($vaga['publicado_em']))) ?>">
 <?php if (!empty($categorias)): ?>
@@ -140,7 +140,7 @@ if ($vaga) {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Mondywork", "item": "https://mondywork.com.br/" },
+    { "@type": "ListItem", "position": 1, "name": "Mondywork", "item": "https://mondywork.com/" },
     { "@type": "ListItem", "position": 2, "name": "<?= esc($vaga['titulo']) ?>", "item": "<?= esc($ogUrl) ?>" }
   ]
 }
@@ -151,8 +151,8 @@ if ($vaga) {
 <meta name="robots" content="noindex">
 <?php endif; ?>
 <?php if ($vaga): ?>
-<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
-<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
+<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
+<link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
 <link rel="stylesheet" href="/css/style.css?v=1.5.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">

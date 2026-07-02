@@ -69,25 +69,25 @@ function capitalizeTitle($str) {
 <title>Vagas de Tecnologia, Design e Marketing | Mondywork</title>
 <meta name="description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto. Oportunidades atualizadas diariamente em todo o Brasil.">
 <?php if ($filterModelo): ?><meta name="robots" content="noindex,follow"><?php endif; ?>
-<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com.br/vagas/">
-<link rel="alternate" hreflang="en" href="https://mondywork.com.br/usa/">
-<link rel="canonical" href="https://mondywork.com.br/vagas/">
+<link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vagas/">
+<link rel="alternate" hreflang="en" href="https://mondywork.com/usa/">
+<link rel="canonical" href="https://mondywork.com/vagas/">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://mondywork.com.br/vagas/">
+<meta property="og:url" content="https://mondywork.com/vagas/">
 <meta property="og:title" content="Vagas de Tecnologia, Design e Marketing | Mondywork">
 <meta property="og:description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto em todo o Brasil.">
-<meta property="og:image" content="https://mondywork.com.br/img/og-image.jpg">
+<meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://mondywork.com.br/vagas/">
+<meta property="twitter:url" content="https://mondywork.com/vagas/">
 <meta property="twitter:title" content="Vagas de Tecnologia, Design e Marketing | Mondywork">
 <meta property="twitter:description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto em todo o Brasil.">
-<meta property="twitter:image" content="https://mondywork.com.br/img/og-image.jpg">
+<meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Mondywork",
-  "url": "https://mondywork.com.br/vagas/",
+  "url": "https://mondywork.com/vagas/",
   "description": "Portal de vagas de tecnologia, design, marketing e produto.",
   "inLanguage": "pt-BR"
 }
