@@ -95,6 +95,18 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     <loc>https://mondywork.com/guia-de-carreira-financas.html</loc>
     <lastmod><?= getLastmod('guia-de-carreira-financas.html') ?></lastmod>
     <changefreq>monthly</changefreq>
+
+    <loc>https://mondywork.com/guia-de-carreira-dados.html</loc>
+    <lastmod><?= getLastmod('guia-de-carreira-dados.html') ?></lastmod>
+    <changefreq>monthly</changefreq>
+
+    <loc>https://mondywork.com/guia-de-carreira-comunicacao.html</loc>
+    <lastmod><?= getLastmod('guia-de-carreira-comunicacao.html') ?></lastmod>
+    <changefreq>monthly</changefreq>
+
+    <loc>https://mondywork.com/guia-de-carreira-administracao.html</loc>
+    <lastmod><?= getLastmod('guia-de-carreira-administracao.html') ?></lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>

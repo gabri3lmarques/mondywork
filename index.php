@@ -136,10 +136,13 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="hero-content">
       <h1 class="hero-title">Conteúdo para sua carreira</h1>
       <p class="hero-subtitle">Artigos, guias e dicas sobre carreira, mercado de trabalho e desenvolvimento profissional em Tecnologia, Design, Marketing e Produto.</p>
-      <div class="hero-description">
-        <p>O <strong>Mondywork</strong> é um portal independente que ajuda profissionais de tecnologia, design, marketing e produto a construírem carreiras de sucesso. Publicamos semanalmente artigos originais sobre planejamento profissional, preparação para entrevistas, desenvolvimento de habilidades, tendências do mercado e estratégias de crescimento.</p>
-        <p>Nosso compromisso é oferecer conteúdo prático e relevante, escrito por profissionais que vivem o dia a dia do mercado. Aqui você encontra desde guias completos sobre cada área de atuação até dicas objetivas para acelerar sua trajetória profissional.</p>
-      </div>
+          </div>
+  </section>
+
+  <section class="about-section">
+    <div class="about-content">
+      <p>O <strong>Mondywork</strong> é um portal independente que ajuda profissionais de tecnologia, design, marketing e produto a construírem carreiras de sucesso. Publicamos semanalmente artigos originais sobre planejamento profissional, preparação para entrevistas, desenvolvimento de habilidades, tendências do mercado e estratégias de crescimento.</p>
+      <p>Nosso compromisso é oferecer conteúdo prático e relevante, escrito por profissionais que vivem o dia a dia do mercado. Aqui você encontra desde guias completos sobre cada área de atuação até dicas objetivas para acelerar sua trajetória profissional.</p>
     </div>
   </section>
 
@@ -158,7 +161,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <span class="stat-label">Empresas parceiras</span>
       </div>
       <div class="stat-card">
-        <span class="stat-number">4</span>
+        <span class="stat-number">7</span>
         <span class="stat-label">Guias de carreira</span>
       </div>
     </div>
@@ -258,7 +261,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
-  <section class="section" style="padding-top:32px">
+  <section class="section">
     <div class="section-header">
       <h2 class="section-title">Guias de Carreira</h2>
     </div>
@@ -271,7 +274,6 @@ gtag('config', 'G-RPQ9FFFNP1');
         <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.</p>
         <p class="guide-card-desc">O guia mais completo para profissionais de tecnologia. Aborda desde a escolha da área de atuação (desenvolvimento, dados, infraestrutura, QA) até a preparação para entrevistas técnicas e planejamento de carreira a longo prazo. Inclui dicas de portfólio, LinkedIn e desenvolvimento de soft skills essenciais para o mercado de tecnologia.</p>
         <a href="/guia-de-carreira.html" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div></a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
@@ -281,7 +283,6 @@ gtag('config', 'G-RPQ9FFFNP1');
         <p>UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.</p>
         <p class="guide-card-desc">Um guia completo para profissionais de design que desejam se destacar no mercado. Aborda UX/UI, Design Gráfico, Design de Produto e muito mais. Inclui dicas de construção de portfólio, ferramentas essenciais, preparação para entrevistas de design e estratégias de crescimento profissional na área criativa.</p>
         <a href="/guia-de-carreira-design.html" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div></a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
@@ -291,7 +292,6 @@ gtag('config', 'G-RPQ9FFFNP1');
         <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
         <p class="guide-card-desc">O guia definitivo para profissionais de marketing digital. Cobre desde os fundamentos de SEO e Marketing de Conteúdo até estratégias avançadas de Mídia Paga e Growth. Inclui certificações recomendadas, ferramentas indispensáveis e um plano de carreira para cada etapa da sua jornada no marketing.</p>
         <a href="/guia-de-carreira-marketing.html" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div></a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
@@ -302,7 +302,33 @@ gtag('config', 'G-RPQ9FFFNP1');
         <p class="guide-card-desc">Aprenda tudo sobre carreira no mercado financeiro. Do currículo ideal às certificações mais valorizadas (CFA, CPA, ANCORD), passando por dicas de entrevistas em bancos e funds. Aborda finanças corporativas, investimentos, private equity e as tendências do setor financeiro no Brasil.</p>
         <a href="/guia-de-carreira-financas.html" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
-    </div>
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon" style="background:linear-gradient(135deg,#e11d48,#fb7185)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Guia de Carreira em Comunicacao</h3>
+        <p>Jornalismo, RP, Comunicacao Corporativa, Marketing de Conteudo e Producao Multimidia.</p>
+        <p class="guide-card-desc">Um guia completo para profissionais de comunicacao. Aborda desde Jornalismo e Comunicacao Corporativa ate Marketing de Conteudo e Producao Multimidia. Inclui dicas de portfolio, ferramentas essenciais, preparacao para entrevistas e estrategias de crescimento na area.</p>
+        <a href="/guia-de-carreira-comunicacao.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div>
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3>Guia de Carreira em Administracao</h3>
+        <p>Gestao de Empresas, RH, Logistica, Consultoria, Gestao de Projetos e Empreendedorismo.</p>
+        <p class="guide-card-desc">Aprenda tudo sobre carreira em administracao. Do currículo ideal as certificacoes mais valorizadas (PMP, CPA, Six Sigma), passando por dicas de entrevistas em consultorias e grandes empresas. Aborda gestao de pessoas, financas, operacoes e estrategia.</p>
+        <a href="/guia-de-carreira-administracao.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div>
+      <div class="guide-card guide-card--primary">
+        <div class="guide-card-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <h3>Guia de Carreira em Dados</h3>
+        <p>Ciencia de Dados, Engenharia de Dados, BI, Machine Learning e IA. Da formacao ao mercado.</p>
+        <p class="guide-card-desc">O guia completo para profissionais de dados. Aborda Ciencia de Dados, Engenharia de Dados, Analise de Dados, Business Intelligence, Machine Learning e Inteligencia Artificial. Inclui roadmap de aprendizagem, ferramentas essenciais (Python, SQL, Spark), portfolios de dados, preparacao para entrevistas tecnicas e plano de carreira na area de dados.</p>
+        <a href="/guia-de-carreira-dados.html" class="guide-card-link">Ler guia completo &rarr;</a>
+      </div>
   </section>
 
   <section class="section">
@@ -338,10 +364,38 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3 class="area-title">Produto</h3>
         <p class="area-text">Product Management, Product Ownership, Agile, Scrum e OKRs. Profissionais que conectam estratégia de negócios com execução técnica para entregar produtos digitais de alto valor.</p>
       </div>
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#e11d48,#fb7185)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3 class="area-title">Comunicacao</h3>
+        <p class="area-text">Jornalismo, Comunicacao Corporativa, Relacoes Publicas, Marketing de Conteudo, Producao Multimidia e Social Media. Profissionais que dominam a arte de contar historias e construir reputacao em um mundo multicanal.</p>
+      </div>
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3 class="area-title">Administracao</h3>
+        <p class="area-text">Gestao de Pessoas, Financas, Operacoes, Logistica, Consultoria e Gestao de Projetos. Profissionais que planejam, organizam e lideram recursos para alcancar resultados estrategicos.</p>
+      </div>
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3 class="area-title">Financas</h3>
+        <p class="area-text">Mercado Financeiro, Investimentos, Financas Corporativas, Contabilidade e Compliance. Profissionais que gerem recursos, analisam riscos e impulsionam a saude financeira das organizacoes.</p>
+      </div>
+      <div class="area-card">
+        <div class="area-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <h3 class="area-title">Dados</h3>
+        <p class="area-text">Ciencia de Dados, Engenharia de Dados, Analise de Dados, Business Intelligence, Machine Learning e IA. Profissionais que transformam dados brutos em insights estrategicos que orientam decisoes de negocios.</p>
+      </div>
     </div>
   </section>
 
-  <section class="section" style="padding-top:32px">
+  <section class="section">
     <div class="section-header">
       <h2 class="section-title">Quem usa recomenda</h2>
     </div>
@@ -385,7 +439,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
-  <section class="section" style="padding-top:32px">
+  <section class="section">
     <div class="section-header">
       <h2 class="section-title">Perguntas Frequentes</h2>
     </div>
@@ -463,6 +517,8 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="footer-link" href="/guia-de-carreira.html">Guia de Tecnologia</a>
       <a class="footer-link" href="/guia-de-carreira-design.html">Guia de Design</a>
       <a class="footer-link" href="/guia-de-carreira-marketing.html">Guia de Marketing</a>
+      <a class="footer-link" href="/guia-de-carreira-comunicacao.html">Guia de Comunicacao</a>
+      <a class="footer-link" href="/guia-de-carreira-administracao.html">Guia de Administracao</a>
       <a class="footer-link" href="/guia-de-carreira-financas.html">Guia de Finanças</a>
       <a class="footer-link" href="/privacidade.html">Privacidade</a>
       <a class="footer-link" href="/termos-de-uso.html">Termos</a>
