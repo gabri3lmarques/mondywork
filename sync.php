@@ -47,7 +47,9 @@ try {
     $pdo = conectarBanco($dbConfig);
     setupSchema($pdo);
 
-    $ch = curl_init();
+    define('MAX_DIAS_VAGA', 45);
+
+$ch = curl_init();
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_SSL_VERIFYPEER => false,
@@ -77,6 +79,14 @@ try {
         if ($afetadas > 0) {
             echo "[ORFAOS] $afetadas vagas inativadas (empresa fora do escopo).\n";
         }
+    }
+
+    // ── Inativar vagas ativas com mais de MAX_DIAS_VAGA dias ──
+    $stmtOld = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE status = 'ativa' AND publicado_em IS NOT NULL AND publicado_em < DATE_SUB(NOW(), INTERVAL ? DAY)");
+    $stmtOld->execute([MAX_DIAS_VAGA]);
+    $oldAffected = $stmtOld->rowCount();
+    if ($oldAffected > 0) {
+        echo "[ANTIGAS] $oldAffected vagas inativadas (mais de " . MAX_DIAS_VAGA . " dias).\n";
     }
 
     // ── Remove empresas ignoradas ──
@@ -211,8 +221,8 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                 }
 
                 $publicadoLista = $vaga['publishedAt'] ?? ($vaga['data']['publishedAt'] ?? null);
-                if ($publicadoLista !== null && strtotime($publicadoLista) < strtotime('-90 days')) {
-                    echo " - [IGNORADA] $titulo (mais de 90 dias)\n";
+                if ($publicadoLista !== null && strtotime($publicadoLista) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                    echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
                     continue;
                 }
 
@@ -234,8 +244,8 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                 $modeloTrabalho = $detalhe['workplaceType'] ?? ($detalhe['data']['workplaceType'] ?? null);
                 $publicadoEm = isset($detalhe['publishedAt']) ? date('Y-m-d H:i:s', strtotime($detalhe['publishedAt'])) : (isset($detalhe['data']['publishedAt']) ? date('Y-m-d H:i:s', strtotime($detalhe['data']['publishedAt'])) : null);
 
-                if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-90 days')) {
-                    echo " - [IGNORADA] $titulo (mais de 90 dias)\n";
+                if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                    echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
                     continue;
                 }
 
@@ -390,6 +400,11 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
                 ? date('Y-m-d H:i:s', strtotime($detalhe['publishedDate']))
                 : null;
 
+            if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
+                continue;
+            }
+
             upsertVaga($pdo, [
                 'vaga_id_externo' => $jobIdPrefixed,
                 'titulo'          => $titulo,
@@ -468,6 +483,11 @@ function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string
             $publicadoEm = isset($vaga['first_published'])
                 ? date('Y-m-d H:i:s', strtotime($vaga['first_published']))
                 : null;
+
+            if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
+                continue;
+            }
 
             $descricao = html_entity_decode($vaga['content'] ?? 'Descricao nao fornecida.', ENT_QUOTES, 'UTF-8');
             $resumo = extrairResumo($descricao);
@@ -611,6 +631,11 @@ function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
             $publicadoEm = isset($publicacao['startDate'])
                 ? date('Y-m-d H:i:s', strtotime($publicacao['startDate']))
                 : null;
+
+            if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
+                continue;
+            }
 
             $modelos = $vaga['vacancy']['jobModel'] ?? [];
             $modeloTrabalho = null;
