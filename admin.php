@@ -248,7 +248,7 @@ if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && i
         }
         $categoria = trim($_POST['categoria'] ?? '');
         if (isset($_POST['id']) && $_POST['id']) {
-            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status WHERE id=:id");
+            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status, published_at=IF(:status='publicado' AND published_at IS NULL, NOW(), published_at) WHERE id=:id");
             $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':id' => (int)$_POST['id']]);
             $blogMsg = 'Post atualizado com sucesso!';
         } else {

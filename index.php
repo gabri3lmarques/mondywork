@@ -215,19 +215,20 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
 
     <?php if ($totalPages > 1): ?>
+    <?php $catParam = $categoriaFiltro ? '&categoria=' . urlencode($categoriaFiltro) : ''; ?>
     <div class="pagination">
       <?php if ($page > 1): ?>
-        <a href="?page=<?= $page - 1 ?>">&laquo; Anterior</a>
+        <a href="?page=<?= $page - 1 . $catParam ?>">&laquo; Anterior</a>
       <?php endif; ?>
       <?php for ($i = 1; $i <= $totalPages; $i++): ?>
         <?php if ($i === $page): ?>
           <span class="current"><?= $i ?></span>
         <?php else: ?>
-          <a href="?page=<?= $i ?>"><?= $i ?></a>
+          <a href="?page=<?= $i . $catParam ?>"><?= $i ?></a>
         <?php endif; ?>
       <?php endfor; ?>
       <?php if ($page < $totalPages): ?>
-        <a href="?page=<?= $page + 1 ?>">Próximo &raquo;</a>
+        <a href="?page=<?= $page + 1 . $catParam ?>">Próximo &raquo;</a>
       <?php endif; ?>
     </div>
     <?php endif; ?>
