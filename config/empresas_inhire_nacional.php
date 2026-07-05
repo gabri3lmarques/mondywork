@@ -32,6 +32,7 @@ return [
     "contabilizei" => "contabilizei",
     "csptech" => "csptech",
     "ctctech" => "ctctech",
+    "Deal" => "Deal",
     "deloitte" => "deloitte",
     "dock" => "dock",
     "dtlabs" => "dtlabs",
