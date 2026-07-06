@@ -212,7 +212,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
     }
 }
 
-$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas']) ? $_GET['tab'] : 'lista';
+$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas', 'categorias']) ? $_GET['tab'] : 'lista';
 
 $blogMsg = '';
 if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_blog'])) {
@@ -268,6 +268,70 @@ if ($isLoggedIn && $tab === 'blog' && isset($_GET['delete'])) {
         $stmt->execute([':id' => (int)$_GET['delete']]);
         $blogMsg = 'Post excluído.';
     } catch (Exception $e) {}
+}
+
+// ── Categoria CRUD ──
+$mensagemCategoria = '';
+$erroCategoria = '';
+if ($isLoggedIn && $tab === 'categorias') {
+    try {
+        $pdoCat = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_categoria'])) {
+            $nomePt = trim($_POST['nome_pt'] ?? '');
+            $nomeEn = trim($_POST['nome_en'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+
+            if ($nomePt === '' || $nomeEn === '' || $slug === '') {
+                $erroCategoria = 'Preencha todos os campos.';
+            } elseif (!preg_match('/^[a-z0-9-]+$/', $slug)) {
+                $erroCategoria = 'O slug deve conter apenas letras minúsculas, números e hífens.';
+            } elseif (strlen($slug) > 30) {
+                $erroCategoria = 'O slug deve ter no máximo 30 caracteres.';
+            } else {
+                $stmt = $pdoCat->prepare("SELECT COUNT(*) FROM categorias WHERE slug = :slug");
+                $stmt->execute([':slug' => $slug]);
+                if ($stmt->fetchColumn() > 0) {
+                    $erroCategoria = 'Já existe uma categoria com este slug.';
+                } else {
+                    $stmt = $pdoCat->prepare("INSERT INTO categorias (slug, nome_pt, nome_en) VALUES (:slug, :pt, :en)");
+                    $stmt->execute([':slug' => $slug, ':pt' => $nomePt, ':en' => $nomeEn]);
+                    $mensagemCategoria = 'Categoria criada com sucesso!';
+                }
+            }
+        }
+
+        if (isset($_GET['deletar_categoria'])) {
+            $catId = (int)$_GET['deletar_categoria'];
+            if ($catId > 0) {
+                $stmt = $pdoCat->prepare("SELECT COUNT(*) FROM vaga_categorias WHERE categoria_id = :id");
+                $stmt->execute([':id' => $catId]);
+                $vagasCount = (int)$stmt->fetchColumn();
+
+                if ($vagasCount > 0) {
+                    $erroCategoria = "Não é possível excluir: {$vagasCount} vaga(s) estão usando esta categoria. Remova a categoria das vagas primeiro.";
+                } else {
+                    $stmt = $pdoCat->prepare("DELETE FROM categorias WHERE id = :id AND slug != 'sem-categoria'");
+                    $stmt->execute([':id' => $catId]);
+                    if ($stmt->rowCount() > 0) {
+                        $mensagemCategoria = 'Categoria excluída com sucesso!';
+                    } else {
+                        $erroCategoria = 'Não é possível excluir a categoria "Sem Categoria".';
+                    }
+                }
+            }
+        }
+
+        $categoriasLista = $pdoCat->query("SELECT c.*, (SELECT COUNT(*) FROM vaga_categorias vc WHERE vc.categoria_id = c.id) as total_vagas FROM categorias c ORDER BY c.id")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        $erroCategoria = 'Erro ao acessar o banco de dados.';
+        $categoriasLista = [];
+    }
 }
 
 $origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
@@ -535,6 +599,7 @@ try {
     <a class="admin-tab <?php echo $tab === 'emails' ? 'active' : '' ?>" href="admin.php?tab=emails">Emails</a>
     <a class="admin-tab <?php echo $tab === 'novas' ? 'active' : '' ?>" href="admin.php?tab=novas">Novas (24h)</a>
     <a class="admin-tab <?php echo $tab === 'blog' ? 'active' : '' ?>" href="admin.php?tab=blog">Blog</a>
+    <a class="admin-tab <?php echo $tab === 'categorias' ? 'active' : '' ?>" href="admin.php?tab=categorias">Categorias</a>
   </div>
 
   <?php if ($tab === 'cadastro'): ?>
@@ -1034,6 +1099,85 @@ try {
       </div>
     <?php endif; ?>
   <?php endif; ?>
+  <?php endif; ?>
+
+  <?php elseif ($tab === 'categorias'): ?>
+
+  <div class="admin-header">
+    <div>
+      <h1>Categorias</h1>
+      <span>Gerenciar categorias de vagas</span>
+    </div>
+  </div>
+
+  <?php if ($mensagemCategoria): ?>
+    <div class="admin-card" style="margin-bottom:16px;padding:16px 24px;border-left:4px solid #1a7d1a">
+      <p style="font-weight:600;margin:0;color:#1a7d1a"><?php echo htmlspecialchars($mensagemCategoria, ENT_QUOTES, 'UTF-8') ?></p>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($erroCategoria): ?>
+    <div class="admin-card" style="margin-bottom:16px;padding:16px 24px;border-left:4px solid #ba1a1a">
+      <p style="font-weight:600;margin:0;color:#ba1a1a"><?php echo htmlspecialchars($erroCategoria, ENT_QUOTES, 'UTF-8') ?></p>
+    </div>
+  <?php endif; ?>
+
+  <div class="admin-card" style="margin-bottom:24px">
+    <h2 style="font-size:18px;font-weight:700;margin:0 0 16px">Nova Categoria</h2>
+    <form method="post" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:end">
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Nome (PT) *</label>
+        <input type="text" name="nome_pt" required class="admin-search-input" style="width:100%" placeholder="Ex: Jurídico">
+      </div>
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Nome (EN) *</label>
+        <input type="text" name="nome_en" required class="admin-search-input" style="width:100%" placeholder="Ex: Legal">
+      </div>
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Slug *</label>
+        <input type="text" name="slug" required class="admin-search-input" style="width:100%" placeholder="Ex: juridico" pattern="[a-z0-9-]+" title="Apenas letras minúsculas, números e hífens">
+      </div>
+      <div style="grid-column:1/-1">
+        <button type="submit" name="criar_categoria" class="btn-search" style="font-size:15px;padding:12px 32px">Criar Categoria</button>
+      </div>
+    </form>
+  </div>
+
+  <?php if (empty($categoriasLista)): ?>
+    <div class="admin-empty">Nenhuma categoria encontrada.</div>
+  <?php else: ?>
+    <div style="overflow-x:auto;background:#fff;border-radius:0.75rem;border:1px solid #c6c6cd">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <thead>
+          <tr style="background:#f8f9fa;border-bottom:2px solid #c6c6cd">
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">ID</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Nome (PT)</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Nome (EN)</th>
+            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#0b1c30">Slug</th>
+            <th style="padding:12px 16px;text-align:center;font-weight:700;color:#0b1c30">Vagas</th>
+            <th style="padding:12px 16px;text-align:center;font-weight:700;color:#0b1c30">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($categoriasLista as $cat): ?>
+            <tr style="border-bottom:1px solid #e5e7eb">
+              <td style="padding:10px 16px;font-weight:600;color:#45464d"><?php echo (int)$cat['id'] ?></td>
+              <td style="padding:10px 16px;font-weight:600;color:#0b1c30"><?php echo htmlspecialchars($cat['nome_pt'], ENT_QUOTES, 'UTF-8') ?></td>
+              <td style="padding:10px 16px;color:#45464d"><?php echo htmlspecialchars($cat['nome_en'], ENT_QUOTES, 'UTF-8') ?></td>
+              <td style="padding:10px 16px;color:#4b41e1;font-family:monospace"><?php echo htmlspecialchars($cat['slug'], ENT_QUOTES, 'UTF-8') ?></td>
+              <td style="padding:10px 16px;text-align:center;font-weight:600"><?php echo (int)$cat['total_vagas'] ?></td>
+              <td style="padding:10px 16px;text-align:center">
+                <?php if ($cat['slug'] !== 'sem-categoria'): ?>
+                  <a href="?tab=categorias&deletar_categoria=<?php echo (int)$cat['id'] ?>" onclick="return confirm('Excluir a categoria &quot;<?php echo htmlspecialchars($cat['nome_pt'], ENT_QUOTES, 'UTF-8') ?>&quot;?')" style="font-size:13px;font-weight:600;padding:6px 16px;border-radius:0.5rem;border:1px solid #ba1a1a;color:#ba1a1a;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Excluir</a>
+                <?php else: ?>
+                  <span style="font-size:12px;color:#76777d">—</span>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
   <?php endif; ?>
 
   <?php else: ?>
