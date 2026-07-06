@@ -78,6 +78,7 @@ return [
     "magnasearch" => "magnasearch",
     "makasi" => "makasi",
     "marbrasil" => "marbrasil",
+    "mazzatech" => "mazzatech",
     "mb" => "mb",
     "meetrox" => "meetrox",
     "melnick" => "melnick",
