@@ -39,6 +39,7 @@ return [
     "ecore" => "ecore",
     "eurosolucoes" => "eurosolucoes",
     "evolutionmobility" => "evolutionmobility",
+    "familhao" => "familhao",
     "fermap" => "fermap",
     "fgempreendimentos" => "fgempreendimentos",
     "flutterbrazil" => "flutterbrazil",
