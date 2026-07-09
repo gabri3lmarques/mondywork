@@ -113,7 +113,6 @@ return [
     "poliedroeducacao" => "poliedroeducacao",
     "poncetech" => "poncetech",
     "premiersoft" => "premiersoft",
-    "priner" => "priner",
     "qitech" => "qitech",
     "qualitycompliance" => "qualitycompliance",
     "queropassagem" => "queropassagem",
