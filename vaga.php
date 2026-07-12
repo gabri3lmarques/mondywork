@@ -186,9 +186,6 @@ gtag('config', 'G-RPQ9FFFNP1');
 
 <?php if ($vaga): ?>
 
-    <a href="<?= $isExterior ? '/usa/' : '/vagas/' ?>" class="job-card-btn" style="display: inline-flex; margin-bottom: 24px; text-decoration: none;">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
-
-    <article class="vaga-page">
       <section class="top-adds-banner-desktop">
         <script>
           atOptions = {
@@ -200,7 +197,12 @@ gtag('config', 'G-RPQ9FFFNP1');
           };
         </script>
         <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-      </section>        
+      </section>       
+
+    <a href="<?= $isExterior ? '/usa/' : '/vagas/' ?>" class="job-card-btn" style="display: inline-flex; margin-bottom: 24px; text-decoration: none;">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
+
+    <article class="vaga-page">
+   
       <header class="vaga-page-header">
         <h1 class="vaga-page-title"><?= esc($vaga['titulo']) ?></h1>
         <p class="vaga-page-company"><?= esc($vaga['empresa']) ?></p>
