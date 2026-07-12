@@ -194,7 +194,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div id="results-info" class="results-info"></div>
     <div class="job-grid">
       <div class="job-list" id="vagas-container">
-<?php foreach ($vagas as $v):
+<?php foreach ($vagas as $idx => $v):
     $local = $v['localizacao'] ?: 'Remote';
     $resumo = $v['resumo'] ?: 'This ' . $v['titulo'] . ' position' . ($v['modelo_trabalho'] ? ' is ' . mb_strtolower($v['modelo_trabalho']) : '') . '.';
     $badge = $v['modelo_trabalho'] ? '<span class="' . badgeClass($v['modelo_trabalho']) . '">' . esc($v['modelo_trabalho']) . '</span>' : '';
@@ -216,6 +216,20 @@ gtag('config', 'G-RPQ9FFFNP1');
             <a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-btn">View Details</a>
           </div>
         </article>
+<?php if (($idx + 1) % 2 === 0): ?>
+        <div class="adds-entre-jobs">
+          <script>
+          atOptions = {
+            'key' : '4ebf9218fca889c045c30ab6b62d4769',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+          </script>
+          <script src="https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js"></script>
+        </div>
+<?php endif; ?>
 <?php endforeach; ?>
       </div>
       <aside class="sidebar">
