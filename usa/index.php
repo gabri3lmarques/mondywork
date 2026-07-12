@@ -87,7 +87,7 @@ function capitalizeTitle($str) {
   "inLanguage": "en"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.6.1">
+<link rel="stylesheet" href="/css/style.css?v=1.6.2">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -174,6 +174,19 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
+  <section class="top-adds-banner-desktop">
+    <script>
+      atOptions = {
+        'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    </script>
+    <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
+  </section>  
+
   <section class="section">
     <div class="section-header">
       <h2 class="section-title">Recent Jobs</h2>
@@ -236,6 +249,18 @@ gtag('config', 'G-RPQ9FFFNP1');
             <button class="sidebar-btn" type="submit">Subscribe Now</button>
           </form>
         </div>
+        <div class="side-bar-add">
+          <script>
+            atOptions = {
+              'key' : '3ef4dcfd491e020af1f92de29081bcc7',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js"></script>
+        </div>        
       </aside>
     </div>
     <div id="loading" class="loading hidden">
@@ -309,6 +334,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.6.1"></script>
+<script src="/js/app-exterior.js?v=1.6.2"></script>
 </body>
 </html>
