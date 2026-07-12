@@ -333,7 +333,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
     <div id="modal-body" class="modal-body"></div>
     <div class="modal-footer" id="modal-footer">
-      <div class="adds-entre-jobs ">
+      <div class="adds-entre-jobs" style="margin-right:auto;">
           <script>
           atOptions = {
               'key' : '4ebf9218fca889c045c30ab6b62d4769',
