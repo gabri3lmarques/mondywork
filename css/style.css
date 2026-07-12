@@ -1361,7 +1361,6 @@ input { font-family: inherit; }
   padding: 32px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #c6c6cd;
-  position: sticky;
   top: 112px;
   display: flex;
   flex-direction: column;

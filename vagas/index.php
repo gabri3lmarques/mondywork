@@ -246,6 +246,18 @@ gtag('config', 'G-RPQ9FFFNP1');
             <button class="sidebar-btn" type="submit">Cadastrar Agora</button>
           </form>
         </div>
+        <div class="side-bar-add">
+          <script>
+            atOptions = {
+              'key' : '3ef4dcfd491e020af1f92de29081bcc7',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js"></script>
+        </div>
       </aside>
     </div>
     <div id="loading" class="loading hidden">
