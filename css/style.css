@@ -1367,6 +1367,12 @@ input { font-family: inherit; }
   gap: 16px;
 }
 
+.side-bar-add {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 .sidebar-icon {
   margin-bottom: 8px;
   color: #4b41e1;
