@@ -217,6 +217,12 @@ input { font-family: inherit; }
   background: linear-gradient(135deg, #eff4ff 0%, #f8f9ff 100%);
 }
 
+.top-adds-banner-desktop {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
 @media (min-width: 768px) {
   .hero { padding: 80px 48px; }
 }

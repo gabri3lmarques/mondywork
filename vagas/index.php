@@ -183,6 +183,19 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
+  <section class="top-adds-banner-desktop">
+    <script>
+      atOptions = {
+        'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    </script>
+    <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
+  </section>
+
   <section class="section">
     <div class="section-header">
       <h2 class="section-title">Vagas Recentes</h2>
