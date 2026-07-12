@@ -315,6 +315,18 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
     <div id="modal-body" class="modal-body"></div>
     <div class="modal-footer" id="modal-footer">
+      <div class="adds-entre-jobs" style="margin-right:auto;">
+          <script>
+          atOptions = {
+              'key' : '4ebf9218fca889c045c30ab6b62d4769',
+              'format' : 'iframe',
+              'height' : 50,
+              'width' : 320,
+              'params' : {}
+          };
+          </script>
+          <script src="https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js"></script>
+      </div>          
       <a id="modal-apply" href="#" target="_blank" class="modal-btn">Apply Now</a>
     </div>
   </div>
