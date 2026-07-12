@@ -36,6 +36,7 @@
     let debounceTimer = null;
     var vagasCache = {};
     var currentModelo = '';
+    var cardsRendered = 0;
 
     function resetAndFetch() {
         container.innerHTML = '';
@@ -44,6 +45,7 @@
         searchCorrection.classList.add('hidden');
         loadingEl.classList.add('hidden');
         vagasCache = {};
+        cardsRendered = 0;
         page = 0;
         hasMore = true;
         loading = false;
@@ -255,6 +257,16 @@
             '<div class="job-card-footer"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">Ver Detalhes</a></div>';
 
         container.appendChild(card);
+        cardsRendered++;
+
+        if (cardsRendered % 2 === 0) {
+            var adDiv = document.createElement('div');
+            adDiv.className = 'adds-entre-jobs';
+            adDiv.innerHTML =
+                '<scr' + 'ipt>atOptions={"key":"4ebf9218fca889c045c30ab6b62d4769","format":"iframe","height":50,"width":320,"params":{}};</scr' + 'ipt>' +
+                '<scr' + 'ipt src="https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js"></scr' + 'ipt>';
+            container.appendChild(adDiv);
+        }
     }
 
     function formatModelo(modelo) {
@@ -456,6 +468,7 @@
                 var initialData = JSON.parse(vagasDataEl.textContent);
                 if (initialData && initialData.vagas && initialData.vagas.length > 0) {
                     initialData.vagas.forEach(function(v) { vagasCache[v.vaga_id_externo] = v; });
+                    cardsRendered = initialData.vagas.length;
                     hasMore = initialData.has_more;
                     page = initialData.vagas.length / LIMIT;
                     if (initialData.modelo) currentModelo = initialData.modelo;
