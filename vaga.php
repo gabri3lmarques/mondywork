@@ -154,7 +154,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.6.6">
+<link rel="stylesheet" href="/css/style.css?v=1.6.7">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -258,21 +258,31 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </footer>
 
-<div id="ad-modal-overlay" class="modal-overlay hidden">
-  <div class="modal-content" role="dialog" aria-modal="true" style="max-width: 440px; text-align: center;">
-    <div class="modal-header" style="border-bottom: none; justify-content: flex-end;">
-      <button id="ad-modal-close" class="modal-close" aria-label="<?= $isExterior ? 'Close' : 'Fechar' ?>">
+<div id="ad-modal-overlay" class="ad-modal-overlay hidden">
+  <div class="ad-modal-content">
+    <div class="ad-modal-header">
+      <div class="ad-modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <button id="ad-modal-close" class="ad-modal-close" aria-label="<?= $isExterior ? 'Close' : 'Fechar' ?>">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="modal-body" style="padding: 0 24px 24px;">
-      <p style="font-size: 16px; line-height: 26px; color: #45464d; margin-bottom: 8px;"><?= $isExterior ? 'Please click the button below to open our sponsor\'s ad.' : 'Por favor, clique no botão abaixo para abrir o anúncio do nosso patrocinador.' ?></p>
-      <p style="font-size: 16px; line-height: 26px; color: #45464d; margin-bottom: 24px;"><?= $isExterior ? 'Once you open the ad, the link to the job will be unlocked.' : 'Assim que você abrir o anúncio, o link para a vaga será liberado.' ?></p>
+    <div class="ad-modal-body">
+      <h2 class="ad-modal-title"><?= $isExterior ? 'One more step' : 'Mais um passo' ?></h2>
+      <div class="ad-modal-divider"></div>
+      <p class="ad-modal-text"><?= $isExterior ? 'Please click the button below to open our sponsor\'s ad. Once you open the ad, the link to the job will be unlocked.' : 'Por favor, clique no botão abaixo para abrir o anúncio do nosso patrocinador. Assim que você abrir o anúncio, o link para a vaga será liberado.' ?></p>
       <div id="ad-btn-wrap">
-        <a href="https://www.effectivecpmnetwork.com/a6riiebvx?key=6d474f928643679d7d0ffd96e1acacfc" target="_blank" rel="noopener noreferrer" class="modal-btn" id="ad-open-btn" style="background: #16a34a; box-shadow: 0 4px 14px rgba(22,163,74,0.3);"><?= $isExterior ? 'Open Ad' : 'Abrir anúncio' ?></a>
+        <a href="https://www.effectivecpmnetwork.com/a6riiebvx?key=6d474f928643679d7d0ffd96e1acacfc" target="_blank" rel="noopener noreferrer" class="ad-modal-btn ad-modal-btn-primary" id="ad-open-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <?= $isExterior ? 'Open Ad' : 'Abrir anúncio' ?>
+        </a>
       </div>
-      <div id="ad-real-link" style="display: none; margin-top: 16px;">
-        <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
+      <div id="ad-real-link" style="display: none;">
+        <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="ad-modal-btn ad-modal-btn-real">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?>
+        </a>
       </div>
     </div>
   </div>
