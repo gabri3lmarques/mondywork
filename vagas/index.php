@@ -92,7 +92,7 @@ function capitalizeTitle($str) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.6.7">
+<link rel="stylesheet" href="/css/style.css?v=1.6.8">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -129,6 +129,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     </button>
   </div>
 </nav>
+
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link active" href="/vagas/">Vagas</a>
   <a class="nav-link" href="/">Blog</a>
@@ -182,6 +183,19 @@ gtag('config', 'G-RPQ9FFFNP1');
       </div>
     </div>
   </section>
+
+  <div class="flex align-center justify-center overflow-hidden" style="height:90px;max-width:728px;width:100%;margin-left:auto;margin-right:auto;background-color:#4b41e1">
+    <script>
+      atOptions = {
+        'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    </script>
+    <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
+  </div>
 
   <section class="section">
     <div class="section-header">
@@ -328,6 +342,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app.js?v=1.6.7"></script>
+<script src="/js/app.js?v=1.6.8"></script>
 </body>
 </html>
