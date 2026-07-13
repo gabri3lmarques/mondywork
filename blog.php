@@ -107,12 +107,6 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-RPQ9FFFNP1');
 </script>
-<script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
-<script type="text/javascript">
-    aclib.runVideoSlider({
-        zoneId: '11692174',
-    });
-</script>
 </head>
 <body>
 
