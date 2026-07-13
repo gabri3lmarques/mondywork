@@ -222,8 +222,7 @@ gtag('config', 'G-RPQ9FFFNP1');
       </div>
 
       <div class="vaga-page-footer">
-        <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn vaga-apply-link" style="display:none;"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
-        <button class="modal-btn vaga-apply-btn" id="vaga-apply-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></button>
+        <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
       </div>
     </article>
 
@@ -258,76 +257,6 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </footer>
 
-<div id="ad-modal-overlay" class="ad-modal-overlay hidden">
-  <div class="ad-modal-content">
-    <div class="ad-modal-header">
-      <div class="ad-modal-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      </div>
-      <button id="ad-modal-close" class="ad-modal-close" aria-label="<?= $isExterior ? 'Close' : 'Fechar' ?>">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="ad-modal-body">
-      <h2 class="ad-modal-title"><?= $isExterior ? 'One more step' : 'Mais um passo' ?></h2>
-      <div class="ad-modal-divider"></div>
-      <p class="ad-modal-text"><?= $isExterior ? 'Please click the button below to open our sponsor\'s ad. Once you open the ad, the link to the job will be unlocked.' : 'Por favor, clique no botão abaixo para abrir o anúncio do nosso patrocinador. Assim que você abrir o anúncio, o link para a vaga será liberado.' ?></p>
-      <div id="ad-btn-wrap">
-        <a href="https://www.effectivecpmnetwork.com/a6riiebvx?key=6d474f928643679d7d0ffd96e1acacfc" target="_blank" rel="noopener noreferrer" class="ad-modal-btn ad-modal-btn-primary" id="ad-open-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          <?= $isExterior ? 'Open Ad' : 'Abrir anúncio' ?>
-        </a>
-      </div>
-      <div id="ad-real-link" style="display: none;">
-        <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="ad-modal-btn ad-modal-btn-real">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-(function() {
-  var applyBtn = document.getElementById('vaga-apply-btn');
-  var overlay = document.getElementById('ad-modal-overlay');
-  var closeBtn = document.getElementById('ad-modal-close');
-  var openBtn = document.getElementById('ad-open-btn');
-  var btnWrap = document.getElementById('ad-btn-wrap');
-  var realLink = document.getElementById('ad-real-link');
-
-  if (applyBtn) {
-    applyBtn.addEventListener('click', function() {
-      overlay.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
-      overlay.classList.add('hidden');
-      document.body.style.overflow = '';
-    });
-  }
-
-  if (overlay) {
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay) {
-        overlay.classList.add('hidden');
-        document.body.style.overflow = '';
-      }
-    });
-  }
-
-  if (openBtn) {
-    openBtn.addEventListener('click', function() {
-      btnWrap.style.display = 'none';
-      realLink.style.display = 'block';
-    });
-  }
-})();
-</script>
 
 </body>
 </html>
