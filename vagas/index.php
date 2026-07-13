@@ -193,7 +193,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div id="results-info" class="results-info"></div>
     <div class="job-grid">
       <div class="job-list" id="vagas-container">
-        <div class="flex align-center justify-center overflow-hidden" style="height:90px;max-width:728px;width:100%;margin-left:auto;margin-right:auto;background-color:#4b41e1">
+        <div class="flex align-center justify-center overflow-hidden" style="height:120px;max-width:728px;width:100%;margin-left:auto;margin-right:auto;background-color:#E6E7FC;border-radius:12px;">
           <script>
             atOptions = {
               'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
