@@ -350,35 +350,6 @@
     }
 
     if (container) {
-        container.addEventListener('click', function(e) {
-            var btn = e.target.closest('.btn-open-desc, .job-card-btn');
-            if (btn) {
-                var card = btn.closest('.job-card');
-                if (!card) return;
-                var id = card.getAttribute('data-vaga-id');
-                if (!id) return;
-                e.preventDefault();
-                var v = vagasCache[id];
-                if (v && v.descricao) {
-                    openModal(v);
-                } else if (v) {
-                    fetchVagaById(id).then(function(vaga) {
-                        if (vaga && vaga.vaga_id_externo) {
-                            vagasCache[id] = vaga;
-                            openModal(vaga);
-                        }
-                    });
-                } else {
-                    fetchVagaById(id).then(function(vaga) {
-                        if (vaga && vaga.vaga_id_externo) {
-                            vagasCache[id] = vaga;
-                            openModal(vaga);
-                        }
-                    });
-                }
-            }
-        });
-
         const observer = new IntersectionObserver(function(entries) {
             if (entries[0].isIntersecting) {
                 fetchVagas();
@@ -416,30 +387,14 @@
         function handleHash() {
             if (location.hash) {
                 var id = decodeURIComponent(location.hash.substring(1));
-                var v = vagasCache[id];
-                if (v) {
-                    openModal(v);
-                } else {
-                    fetchVagaById(id).then(function(vaga) {
-                        if (vaga && vaga.vaga_id_externo) openModal(vaga);
-                    });
-                }
+                window.location.href = '/vaga/' + encodeURIComponent(id);
             }
         }
 
         window.addEventListener('hashchange', function() {
             if (location.hash) {
                 var id = decodeURIComponent(location.hash.substring(1));
-                var v = vagasCache[id];
-                if (v) {
-                    openModal(v);
-                } else {
-                    fetchVagaById(id).then(function(vaga) {
-                        if (vaga && vaga.vaga_id_externo) openModal(vaga);
-                    });
-                }
-            } else {
-                if (!modalOverlay.classList.contains('hidden')) closeModal();
+                window.location.href = '/vaga/' + encodeURIComponent(id);
             }
         });
 
