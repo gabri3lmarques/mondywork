@@ -189,21 +189,22 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="section-header">
       <h2 class="section-title">Vagas Recentes</h2>
     </div>
-    <div class="flex align-center justify-center overflow-hidden" style="height:90px;max-width:728px;width:100%;margin-left:auto;margin-right:auto;background-color:#4b41e1">
-      <script>
-        atOptions = {
-          'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
-          'format' : 'iframe',
-          'height' : 90,
-          'width' : 728,
-          'params' : {}
-        };
-      </script>
-      <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-    </div>    
+ 
     <div id="results-info" class="results-info"></div>
     <div class="job-grid">
       <div class="job-list" id="vagas-container">
+        <div class="flex align-center justify-center overflow-hidden" style="height:90px;max-width:728px;width:100%;margin-left:auto;margin-right:auto;background-color:#4b41e1">
+          <script>
+            atOptions = {
+              'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
+              'format' : 'iframe',
+              'height' : 90,
+              'width' : 728,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
+        </div>           
 <?php foreach ($vagas as $idx => $v):
     $modelo = $v['modelo_trabalho'] ? formatModelo($v['modelo_trabalho']) : null;
     $local = $v['localizacao'] ?: 'Remoto';
