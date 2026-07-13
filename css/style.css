@@ -217,11 +217,7 @@ input { font-family: inherit; }
   background: linear-gradient(135deg, #eff4ff 0%, #f8f9ff 100%);
 }
 
-.top-adds-banner-desktop {
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-}
+
 
 
 
@@ -746,12 +742,7 @@ input { font-family: inherit; }
   min-width: 0;
 }
 
-.adds-entre-jobs {
-  display: flex;
-  justify-content: center;
-  padding: 8px 0;
-  min-height: 50px;
-}
+
 
 /* ===== JOB CARDS ===== */
 .job-card {
@@ -1383,11 +1374,7 @@ input { font-family: inherit; }
   gap: 16px;
 }
 
-.side-bar-add {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
+
 
 .sidebar-icon {
   margin-bottom: 8px;

@@ -258,21 +258,6 @@
 
         container.appendChild(card);
         cardsRendered++;
-
-        if (cardsRendered % 2 === 0) {
-            var adDiv = document.createElement('div');
-            adDiv.className = 'adds-entre-jobs';
-
-            var s1 = document.createElement('script');
-            s1.textContent = 'atOptions={"key":"4ebf9218fca889c045c30ab6b62d4769","format":"iframe","height":50,"width":320,"params":{}}';
-            adDiv.appendChild(s1);
-
-            var s2 = document.createElement('script');
-            s2.src = 'https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js';
-            adDiv.appendChild(s2);
-
-            container.appendChild(adDiv);
-        }
     }
 
     function formatModelo(modelo) {

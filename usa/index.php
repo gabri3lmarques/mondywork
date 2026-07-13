@@ -174,19 +174,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
-  <section class="top-adds-banner-desktop">
-    <script>
-      atOptions = {
-        'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
-        'format' : 'iframe',
-        'height' : 90,
-        'width' : 728,
-        'params' : {}
-      };
-    </script>
-    <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-  </section>  
-
   <section class="section">
     <div class="section-header">
       <h2 class="section-title">Recent Jobs</h2>
@@ -216,20 +203,6 @@ gtag('config', 'G-RPQ9FFFNP1');
             <a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-btn">View Details</a>
           </div>
         </article>
-<?php if (($idx + 1) % 2 === 0): ?>
-        <div class="adds-entre-jobs">
-          <script>
-          atOptions = {
-            'key' : '4ebf9218fca889c045c30ab6b62d4769',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
-          </script>
-          <script src="https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js"></script>
-        </div>
-<?php endif; ?>
 <?php endforeach; ?>
       </div>
       <aside class="sidebar">
@@ -263,18 +236,7 @@ gtag('config', 'G-RPQ9FFFNP1');
             <button class="sidebar-btn" type="submit">Subscribe Now</button>
           </form>
         </div>
-        <div class="side-bar-add">
-          <script>
-            atOptions = {
-              'key' : '3ef4dcfd491e020af1f92de29081bcc7',
-              'format' : 'iframe',
-              'height' : 250,
-              'width' : 300,
-              'params' : {}
-            };
-          </script>
-          <script src="https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js"></script>
-        </div>        
+
       </aside>
     </div>
     <div id="loading" class="loading hidden">
@@ -315,18 +277,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
     <div id="modal-body" class="modal-body"></div>
     <div class="modal-footer" id="modal-footer">
-      <div class="adds-entre-jobs" style="margin-right:auto;">
-          <script>
-          atOptions = {
-              'key' : '4ebf9218fca889c045c30ab6b62d4769',
-              'format' : 'iframe',
-              'height' : 50,
-              'width' : 320,
-              'params' : {}
-          };
-          </script>
-          <script src="https://www.highperformanceformat.com/4ebf9218fca889c045c30ab6b62d4769/invoke.js"></script>
-      </div>          
       <a id="modal-apply" href="#" target="_blank" class="modal-btn">Apply Now</a>
     </div>
   </div>

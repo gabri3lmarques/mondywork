@@ -186,19 +186,6 @@ gtag('config', 'G-RPQ9FFFNP1');
 
 <?php if ($vaga): ?>
 
-      <section class="top-adds-banner-desktop">
-        <script>
-          atOptions = {
-            'key' : '42bd95ac1f5bc41ae0232917b44a6c69',
-            'format' : 'iframe',
-            'height' : 90,
-            'width' : 728,
-            'params' : {}
-          };
-        </script>
-        <script src="https://www.highperformanceformat.com/42bd95ac1f5bc41ae0232917b44a6c69/invoke.js"></script>
-      </section>       
-
     <a href="<?= $isExterior ? '/usa/' : '/vagas/' ?>" class="job-card-btn" style="display: inline-flex; margin-bottom: 24px; text-decoration: none;">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
 
     <article class="vaga-page">
