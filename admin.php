@@ -464,12 +464,6 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 .cat-filter-checkbox:hover { border-color: #4b41e1; }
 .cat-filter-checkbox input { width: 16px; height: 16px; cursor: pointer; }
 </style>
-<script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
-<script type="text/javascript">
-    aclib.runVideoSlider({
-        zoneId: '11692174',
-    });
-</script>
 </head>
 <body>
 
