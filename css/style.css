@@ -2110,4 +2110,155 @@ input { font-family: inherit; }
   border-color: #4b41e1;
 }
 
+/* ===== VAGA PAGE - DICA DO ESPECIALISTA ===== */
+.dica-expert {
+  background: linear-gradient(135deg, #f0efff 0%, #e8e6ff 100%);
+  border: 1px solid rgba(75, 65, 225, 0.15);
+  border-radius: 1rem;
+  padding: 28px 32px;
+  margin: 40px 0;
+}
+
+.dica-expert-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.dica-expert-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4b41e1;
+  margin-bottom: 2px;
+}
+
+.dica-expert-subtitle {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+.dica-expert-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #333;
+}
+
+.dica-expert-body p {
+  margin-bottom: 12px;
+}
+
+.dica-expert-body p:last-child {
+  margin-bottom: 0;
+}
+
+.dica-expert-footer {
+  margin-top: 16px;
+}
+
+.dica-expert-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b41e1;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dica-expert-link:hover {
+  color: #3530c9;
+  text-decoration: underline;
+}
+
+/* ===== VAGA PAGE - ARTIGOS RELACIONADOS ===== */
+.related-posts {
+  margin: 40px 0 48px;
+}
+
+.related-posts-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0b1c30;
+  margin-bottom: 20px;
+}
+
+.related-posts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .related-posts-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .related-posts-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.related-post-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.related-post-card:hover {
+  box-shadow: 0 8px 20px -4px rgba(0,0,0,0.08);
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.related-post-image {
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+}
+
+.related-post-image--empty {
+  background: linear-gradient(135deg, #4b41e1, #7c75ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.related-post-body {
+  padding: 16px 20px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.related-post-title {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 700;
+  color: #0b1c30;
+  margin-bottom: 6px;
+  transition: color 0.3s;
+}
+
+.related-post-card:hover .related-post-title {
+  color: #4b41e1;
+}
+
+.related-post-excerpt {
+  font-size: 13px;
+  line-height: 20px;
+  color: #555;
+  flex: 1;
+}
+
 

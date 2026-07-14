@@ -86,7 +86,7 @@ function excerpt($text, $max = 350) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.6.8">
+<link rel="stylesheet" href="/css/style.css?v=1.7.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -104,7 +104,6 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
-      <a class="nav-link" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/sobre.php">Sobre</a>
       <a class="nav-link" href="/contato.php">Contato</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
@@ -123,7 +122,6 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </nav>
 <div class="mobile-menu" id="mobile-menu">
-  <a class="nav-link" href="/vagas/">Vagas</a>
   <a class="nav-link" href="/sobre.php">Sobre</a>
   <a class="nav-link" href="/contato.php">Contato</a>
   <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
@@ -514,11 +512,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
   </section>
 
-  <section class="section cta-section">
-    <h2 class="section-title" style="margin-bottom:16px">Encontre sua próxima vaga</h2>
-    <p>Confira as vagas mais recentes em tecnologia, design, marketing e produto. Oportunidades atualizadas diariamente em todo o Brasil.</p>
-    <a href="/vagas/" class="cta-btn">Ver Vagas</a>
-  </section>
 </main>
 
 <footer class="footer">

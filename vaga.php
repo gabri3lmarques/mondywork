@@ -33,6 +33,23 @@ try {
     $categorias = [];
 }
 
+$dicaPost = null;
+$relatedPosts = [];
+try {
+    if ($vaga) {
+        $stmtDica = $pdo->prepare("SELECT slug, title, excerpt, content, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY RAND() LIMIT 1");
+        $stmtDica->execute();
+        $dicaPost = $stmtDica->fetch(PDO::FETCH_ASSOC);
+
+        $stmtRelated = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC LIMIT 3");
+        $stmtRelated->execute();
+        $relatedPosts = $stmtRelated->fetchAll(PDO::FETCH_ASSOC);
+    }
+} catch (Exception $e) {
+    $dicaPost = null;
+    $relatedPosts = [];
+}
+
 if (!$vaga) {
     http_response_code(404);
 }
@@ -56,6 +73,11 @@ function badgeClass($modelo) {
 function formatModelo($modelo) {
     $map = ['Remote' => 'Remoto', 'Hybrid' => 'Híbrido', 'On-site' => 'Presencial'];
     return $map[$modelo] ?? $modelo;
+}
+
+function blogExcerpt($text, $max = 350) {
+    if (mb_strlen($text) <= $max) return $text;
+    return mb_substr($text, 0, $max) . '...';
 }
 
 $isExterior = ($vaga ? $vaga['origem'] : 'nacional') === 'exterior';
@@ -111,7 +133,6 @@ if ($vaga) {
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<meta name="robots" content="noindex,nofollow">
 <?php if ($vaga): ?>
 <title><?= esc($pageTitle) ?></title>
 <meta name="description" content="<?= esc($pageDesc) ?>">
@@ -155,7 +176,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.6.8">
+<link rel="stylesheet" href="/css/style.css?v=1.7.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -176,7 +197,6 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="nav-link" href="/sobre.php"><?= $isExterior ? 'About' : 'Sobre' ?></a>
       <a class="nav-link" href="/contato.php"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
 <?php if (!$isExterior): ?>
-      <a class="nav-link" href="/vagas/">Vagas</a>
 <?php endif; ?>
     </div>
   </div>
@@ -226,6 +246,54 @@ gtag('config', 'G-RPQ9FFFNP1');
         <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
       </div>
     </article>
+
+<?php if ($dicaPost): ?>
+    <div class="dica-expert">
+      <div class="dica-expert-header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;color:#4b41e1;flex-shrink:0"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
+        <div>
+          <h3 class="dica-expert-title">Dica do Especialista</h3>
+          <p class="dica-expert-subtitle"><?= esc($dicaPost['title']) ?></p>
+        </div>
+      </div>
+      <div class="dica-expert-body">
+        <?php
+          $excerpt = $dicaPost['excerpt'] ?: mb_substr(strip_tags($dicaPost['content']), 0, 600);
+          echo '<p>' . esc(strip_tags($excerpt)) . '</p>';
+        ?>
+      </div>
+      <div class="dica-expert-footer">
+        <a href="/blog/<?= esc($dicaPost['slug']) ?>" class="dica-expert-link">Ler artigo completo &rarr;</a>
+      </div>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($relatedPosts)): ?>
+    <div class="related-posts">
+      <h3 class="related-posts-title">Artigos Relacionados</h3>
+      <div class="related-posts-grid">
+        <?php foreach ($relatedPosts as $p):
+          $rImg = $p['image'] ?: '';
+          $rDate = $p['published_at'] ? date('d/m/Y', strtotime($p['published_at'])) : '';
+        ?>
+        <a href="/blog/<?= esc($p['slug']) ?>" class="related-post-card">
+          <?php if ($rImg): ?>
+            <div class="related-post-image" style="background-image:url('<?= esc($rImg) ?>')"></div>
+          <?php else: ?>
+            <div class="related-post-image related-post-image--empty"><?= esc(mb_substr($p['title'], 0, 1)) ?></div>
+          <?php endif; ?>
+          <div class="related-post-body">
+            <?php if (!empty($p['categoria'])): ?>
+              <span class="blog-card-cat"><?= esc($p['categoria']) ?></span>
+            <?php endif; ?>
+            <h4 class="related-post-title"><?= esc($p['title']) ?></h4>
+            <p class="related-post-excerpt"><?= esc(blogExcerpt(strip_tags($p['excerpt'] ?: ''))) ?></p>
+          </div>
+        </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+<?php endif; ?>
 
 <?php else: ?>
 

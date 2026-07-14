@@ -20,7 +20,7 @@ try {
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="/css/style.css?v=1.6.8">
+<link rel="stylesheet" href="/css/style.css?v=1.7.0">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://mondywork.com/guia-de-carreira-produto.php">
 <meta property="og:title" content="Guia de Carreira em Produto | Mondywork">
@@ -53,7 +53,6 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
-      <a class="nav-link" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/">Blog</a>
       <a class="nav-link" href="/sobre.php">Sobre</a>
       <a class="nav-link" href="/contato.php">Contato</a>
@@ -73,7 +72,6 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </nav>
 <div class="mobile-menu" id="mobile-menu">
-  <a class="nav-link" href="/vagas/">Vagas</a>
   <a class="nav-link" href="/">Blog</a>
   <a class="nav-link" href="/sobre.php">Sobre</a>
   <a class="nav-link" href="/contato.php">Contato</a>

@@ -74,7 +74,6 @@ function capitalizeTitle($str) {
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<meta name="robots" content="noindex,nofollow">
 <title>Mondywork | Tech, Design & Marketing Jobs in USA & worldwide (Remote & On-site)</title>
 <meta name="description" content="Find the best remote and on-site job opportunities in the USA. Tech, Design, Marketing, and Product positions updated daily.">
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/">
@@ -100,7 +99,7 @@ function capitalizeTitle($str) {
   "inLanguage": "en"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.6.8">
+<link rel="stylesheet" href="/css/style.css?v=1.7.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -362,6 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.6.8"></script>
+<script src="/js/app-exterior.js?v=1.7.0"></script>
 </body>
 </html>
