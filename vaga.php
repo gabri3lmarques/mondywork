@@ -176,7 +176,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.7.3">
+<link rel="stylesheet" href="/css/style.css?v=1.7.4">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -240,83 +240,42 @@ gtag('config', 'G-RPQ9FFFNP1');
 
 <?php
 $score = 0;
-$scoreDetails = [];
+$scoreCriteria = [];
 $modelo = $vaga['modelo_trabalho'] ? mb_strtolower($vaga['modelo_trabalho']) : '';
 
 if (in_array($modelo, ['remote', 'remoto'])) {
-    $score += 40;
-    $scoreDetails[] = $isExterior ? '100% remote' : '100% remoto';
+    $score += 90;
+    $scoreCriteria[] = $isExterior ? 'Remote model (+90)' : 'Modelo remoto (+90)';
 } elseif (in_array($modelo, ['hybrid', 'hibrido'])) {
-    $score += 25;
-    $scoreDetails[] = $isExterior ? 'hybrid model' : 'modelo híbrido';
+    $score += 80;
+    $scoreCriteria[] = $isExterior ? 'Hybrid model (+80)' : 'Modelo híbrido (+80)';
 } else {
-    $score += 10;
-    $scoreDetails[] = $isExterior ? 'on-site' : 'presencial';
+    $score += 70;
+    $scoreCriteria[] = $isExterior ? 'On-site model (+70)' : 'Modelo presencial (+70)';
 }
 
-$catNames = [];
+$catCount = 0;
 foreach ($categorias as $cat) {
-    $catName = $isExterior ? $cat['nome_en'] : $cat['nome_pt'];
     $slug = $cat['slug'];
-    if (!in_array($slug, ['sem-categoria'])) {
-        $catNames[] = $catName;
-        $score += 20;
+    if (!in_array($slug, ['sem-categoria']) && $catCount < 3) {
+        $catName = $isExterior ? $cat['nome_en'] : $cat['nome_pt'];
+        $score += 10;
+        $catCount++;
+        $scoreCriteria[] = $catName . ' (+10)';
     }
 }
 $score = min($score, 100);
-
-if ($score >= 80) {
-    $compatLevel = $isExterior ? 'excellent' : 'excelente';
-    $compatLabel = $isExterior ? 'Excellent match' : 'Excelente compatibilidade';
-} elseif ($score >= 50) {
-    $compatLevel = 'good';
-    $compatLabel = $isExterior ? 'Good match' : 'Boa compatibilidade';
-} else {
-    $compatLevel = 'basic';
-    $compatLabel = $isExterior ? 'Basic match' : 'Compatibilidade básica';
-}
-
-$compatText = '';
-if ($isExterior) {
-    $compatText = 'This position';
-    if (!empty($catNames)) {
-        $compatText .= ' in <strong>' . esc(implode(' / ', $catNames)) . '</strong>';
-    }
-    $compatText .= ' is a ' . $compatLabel . ' for professionals';
-    if ($score >= 80) {
-        $compatText .= ' seeking ' . esc(implode(' and ', $scoreDetails)) . ' opportunities.';
-    } elseif ($score >= 50) {
-        $compatText .= '. ';
-        $compatText .= 'Model: ' . esc(implode(', ', $scoreDetails)) . '.';
-    } else {
-        $compatText .= ' looking for ' . esc(implode(', ', $scoreDetails)) . ' roles.';
-    }
-} else {
-    $compatText = 'Esta vaga';
-    if (!empty($catNames)) {
-        $compatText .= ' na área de <strong>' . esc(implode(' / ', $catNames)) . '</strong>';
-    }
-    $compatText .= ' possui ' . mb_strtolower($compatLabel) . ' para profissionais';
-    if ($score >= 80) {
-        $compatText .= ' que buscam oportunidades ' . esc(implode(' e ', $scoreDetails)) . '.';
-    } elseif ($score >= 50) {
-        $compatText .= '. ';
-        $compatText .= 'Modelo de trabalho: ' . esc(implode(', ', $scoreDetails)) . '.';
-    } else {
-        $compatText .= ' em busca de vagas ' . esc(implode(', ', $scoreDetails)) . '.';
-    }
-}
 ?>
 
       <div class="vaga-compat">
         <div class="vaga-compat-header">
-          <div class="vaga-compat-score <?= $compatLevel ?>">
-            <span class="vaga-compat-number"><?= $score ?>%</span>
-            <span class="vaga-compat-label"><?= $compatLabel ?></span>
-          </div>
+          <h3 class="vaga-compat-title"><?= $isExterior ? 'Job Score' : 'Score da Vaga' ?></h3>
+          <span class="vaga-compat-number"><?= $score ?> <?= $isExterior ? 'pts' : 'pontos' ?></span>
         </div>
-        <div class="vaga-compat-body">
-          <p><?= $compatText ?></p>
+        <div class="vaga-compat-criteria">
+          <?php foreach ($scoreCriteria as $c): ?>
+            <span class="vaga-compat-tag"><?= esc($c) ?></span>
+          <?php endforeach; ?>
         </div>
       </div>
 

@@ -26,7 +26,7 @@ try {
 <meta property="twitter:title" content="Terms of Service | Mondywork">
 <meta property="twitter:description" content="Terms of Service for Mondywork. By using our website, you agree to these terms.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image-usa.jpg">
-<link rel="stylesheet" href="/css/style.css?v=1.7.3">
+<link rel="stylesheet" href="/css/style.css?v=1.7.4">
 <link rel="icon" href="../img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="../img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../img/favicon/apple-touch-icon.png">

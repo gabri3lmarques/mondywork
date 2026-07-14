@@ -104,7 +104,7 @@ function capitalizeTitle($str) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.7.3">
+<link rel="stylesheet" href="/css/style.css?v=1.7.4">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -383,6 +383,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app.js?v=1.7.3"></script>
+<script src="/js/app.js?v=1.7.4"></script>
 </body>
 </html>
