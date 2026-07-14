@@ -99,7 +99,7 @@ function capitalizeTitle($str) {
   "inLanguage": "en"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.7.1">
+<link rel="stylesheet" href="/css/style.css?v=1.7.2">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -195,7 +195,8 @@ gtag('config', 'G-RPQ9FFFNP1');
       <div class="job-list" id="vagas-container">
 <?php foreach ($vagas as $idx => $v):
     $local = $v['localizacao'] ?: 'Remote';
-    $resumo = $v['resumo'] ?: 'This ' . $v['titulo'] . ' position' . ($v['modelo_trabalho'] ? ' is ' . mb_strtolower($v['modelo_trabalho']) : '') . '.';
+    $modeloLabel = $v['modelo_trabalho'] ? mb_strtolower($v['modelo_trabalho']) : '';
+    $resumo = 'Position: ' . esc($v['titulo']) . ' at ' . esc($v['empresa']) . ($modeloLabel ? ', ' . $modeloLabel . ' model' : '') . '. Click below to see details and apply.';
     $badge = $v['modelo_trabalho'] ? '<span class="' . badgeClass($v['modelo_trabalho']) . '">' . esc($v['modelo_trabalho']) . '</span>' : '';
 ?>
         <article class="job-card" data-vaga-id="<?= esc($v['vaga_id_externo']) ?>">
@@ -210,7 +211,7 @@ gtag('config', 'G-RPQ9FFFNP1');
             <span class="job-card-info-text job-card-date"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><?= esc($v['publicado_em']) ?></span>
 <?php endif; ?>
           </div>
-          <p class="job-card-resumo line-clamp-2"><?= esc($resumo) ?></p>
+          <p class="job-card-resumo line-clamp-2"><?= $resumo ?></p>
           <div class="job-card-footer">
             <a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-btn">View Details</a>
           </div>
@@ -361,6 +362,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.7.1"></script>
+<script src="/js/app-exterior.js?v=1.7.2"></script>
 </body>
 </html>
