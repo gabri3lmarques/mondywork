@@ -2132,6 +2132,59 @@ input { font-family: inherit; }
   border-color: #4b41e1;
 }
 
+/* ===== VAGA PAGE - CATEGORY CONTENT BLOCKS ===== */
+.vaga-cat-block {
+  background: #f8f9ff;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #4b41e1;
+  border-radius: 0 0.75rem 0.75rem 0;
+  padding: 24px 28px;
+  margin: 24px 0;
+}
+
+.vaga-cat-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0b1c30;
+  margin: 0 0 12px;
+}
+
+.vaga-cat-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #444;
+}
+
+.vaga-cat-body h2,
+.vaga-cat-body h3,
+.vaga-cat-body h4 {
+  color: #0b1c30;
+  margin: 16px 0 8px;
+  font-size: 15px;
+}
+
+.vaga-cat-body p {
+  margin-bottom: 10px;
+}
+
+.vaga-cat-body p:last-child {
+  margin-bottom: 0;
+}
+
+.vaga-cat-body ul,
+.vaga-cat-body ol {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.vaga-cat-body li {
+  margin-bottom: 4px;
+}
+
+.vaga-cat-body strong {
+  color: #0b1c30;
+}
+
 /* ===== VAGA PAGE - COMPATIBILITY SCORE ===== */
 .vaga-compat {
   background: #fff;

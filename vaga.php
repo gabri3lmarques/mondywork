@@ -35,6 +35,7 @@ try {
 
 $dicaPost = null;
 $relatedPosts = [];
+$catConteudos = [];
 try {
     if ($vaga) {
         $stmtDica = $pdo->prepare("SELECT slug, title, excerpt, content, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY RAND() LIMIT 1");
@@ -44,10 +45,20 @@ try {
         $stmtRelated = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC LIMIT 3");
         $stmtRelated->execute();
         $relatedPosts = $stmtRelated->fetchAll(PDO::FETCH_ASSOC);
+
+        $langField = $isExterior ? 'en' : 'pt';
+        $stmtCatCont = $pdo->prepare("SELECT cc.titulo_{$langField} as titulo, cc.conteudo_{$langField} as conteudo
+            FROM categoria_conteudo cc
+            JOIN vaga_categorias vc ON vc.categoria_id = cc.categoria_id
+            WHERE vc.vaga_id = :vagaId
+            ORDER BY cc.id ASC LIMIT 3");
+        $stmtCatCont->execute([':vagaId' => $vaga['id']]);
+        $catConteudos = $stmtCatCont->fetchAll(PDO::FETCH_ASSOC);
     }
 } catch (Exception $e) {
     $dicaPost = null;
     $relatedPosts = [];
+    $catConteudos = [];
 }
 
 if (!$vaga) {
@@ -176,7 +187,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.7.5">
+<link rel="stylesheet" href="/css/style.css?v=1.7.6">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -283,6 +294,15 @@ $score = min($score, 100);
       <div class="vaga-page-body">
         <?= $vaga['descricao'] ?: '<p>' . ($isExterior ? 'Description not available.' : 'Descrição não disponível.') . '</p>' ?>
       </div>
+
+<?php if (!empty($catConteudos)): ?>
+<?php foreach ($catConteudos as $cc): ?>
+      <div class="vaga-cat-block">
+        <h3 class="vaga-cat-title"><?= esc($cc['titulo']) ?></h3>
+        <div class="vaga-cat-body"><?= $cc['conteudo'] ?></div>
+      </div>
+<?php endforeach; ?>
+<?php endif; ?>
 
       <div class="vaga-page-footer">
         <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
