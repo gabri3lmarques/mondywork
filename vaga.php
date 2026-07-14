@@ -176,7 +176,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.7.0">
+<link rel="stylesheet" href="/css/style.css?v=1.7.1">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -257,10 +257,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         </div>
       </div>
       <div class="dica-expert-body">
-        <?php
-          $excerpt = $dicaPost['excerpt'] ?: mb_substr(strip_tags($dicaPost['content']), 0, 600);
-          echo '<p>' . esc(strip_tags($excerpt)) . '</p>';
-        ?>
+        <?= $dicaPost['content'] ?>
       </div>
       <div class="dica-expert-footer">
         <a href="/blog/<?= esc($dicaPost['slug']) ?>" class="dica-expert-link">Ler artigo completo &rarr;</a>

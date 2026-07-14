@@ -26,7 +26,7 @@ try {
 <meta property="twitter:title" content="About | Mondywork">
 <meta property="twitter:description" content="Learn about Mondywork, the platform that connects talent to the best job opportunities in Tech, Design, Marketing, and Product.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image-usa.jpg">
-<link rel="stylesheet" href="/css/style.css?v=1.7.0">
+<link rel="stylesheet" href="/css/style.css?v=1.7.1">
 <link rel="icon" href="../img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="../img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../img/favicon/apple-touch-icon.png">

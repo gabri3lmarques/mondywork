@@ -2145,12 +2145,49 @@ input { font-family: inherit; }
   color: #333;
 }
 
+.dica-expert-body h2,
+.dica-expert-body h3,
+.dica-expert-body h4 {
+  color: #0b1c30;
+  margin: 20px 0 10px;
+}
+
 .dica-expert-body p {
   margin-bottom: 12px;
 }
 
-.dica-expert-body p:last-child {
-  margin-bottom: 0;
+.dica-expert-body ul,
+.dica-expert-body ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.dica-expert-body li {
+  margin-bottom: 6px;
+}
+
+.dica-expert-body strong {
+  color: #0b1c30;
+}
+
+.dica-expert-body a {
+  color: #4b41e1;
+  text-decoration: underline;
+}
+
+.dica-expert-body blockquote {
+  border-left: 3px solid #4b41e1;
+  margin: 16px 0;
+  padding: 8px 16px;
+  background: rgba(75, 65, 225, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+.dica-expert-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 12px 0;
 }
 
 .dica-expert-footer {
