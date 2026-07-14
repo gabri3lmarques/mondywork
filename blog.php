@@ -116,8 +116,8 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="nav-links">
       <a class="nav-link" href="/vagas/">Vagas</a>
       <a class="nav-link active" href="/">Blog</a>
-      <a class="nav-link" href="/sobre.html">Sobre</a>
-      <a class="nav-link" href="/contato.html">Contato</a>
+      <a class="nav-link" href="/sobre.php">Sobre</a>
+      <a class="nav-link" href="/contato.php">Contato</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
     </div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
@@ -128,8 +128,8 @@ gtag('config', 'G-RPQ9FFFNP1');
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link" href="/vagas/">Vagas</a>
   <a class="nav-link active" href="/">Blog</a>
-  <a class="nav-link" href="/sobre.html">Sobre</a>
-  <a class="nav-link" href="/contato.html">Contato</a>
+  <a class="nav-link" href="/sobre.php">Sobre</a>
+  <a class="nav-link" href="/contato.php">Contato</a>
   <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
 </div>
 
@@ -224,18 +224,18 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="footer-inner">
     <span class="footer-logo">Mondywork</span>
     <div class="footer-links">
-      <a class="footer-link" href="/contato.html">Contato</a>
-      <a class="footer-link" href="/sobre.html">Sobre</a>
-      <a class="footer-link" href="/guia-de-carreira.html">Guia de Tecnologia</a>
-      <a class="footer-link" href="/guia-de-carreira-design.html">Guia de Design</a>
-      <a class="footer-link" href="/guia-de-carreira-marketing.html">Guia de Marketing</a>
-      <a class="footer-link" href="/guia-de-carreira-comunicacao.html">Guia de Comunicacao</a>
-      <a class="footer-link" href="/guia-de-carreira-administracao.html">Guia de Administracao</a>
-      <a class="footer-link" href="/guia-de-carreira-dados.html">Guia de Dados</a>
-      <a class="footer-link" href="/guia-de-carreira-produto.html">Guia de Produto</a>
-      <a class="footer-link" href="/guia-de-carreira-financas.html">Guia de Finanças</a>
-      <a class="footer-link" href="/privacidade.html">Privacidade</a>
-      <a class="footer-link" href="/termos-de-uso.html">Termos</a>
+      <a class="footer-link" href="/contato.php">Contato</a>
+      <a class="footer-link" href="/sobre.php">Sobre</a>
+      <a class="footer-link" href="/guia-de-carreira.php">Guia de Tecnologia</a>
+      <a class="footer-link" href="/guia-de-carreira-design.php">Guia de Design</a>
+      <a class="footer-link" href="/guia-de-carreira-marketing.php">Guia de Marketing</a>
+      <a class="footer-link" href="/guia-de-carreira-comunicacao.php">Guia de Comunicacao</a>
+      <a class="footer-link" href="/guia-de-carreira-administracao.php">Guia de Administracao</a>
+      <a class="footer-link" href="/guia-de-carreira-dados.php">Guia de Dados</a>
+      <a class="footer-link" href="/guia-de-carreira-produto.php">Guia de Produto</a>
+      <a class="footer-link" href="/guia-de-carreira-financas.php">Guia de Finanças</a>
+      <a class="footer-link" href="/privacidade.php">Privacidade</a>
+      <a class="footer-link" href="/termos-de-uso.php">Termos</a>
     </div>
     <p class="footer-text">&copy; 2026 Mondywork. Todos os direitos reservados.</p>
   </div>

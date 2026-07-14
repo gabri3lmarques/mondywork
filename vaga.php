@@ -111,6 +111,7 @@ if ($vaga) {
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta name="robots" content="noindex,nofollow">
 <?php if ($vaga): ?>
 <title><?= esc($pageTitle) ?></title>
 <meta name="description" content="<?= esc($pageDesc) ?>">
@@ -172,8 +173,8 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
-      <a class="nav-link" href="/sobre.html"><?= $isExterior ? 'About' : 'Sobre' ?></a>
-      <a class="nav-link" href="/contato.html"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
+      <a class="nav-link" href="/sobre.php"><?= $isExterior ? 'About' : 'Sobre' ?></a>
+      <a class="nav-link" href="/contato.php"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
 <?php if (!$isExterior): ?>
       <a class="nav-link" href="/vagas/">Vagas</a>
 <?php endif; ?>
@@ -243,14 +244,14 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="footer-inner">
     <span class="footer-logo">Mondywork</span>
     <div class="footer-links">
-      <a class="footer-link" href="/contato.html"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
-      <a class="footer-link" href="/sobre.html"><?= $isExterior ? 'About' : 'Sobre' ?></a>
+      <a class="footer-link" href="/contato.php"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
+      <a class="footer-link" href="/sobre.php"><?= $isExterior ? 'About' : 'Sobre' ?></a>
 <?php if ($isExterior): ?>
-      <a class="footer-link" href="/usa/privacy.html">Privacy</a>
-      <a class="footer-link" href="/usa/terms.html">Terms</a>
+      <a class="footer-link" href="/usa/privacy.php">Privacy</a>
+      <a class="footer-link" href="/usa/terms.php">Terms</a>
 <?php else: ?>
-      <a class="footer-link" href="/privacidade.html">Privacidade</a>
-      <a class="footer-link" href="/termos-de-uso.html">Termos</a>
+      <a class="footer-link" href="/privacidade.php">Privacidade</a>
+      <a class="footer-link" href="/termos-de-uso.php">Termos</a>
 <?php endif; ?>
     </div>
     <p class="footer-text">&copy; 2026 Mondywork. <?= $isExterior ? 'All rights reserved.' : 'Todos os direitos reservados.' ?></p>

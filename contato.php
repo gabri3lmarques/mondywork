@@ -1,19 +1,30 @@
+<?php
+$configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
+$config = require $configFile;
+require_once __DIR__ . '/lib/Database.php';
+require_once __DIR__ . '/lib/BlogHelper.php';
+try {
+    $pdo = new PDO("mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4", $config['user'], $config['pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    setupSchema($pdo);
+    $blogPosts = getBlogPosts($pdo);
+} catch (Exception $e) { $blogPosts = []; }
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Sobre | Mondywork</title>
-<meta name="description" content="Saiba mais sobre o Mondywork, o portal que conecta talentos às melhores oportunidades de trabalho em Tecnologia, Design, Marketing e Produto no Brasil.">
+<title>Contato | Mondywork</title>
+<meta name="description" content="Entre em contato com o Mondywork. Tire dúvidas, envie sugestões ou fale sobre parcerias.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://mondywork.com/sobre.html">
-<meta property="og:title" content="Sobre | Mondywork">
-<meta property="og:description" content="Saiba mais sobre o Mondywork, o portal que conecta talentos às melhores oportunidades de trabalho em Tecnologia, Design, Marketing e Produto no Brasil.">
+<meta property="og:url" content="https://mondywork.com/contato.php">
+<meta property="og:title" content="Contato | Mondywork">
+<meta property="og:description" content="Entre em contato com o Mondywork. Tire dúvidas, envie sugestões ou fale sobre parcerias.">
 <meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://mondywork.com/sobre.html">
-<meta property="twitter:title" content="Sobre | Mondywork">
-<meta property="twitter:description" content="Saiba mais sobre o Mondywork, o portal que conecta talentos às melhores oportunidades de trabalho em Tecnologia, Design, Marketing e Produto no Brasil.">
+<meta property="twitter:url" content="https://mondywork.com/contato.php">
+<meta property="twitter:title" content="Contato | Mondywork">
+<meta property="twitter:description" content="Entre em contato com o Mondywork. Tire dúvidas, envie sugestões ou fale sobre parcerias.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
 <link rel="stylesheet" href="/css/style.css?v=1.6.8">
 <link rel="icon" href="./img/favicon/favicon.ico" sizes="any">
@@ -35,8 +46,8 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="nav-links">
       <a class="nav-link" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/">Blog</a>
-      <a class="nav-link active" href="sobre.html">Sobre</a>
-      <a class="nav-link" href="contato.html">Contato</a>
+      <a class="nav-link" href="sobre.php">Sobre</a>
+      <a class="nav-link active" href="contato.php">Contato</a>
       <a class="nav-link" href="./usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
     </div>
     <div class="nav-icon">
@@ -55,8 +66,8 @@ gtag('config', 'G-RPQ9FFFNP1');
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link" href="/vagas/">Vagas</a>
   <a class="nav-link" href="/">Blog</a>
-  <a class="nav-link active" href="sobre.html">Sobre</a>
-  <a class="nav-link" href="contato.html">Contato</a>
+  <a class="nav-link" href="sobre.php">Sobre</a>
+  <a class="nav-link active" href="contato.php">Contato</a>
   <a class="nav-link" href="./usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
   <a class="nav-icon-mobile" aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -69,58 +80,51 @@ gtag('config', 'G-RPQ9FFFNP1');
 <main class="main-content">
   <section class="legal-section">
     <div class="legal-container">
-      <h1 class="legal-title">Sobre o Mondywork</h1>
+      <h1 class="legal-title">Contato</h1>
 
-      <p>O Mondywork nasceu do esforço voluntário para ajudar profissionais a construírem carreiras de sucesso em Tecnologia, Design, Marketing e Produto. Acreditamos que informação de qualidade e oportunidades acessíveis são os pilares para transformar trajetórias profissionais.</p>
+      <p>Tem dúvidas, sugestões ou quer falar sobre parcerias? Entre em contato conosco! Responderemos o mais breve possível.</p>
 
-      <p>Nosso portal combina um blog com artigos originais sobre carreira, mercado de trabalho e desenvolvimento profissional com uma plataforma de vagas que reúne diariamente centenas de oportunidades em todo o Brasil. Através de parcerias com empresas que utilizam as principais plataformas de recrutamento (InHire, Ashby e Greenhouse), oferecemos uma experiência unificada de busca de emprego.</p>
+      <p style="font-size:1.5rem;font-weight:600;color:#4b41e1;text-align:center;padding:32px 0">
+        <a href="mailto:hello@mondywork.com" style="color:#4b41e1;text-decoration:none">hello@mondywork.com</a>
+      </p>
 
-      <h2>Nossa Missão</h2>
-      <p>Democratizar o acesso a conhecimento e oportunidades de qualidade, eliminando a necessidade de buscar vaga por vaga em dezenas de sites diferentes. Queremos que você encontre conteúdo relevante para sua carreira e a vaga certa de forma rápida, simples e gratuita.</p>
-
-      <h2>O que oferecemos</h2>
+      <h2>Redes Sociais</h2>
+      <p>Acompanhe o Mondywork nas redes sociais para ficar por dentro das novidades:</p>
       <ul>
-        <li><strong>Blog com conteúdo original:</strong> Artigos, guias e dicas sobre carreira, entrevistas, desenvolvimento profissional e tendências do mercado escritos por profissionais da área.</li>
-        <li><strong>Agregação inteligente de vagas:</strong> Coletamos vagas de centenas de empresas em um só lugar.</li>
-        <li><strong>Categorização automática:</strong> Classificamos as oportunidades por área de atuação para facilitar sua busca.</li>
-        <li><strong>Busca inteligente:</strong> Encontre vagas por cargo, palavra-chave ou habilidade com correção ortográfica integrada.</li>
-        <li><strong>Atualização diária:</strong> Novas vagas e conteúdos são adicionados todos os dias.</li>
+        <li><strong>X (Twitter):</strong> <a href="https://x.com/mondywork" target="_blank">@mondywork</a></li>
+        <li><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/company/mondywork/" target="_blank">/company/mondywork</a></li>
       </ul>
 
-      <h2>Para Empresas</h2>
-      <p>Se você é uma empresa e deseja divulgar suas vagas em nossa plataforma ou contribuir com conteúdo para o blog, entre em contato conosco. Estamos sempre abertos a novas parcerias que ajudem a conectar talentos às melhores oportunidades.</p>
-
-      <h2>Transparência</h2>
-      <p>Este portal é mantido de forma independente. Para continuarmos oferecendo conteúdo de qualidade e oportunidades gratuitas, precisamos do seu apoio. Siga nossas redes sociais, compartilhe nossos artigos e ajude-nos a alcançar cada vez mais profissionais que buscam crescimento na carreira.</p>
-
-      <p>Juntos, podemos transformar nossa realidade profissional. Muito obrigado!</p>
+      <h2>Horário de Resposta</h2>
+      <p>Nos esforçamos para responder todas as mensagens em até 48 horas úteis.</p>
     </div>
   </section>
 </main>
 
+<?php renderBlogSection($blogPosts); ?>
 <footer class="footer">
   <div class="footer-inner">
     <span class="footer-logo">Mondywork</span>
     <div class="footer-links">
-      <a class="footer-link" href="contato.html">Contato</a>
-      <a class="footer-link" href="sobre.html">Sobre</a>
-      <a class="footer-link" href="guia-de-carreira.html">Guia de Tecnologia</a>
-      <a class="footer-link" href="guia-de-carreira-design.html">Guia de Design</a>
-      <a class="footer-link" href="guia-de-carreira-marketing.html">Guia de Marketing</a>
-      <a class="footer-link" href="guia-de-carreira-comunicacao.html">Guia de Comunicacao</a>
-      <a class="footer-link" href="guia-de-carreira-administracao.html">Guia de Administracao</a>
-      <a class="footer-link" href="guia-de-carreira-dados.html">Guia de Dados</a>
-      <a class="footer-link" href="guia-de-carreira-produto.html">Guia de Produto</a>
-      <a class="footer-link" href="guia-de-carreira-financas.html">Guia de Finanças</a>
-      <a class="footer-link" href="privacidade.html">Privacidade</a>
-      <a class="footer-link" href="termos-de-uso.html">Termos</a>
+      <a class="footer-link" href="contato.php">Contato</a>
+      <a class="footer-link" href="sobre.php">Sobre</a>
+      <a class="footer-link" href="guia-de-carreira.php">Guia de Tecnologia</a>
+      <a class="footer-link" href="guia-de-carreira-design.php">Guia de Design</a>
+      <a class="footer-link" href="guia-de-carreira-marketing.php">Guia de Marketing</a>
+      <a class="footer-link" href="guia-de-carreira-comunicacao.php">Guia de Comunicacao</a>
+      <a class="footer-link" href="guia-de-carreira-administracao.php">Guia de Administracao</a>
+      <a class="footer-link" href="guia-de-carreira-dados.php">Guia de Dados</a>
+      <a class="footer-link" href="guia-de-carreira-produto.php">Guia de Produto</a>
+      <a class="footer-link" href="guia-de-carreira-financas.php">Guia de Finanças</a>
+      <a class="footer-link" href="privacidade.php">Privacidade</a>
+      <a class="footer-link" href="termos-de-uso.php">Termos</a>
     </div>
     <p class="footer-text">&copy; 2026 Mondywork. Todos os direitos reservados.</p>
   </div>
 </footer>
 
 <div id="cookie-banner" class="cookie-banner">
-  <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="privacidade.html">Política de Privacidade</a>.</p>
+  <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="privacidade.php">Política de Privacidade</a>.</p>
   <button id="cookie-accept" class="cookie-btn">Aceitar</button>
 </div>
 

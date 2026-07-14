@@ -40,6 +40,14 @@ try {
     $hasMore = false;
 }
 
+try {
+    $stmtBlog = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC LIMIT 9");
+    $stmtBlog->execute();
+    $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $blogPosts = [];
+}
+
 function badgeClass($modelo) {
     if (!$modelo) return '';
     $m = mb_strtolower($modelo);
@@ -57,6 +65,11 @@ function esc($s) {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 
+function excerpt($text, $max = 350) {
+    if (mb_strlen($text) <= $max) return $text;
+    return mb_substr($text, 0, $max) . '...';
+}
+
 function capitalizeTitle($str) {
     return mb_convert_case($str, MB_CASE_TITLE, 'UTF-8');
 }
@@ -66,9 +79,9 @@ function capitalizeTitle($str) {
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta name="robots" content="noindex,nofollow">
 <title>Vagas de Tecnologia, Design e Marketing | Mondywork</title>
 <meta name="description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto. Oportunidades atualizadas diariamente em todo o Brasil.">
-<?php if ($filterModelo): ?><meta name="robots" content="noindex,follow"><?php endif; ?>
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vagas/">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/">
 <link rel="canonical" href="https://mondywork.com/vagas/">
@@ -112,8 +125,8 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="nav-links">
       <a class="nav-link active" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/">Blog</a>
-      <a class="nav-link" href="/sobre.html">Sobre</a>
-      <a class="nav-link" href="/contato.html">Contato</a>
+      <a class="nav-link" href="/sobre.php">Sobre</a>
+      <a class="nav-link" href="/contato.php">Contato</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
     </div>
     <div class="nav-icon">
@@ -133,8 +146,8 @@ gtag('config', 'G-RPQ9FFFNP1');
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link active" href="/vagas/">Vagas</a>
   <a class="nav-link" href="/">Blog</a>
-  <a class="nav-link" href="/sobre.html">Sobre</a>
-  <a class="nav-link" href="/contato.html">Contato</a>
+  <a class="nav-link" href="/sobre.php">Sobre</a>
+  <a class="nav-link" href="/contato.php">Contato</a>
   <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
   <a class="nav-icon-mobile" aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -258,24 +271,63 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
     <div id="sentinel" style="height:1px"></div>
   </section>
+
+  <?php if (!empty($blogPosts)): ?>
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Artigos Recentes</h2>
+    </div>
+    <p class="section-description">Confira nossos artigos sobre carreira, mercado de trabalho e desenvolvimento profissional em Tecnologia, Design, Marketing e Produto.</p>
+    <div class="blog-grid">
+      <?php foreach ($blogPosts as $p):
+        $img = $p['image'] ?: '';
+        $date = $p['published_at'] ? date('d/m/Y', strtotime($p['published_at'])) : '';
+      ?>
+      <article class="blog-card">
+        <a href="/blog/<?= esc($p['slug']) ?>" class="blog-card-link">
+          <?php if ($img): ?>
+            <div class="blog-card-image" style="background-image:url('<?= esc($img) ?>')"></div>
+          <?php else: ?>
+            <div class="blog-card-image blog-card-image--empty"><?= esc(mb_substr($p['title'], 0, 1)) ?></div>
+          <?php endif; ?>
+          <div class="blog-card-body">
+            <?php if (!empty($p['categoria'])): ?>
+              <span class="blog-card-cat"><?= esc($p['categoria']) ?></span>
+            <?php endif; ?>
+            <h3 class="blog-card-title"><?= esc($p['title']) ?></h3>
+            <p class="blog-card-excerpt"><?= esc(excerpt(strip_tags($p['excerpt'] ?: ''))) ?></p>
+            <div class="blog-card-meta">
+              <span><?= esc($p['author']) ?></span>
+              <span><?= $date ?></span>
+            </div>
+          </div>
+        </a>
+      </article>
+      <?php endforeach; ?>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <a href="/" class="btn-clear" style="display:inline-flex;align-items:center">Ver todos os artigos &rarr;</a>
+    </div>
+  </section>
+  <?php endif; ?>
 </main>
 
 <footer class="footer">
   <div class="footer-inner">
     <span class="footer-logo">Mondywork</span>
     <div class="footer-links">
-      <a class="footer-link" href="/contato.html">Contato</a>
-      <a class="footer-link" href="/sobre.html">Sobre</a>
-      <a class="footer-link" href="/guia-de-carreira.html">Guia de Tecnologia</a>
-      <a class="footer-link" href="/guia-de-carreira-design.html">Guia de Design</a>
-      <a class="footer-link" href="/guia-de-carreira-marketing.html">Guia de Marketing</a>
-      <a class="footer-link" href="/guia-de-carreira-comunicacao.html">Guia de Comunicacao</a>
-      <a class="footer-link" href="/guia-de-carreira-administracao.html">Guia de Administracao</a>
-      <a class="footer-link" href="/guia-de-carreira-dados.html">Guia de Dados</a>
-      <a class="footer-link" href="/guia-de-carreira-produto.html">Guia de Produto</a>
-      <a class="footer-link" href="/guia-de-carreira-financas.html">Guia de Finanças</a>
-      <a class="footer-link" href="/privacidade.html">Privacidade</a>
-      <a class="footer-link" href="/termos-de-uso.html">Termos</a>
+      <a class="footer-link" href="/contato.php">Contato</a>
+      <a class="footer-link" href="/sobre.php">Sobre</a>
+      <a class="footer-link" href="/guia-de-carreira.php">Guia de Tecnologia</a>
+      <a class="footer-link" href="/guia-de-carreira-design.php">Guia de Design</a>
+      <a class="footer-link" href="/guia-de-carreira-marketing.php">Guia de Marketing</a>
+      <a class="footer-link" href="/guia-de-carreira-comunicacao.php">Guia de Comunicacao</a>
+      <a class="footer-link" href="/guia-de-carreira-administracao.php">Guia de Administracao</a>
+      <a class="footer-link" href="/guia-de-carreira-dados.php">Guia de Dados</a>
+      <a class="footer-link" href="/guia-de-carreira-produto.php">Guia de Produto</a>
+      <a class="footer-link" href="/guia-de-carreira-financas.php">Guia de Finanças</a>
+      <a class="footer-link" href="/privacidade.php">Privacidade</a>
+      <a class="footer-link" href="/termos-de-uso.php">Termos</a>
     </div>
     <p class="footer-text">&copy; 2026 Mondywork. Todos os direitos reservados.</p>
   </div>
@@ -304,7 +356,7 @@ gtag('config', 'G-RPQ9FFFNP1');
 </div>
 
 <div id="cookie-banner" class="cookie-banner">
-  <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="/privacidade.html">Política de Privacidade</a>.</p>
+  <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="/privacidade.php">Política de Privacidade</a>.</p>
   <button id="cookie-accept" class="cookie-btn">Aceitar</button>
 </div>
 

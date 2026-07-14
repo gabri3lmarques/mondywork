@@ -1,3 +1,14 @@
+<?php
+$configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
+$config = require $configFile;
+require_once __DIR__ . '/lib/Database.php';
+require_once __DIR__ . '/lib/BlogHelper.php';
+try {
+    $pdo = new PDO("mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4", $config['user'], $config['pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    setupSchema($pdo);
+    $blogPosts = getBlogPosts($pdo);
+} catch (Exception $e) { $blogPosts = []; }
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,16 +17,16 @@
 <title>Política de Privacidade | Mondywork</title>
 <meta name="description" content="Política de Privacidade do Mondywork. Saiba como coletamos, usamos e protegemos suas informações.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://mondywork.com/privacidade.html">
+<meta property="og:url" content="https://mondywork.com/privacidade.php">
 <meta property="og:title" content="Política de Privacidade | Mondywork">
 <meta property="og:description" content="Política de Privacidade do Mondywork. Saiba como coletamos, usamos e protegemos suas informações.">
 <meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://mondywork.com/privacidade.html">
+<meta property="twitter:url" content="https://mondywork.com/privacidade.php">
 <meta property="twitter:title" content="Política de Privacidade | Mondywork">
 <meta property="twitter:description" content="Política de Privacidade do Mondywork. Saiba como coletamos, usamos e protegemos suas informações.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
-<link rel="canonical" href="https://mondywork.com/privacidade.html">
+<link rel="canonical" href="https://mondywork.com/privacidade.php">
 <link rel="stylesheet" href="/css/style.css?v=1.6.8">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
@@ -36,8 +47,8 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="nav-links">
       <a class="nav-link" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/">Blog</a>
-      <a class="nav-link" href="sobre.html">Sobre</a>
-      <a class="nav-link" href="contato.html">Contato</a>
+      <a class="nav-link" href="sobre.php">Sobre</a>
+      <a class="nav-link" href="contato.php">Contato</a>
       <a class="nav-link" href="./usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
     </div>
     <div class="nav-icon">
@@ -56,8 +67,8 @@ gtag('config', 'G-RPQ9FFFNP1');
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link" href="/vagas/">Vagas</a>
   <a class="nav-link" href="/">Blog</a>
-  <a class="nav-link" href="sobre.html">Sobre</a>
-  <a class="nav-link" href="contato.html">Contato</a>
+  <a class="nav-link" href="sobre.php">Sobre</a>
+  <a class="nav-link" href="contato.php">Contato</a>
   <a class="nav-link" href="./usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
   <a class="nav-icon-mobile" aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -122,22 +133,23 @@ gtag('config', 'G-RPQ9FFFNP1');
   </section>
 </main>
 
+<?php renderBlogSection($blogPosts); ?>
 <footer class="footer">
   <div class="footer-inner">
     <span class="footer-logo">Mondywork</span>
     <div class="footer-links">
-      <a class="footer-link" href="contato.html">Contato</a>
-      <a class="footer-link" href="sobre.html">Sobre</a>
-      <a class="footer-link" href="guia-de-carreira.html">Guia de Tecnologia</a>
-      <a class="footer-link" href="guia-de-carreira-design.html">Guia de Design</a>
-      <a class="footer-link" href="guia-de-carreira-marketing.html">Guia de Marketing</a>
-      <a class="footer-link" href="guia-de-carreira-comunicacao.html">Guia de Comunicacao</a>
-      <a class="footer-link" href="guia-de-carreira-administracao.html">Guia de Administracao</a>
-      <a class="footer-link" href="guia-de-carreira-dados.html">Guia de Dados</a>
-      <a class="footer-link" href="guia-de-carreira-produto.html">Guia de Produto</a>
-      <a class="footer-link" href="guia-de-carreira-financas.html">Guia de Finanças</a>
-      <a class="footer-link" href="privacidade.html">Privacidade</a>
-      <a class="footer-link" href="termos-de-uso.html">Termos</a>
+      <a class="footer-link" href="contato.php">Contato</a>
+      <a class="footer-link" href="sobre.php">Sobre</a>
+      <a class="footer-link" href="guia-de-carreira.php">Guia de Tecnologia</a>
+      <a class="footer-link" href="guia-de-carreira-design.php">Guia de Design</a>
+      <a class="footer-link" href="guia-de-carreira-marketing.php">Guia de Marketing</a>
+      <a class="footer-link" href="guia-de-carreira-comunicacao.php">Guia de Comunicacao</a>
+      <a class="footer-link" href="guia-de-carreira-administracao.php">Guia de Administracao</a>
+      <a class="footer-link" href="guia-de-carreira-dados.php">Guia de Dados</a>
+      <a class="footer-link" href="guia-de-carreira-produto.php">Guia de Produto</a>
+      <a class="footer-link" href="guia-de-carreira-financas.php">Guia de Finanças</a>
+      <a class="footer-link" href="privacidade.php">Privacidade</a>
+      <a class="footer-link" href="termos-de-uso.php">Termos</a>
     </div>
     <p class="footer-text">&copy; 2026 Mondywork. Todos os direitos reservados.</p>
   </div>
@@ -162,7 +174,7 @@ gtag('config', 'G-RPQ9FFFNP1');
 </div>
 
 <div id="cookie-banner" class="cookie-banner">
-  <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="privacidade.html">Política de Privacidade</a>.</p>
+  <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="privacidade.php">Política de Privacidade</a>.</p>
   <button id="cookie-accept" class="cookie-btn">Aceitar</button>
 </div>
 

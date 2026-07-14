@@ -105,8 +105,8 @@ gtag('config', 'G-RPQ9FFFNP1');
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
       <a class="nav-link" href="/vagas/">Vagas</a>
-      <a class="nav-link" href="/sobre.html">Sobre</a>
-      <a class="nav-link" href="/contato.html">Contato</a>
+      <a class="nav-link" href="/sobre.php">Sobre</a>
+      <a class="nav-link" href="/contato.php">Contato</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
     </div>
     <div class="nav-icon">
@@ -124,8 +124,8 @@ gtag('config', 'G-RPQ9FFFNP1');
 </nav>
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link" href="/vagas/">Vagas</a>
-  <a class="nav-link" href="/sobre.html">Sobre</a>
-  <a class="nav-link" href="/contato.html">Contato</a>
+  <a class="nav-link" href="/sobre.php">Sobre</a>
+  <a class="nav-link" href="/contato.php">Contato</a>
   <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
 </div>
 
@@ -274,7 +274,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Tecnologia</h3>
         <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.</p>
         <p class="guide-card-desc">O guia mais completo para profissionais de tecnologia. Aborda desde a escolha da área de atuação (desenvolvimento, dados, infraestrutura, QA) até a preparação para entrevistas técnicas e planejamento de carreira a longo prazo. Inclui dicas de portfólio, LinkedIn e desenvolvimento de soft skills essenciais para o mercado de tecnologia.</p>
-        <a href="/guia-de-carreira.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
@@ -283,7 +283,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Design</h3>
         <p>UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.</p>
         <p class="guide-card-desc">Um guia completo para profissionais de design que desejam se destacar no mercado. Aborda UX/UI, Design Gráfico, Design de Produto e muito mais. Inclui dicas de construção de portfólio, ferramentas essenciais, preparação para entrevistas de design e estratégias de crescimento profissional na área criativa.</p>
-        <a href="/guia-de-carreira-design.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira-design.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
@@ -292,7 +292,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Marketing</h3>
         <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
         <p class="guide-card-desc">O guia definitivo para profissionais de marketing digital. Cobre desde os fundamentos de SEO e Marketing de Conteúdo até estratégias avançadas de Mídia Paga e Growth. Inclui certificações recomendadas, ferramentas indispensáveis e um plano de carreira para cada etapa da sua jornada no marketing.</p>
-        <a href="/guia-de-carreira-marketing.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira-marketing.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
@@ -301,7 +301,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Finanças</h3>
         <p>Mercado financeiro, investimentos, finanças corporativas, certificações e estratégias para crescer na área financeira.</p>
         <p class="guide-card-desc">Aprenda tudo sobre carreira no mercado financeiro. Do currículo ideal às certificações mais valorizadas (CFA, CPA, ANCORD), passando por dicas de entrevistas em bancos e funds. Aborda finanças corporativas, investimentos, private equity e as tendências do setor financeiro no Brasil.</p>
-        <a href="/guia-de-carreira-financas.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira-financas.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#e11d48,#fb7185)">
@@ -310,7 +310,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Comunicacao</h3>
         <p>Jornalismo, RP, Comunicacao Corporativa, Marketing de Conteudo e Producao Multimidia.</p>
         <p class="guide-card-desc">Um guia completo para profissionais de comunicacao. Aborda desde Jornalismo e Comunicacao Corporativa ate Marketing de Conteudo e Producao Multimidia. Inclui dicas de portfolio, ferramentas essenciais, preparacao para entrevistas e estrategias de crescimento na area.</p>
-        <a href="/guia-de-carreira-comunicacao.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira-comunicacao.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
@@ -319,7 +319,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Administracao</h3>
         <p>Gestao de Empresas, RH, Logistica, Consultoria, Gestao de Projetos e Empreendedorismo.</p>
         <p class="guide-card-desc">Aprenda tudo sobre carreira em administracao. Do currículo ideal as certificacoes mais valorizadas (PMP, CPA, Six Sigma), passando por dicas de entrevistas em consultorias e grandes empresas. Aborda gestao de pessoas, financas, operacoes e estrategia.</p>
-        <a href="/guia-de-carreira-administracao.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira-administracao.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
@@ -328,7 +328,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Dados</h3>
         <p>Ciencia de Dados, Engenharia de Dados, BI, Machine Learning e IA. Da formacao ao mercado.</p>
         <p class="guide-card-desc">O guia completo para profissionais de dados. Aborda Ciencia de Dados, Engenharia de Dados, Analise de Dados, Business Intelligence, Machine Learning e Inteligencia Artificial. Inclui roadmap de aprendizagem, ferramentas essenciais (Python, SQL, Spark), portfolios de dados, preparacao para entrevistas tecnicas e plano de carreira na area de dados.</p>
-        <a href="/guia-de-carreira-dados.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira-dados.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
       <div class="guide-card guide-card--primary">
         <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
@@ -337,7 +337,7 @@ gtag('config', 'G-RPQ9FFFNP1');
         <h3>Guia de Carreira em Produto</h3>
         <p>Product Management, Product Ownership, Agile, Scrum e OKRs. Da estrategia a execucao.</p>
         <p class="guide-card-desc">O guia essencial para profissionais de produto. Aborda Product Management, Product Ownership, metodologias Ageis (Scrum, Kanban), OKRs, descoberta de produto, priorizacao, analise de metricas e lideranca de produto. Inclui certificacoes (CSPO, PSPO), ferramentas (Jira, Notion, Amplitude) e plano de carreira de PM a CPO.</p>
-        <a href="/guia-de-carreira-produto.html" class="guide-card-link">Ler guia completo &rarr;</a>
+        <a href="/guia-de-carreira-produto.php" class="guide-card-link">Ler guia completo &rarr;</a>
       </div>
   </section>
 
@@ -490,7 +490,7 @@ gtag('config', 'G-RPQ9FFFNP1');
       <details class="faq-item">
         <summary class="faq-question">Sou empresa. Como divulgar minhas vagas?</summary>
         <div class="faq-answer">
-          <p>Entre em contato conosco através da página de <a href="/contato.html">Contato</a>. Estamos abertos a novas parcerias para conectar talentos às melhores oportunidades.</p>
+          <p>Entre em contato conosco através da página de <a href="/contato.php">Contato</a>. Estamos abertos a novas parcerias para conectar talentos às melhores oportunidades.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -525,16 +525,16 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="footer-inner">
     <span class="footer-logo">Mondywork</span>
     <div class="footer-links">
-      <a class="footer-link" href="/contato.html">Contato</a>
-      <a class="footer-link" href="/sobre.html">Sobre</a>
-      <a class="footer-link" href="/guia-de-carreira.html">Guia de Tecnologia</a>
-      <a class="footer-link" href="/guia-de-carreira-design.html">Guia de Design</a>
-      <a class="footer-link" href="/guia-de-carreira-marketing.html">Guia de Marketing</a>
-      <a class="footer-link" href="/guia-de-carreira-comunicacao.html">Guia de Comunicacao</a>
-      <a class="footer-link" href="/guia-de-carreira-administracao.html">Guia de Administracao</a>
-      <a class="footer-link" href="/guia-de-carreira-financas.html">Guia de Finanças</a>
-      <a class="footer-link" href="/privacidade.html">Privacidade</a>
-      <a class="footer-link" href="/termos-de-uso.html">Termos</a>
+      <a class="footer-link" href="/contato.php">Contato</a>
+      <a class="footer-link" href="/sobre.php">Sobre</a>
+      <a class="footer-link" href="/guia-de-carreira.php">Guia de Tecnologia</a>
+      <a class="footer-link" href="/guia-de-carreira-design.php">Guia de Design</a>
+      <a class="footer-link" href="/guia-de-carreira-marketing.php">Guia de Marketing</a>
+      <a class="footer-link" href="/guia-de-carreira-comunicacao.php">Guia de Comunicacao</a>
+      <a class="footer-link" href="/guia-de-carreira-administracao.php">Guia de Administracao</a>
+      <a class="footer-link" href="/guia-de-carreira-financas.php">Guia de Finanças</a>
+      <a class="footer-link" href="/privacidade.php">Privacidade</a>
+      <a class="footer-link" href="/termos-de-uso.php">Termos</a>
     </div>
     <p class="footer-text">&copy; 2026 Mondywork. Todos os direitos reservados.</p>
   </div>

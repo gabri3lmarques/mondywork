@@ -15,6 +15,11 @@ RewriteRule ^blog/(.+)$ blog.php?slug=$1 [L,QSA]
 # Redirecionar /blog/ para /
 RewriteRule ^blog/?$ / [L,R=301]
 
+# Redirecionar .html para .php (paginas renomeadas)
+RewriteCond %{REQUEST_URI} \.html$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.+)\.html$ /$1.php [R=301,L]
+
 # Sitemap dinamico
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
 
