@@ -110,6 +110,28 @@ input { font-family: inherit; }
   padding-bottom: 4px;
 }
 
+.nav-link.nav-btn {
+  background: #4b41e1;
+  color: #fff;
+  padding: 6px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.nav-link.nav-btn:hover {
+  background: #3530c9;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.nav-link.nav-btn.active {
+  background: #3530c9;
+  color: #fff;
+  border-bottom: none;
+  padding-bottom: 6px;
+}
+
 .nav-icon {
   color: #4b41e1;
   transition: color 0.2s;

@@ -176,7 +176,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.7.4">
+<link rel="stylesheet" href="/css/style.css?v=1.7.5">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -194,6 +194,7 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
+      <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/sobre.php"><?= $isExterior ? 'About' : 'Sobre' ?></a>
       <a class="nav-link" href="/contato.php"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
 <?php if (!$isExterior): ?>

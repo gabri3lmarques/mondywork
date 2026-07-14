@@ -104,7 +104,7 @@ function capitalizeTitle($str) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.7.4">
+<link rel="stylesheet" href="/css/style.css?v=1.7.5">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -122,7 +122,7 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
-      <a class="nav-link active" href="/vagas/">Vagas</a>
+      <a class="nav-link active nav-btn" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/">Blog</a>
       <a class="nav-link" href="/sobre.php">Sobre</a>
       <a class="nav-link" href="/contato.php">Contato</a>
@@ -143,7 +143,7 @@ gtag('config', 'G-RPQ9FFFNP1');
 </nav>
 
 <div class="mobile-menu" id="mobile-menu">
-  <a class="nav-link active" href="/vagas/">Vagas</a>
+  <a class="nav-link active nav-btn" href="/vagas/">Vagas</a>
   <a class="nav-link" href="/">Blog</a>
   <a class="nav-link" href="/sobre.php">Sobre</a>
   <a class="nav-link" href="/contato.php">Contato</a>
@@ -383,6 +383,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app.js?v=1.7.4"></script>
+<script src="/js/app.js?v=1.7.5"></script>
 </body>
 </html>

@@ -20,7 +20,7 @@ try {
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="/css/style.css?v=1.7.4">
+<link rel="stylesheet" href="/css/style.css?v=1.7.5">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://mondywork.com/guia-de-carreira-marketing.php">
 <meta property="og:title" content="Guia de Carreira em Marketing | Mondywork">
@@ -54,6 +54,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
       <a class="nav-link" href="/">Blog</a>
+      <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/sobre.php">Sobre</a>
       <a class="nav-link" href="/contato.php">Contato</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
@@ -73,7 +74,8 @@ gtag('config', 'G-RPQ9FFFNP1');
 </nav>
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link" href="/">Blog</a>
-  <a class="nav-link" href="/sobre.php">Sobre</a>
+  <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
+      <a class="nav-link" href="/sobre.php">Sobre</a>
   <a class="nav-link" href="/contato.php">Contato</a>
   <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
   <a class="nav-icon-mobile" aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">

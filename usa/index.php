@@ -99,7 +99,7 @@ function capitalizeTitle($str) {
   "inLanguage": "en"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=1.7.4">
+<link rel="stylesheet" href="/css/style.css?v=1.7.5">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -117,6 +117,7 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
+      <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
       <a class="nav-link" href="about.php">About</a>
       <a class="nav-link" href="contact.php">Contact</a>
       <a class="nav-link active" href="/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
@@ -135,7 +136,8 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </nav>
 <div class="mobile-menu" id="mobile-menu">
-  <a class="nav-link" href="about.php">About</a>
+  <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
+      <a class="nav-link" href="about.php">About</a>
   <a class="nav-link" href="contact.php">Contact</a>
   <a class="nav-link active" href="/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
   <a class="nav-icon-mobile" aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">
@@ -362,6 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.7.4"></script>
+<script src="/js/app-exterior.js?v=1.7.5"></script>
 </body>
 </html>
