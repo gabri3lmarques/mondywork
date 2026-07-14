@@ -14,7 +14,7 @@ try {
 
     $categoriaFiltro = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
     $page = max(1, (int)($_GET['page'] ?? 1));
-    $limit = 12;
+    $limit = 24;
     $offset = ($page - 1) * $limit;
 
     $whereBlog = "status='publicado'";
