@@ -295,6 +295,10 @@ $score = min($score, 100);
         <?= $vaga['descricao'] ?: '<p>' . ($isExterior ? 'Description not available.' : 'Descrição não disponível.') . '</p>' ?>
       </div>
 
+      <div class="vaga-page-footer">
+        <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
+      </div>
+
 <?php if (!empty($catConteudos)): ?>
 <?php foreach ($catConteudos as $cc): ?>
       <div class="vaga-cat-block">
@@ -303,10 +307,6 @@ $score = min($score, 100);
       </div>
 <?php endforeach; ?>
 <?php endif; ?>
-
-      <div class="vaga-page-footer">
-        <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
-      </div>
     </article>
 
 <?php if ($dicaPost): ?>
