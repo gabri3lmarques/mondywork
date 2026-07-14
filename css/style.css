@@ -2110,6 +2110,70 @@ input { font-family: inherit; }
   border-color: #4b41e1;
 }
 
+/* ===== VAGA PAGE - COMPATIBILITY SCORE ===== */
+.vaga-compat {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 24px 28px;
+  margin: 24px 0 32px;
+}
+
+.vaga-compat-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.vaga-compat-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vaga-compat-number {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.vaga-compat-score.excellent .vaga-compat-number { color: #16a34a; }
+.vaga-compat-score.good .vaga-compat-number { color: #d97706; }
+.vaga-compat-score.basic .vaga-compat-number { color: #6b7280; }
+
+.vaga-compat-label {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 9999px;
+}
+
+.vaga-compat-score.excellent .vaga-compat-label {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+
+.vaga-compat-score.good .vaga-compat-label {
+  background: rgba(217, 119, 6, 0.1);
+  color: #d97706;
+}
+
+.vaga-compat-score.basic .vaga-compat-label {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.vaga-compat-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.vaga-compat-body strong {
+  color: #0b1c30;
+}
+
 /* ===== VAGA PAGE - DICA DO ESPECIALISTA ===== */
 .dica-expert {
   background: linear-gradient(135deg, #f0efff 0%, #e8e6ff 100%);
