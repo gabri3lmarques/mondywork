@@ -309,6 +309,78 @@ $score = min($score, 100);
 <?php endif; ?>
     </article>
 
+    <section class="section" style="margin-top: 48px;">
+      <div class="section-header">
+        <h2 class="section-title">Guias de Carreira</h2>
+      </div>
+      <div class="guide-grid">
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <h3>Guia de Carreira em Tecnologia</h3>
+          <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.</p>
+          <a href="/guia-de-carreira.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <h3>Guia de Carreira em Design</h3>
+          <p>UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.</p>
+          <a href="/guia-de-carreira-design.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M12 6v12"/></svg>
+          </div>
+          <h3>Guia de Carreira em Marketing</h3>
+          <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
+          <a href="/guia-de-carreira-marketing.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3>Guia de Carreira em Finanças</h3>
+          <p>Mercado financeiro, investimentos, finanças corporativas, certificações e estratégias para crescer na área financeira.</p>
+          <a href="/guia-de-carreira-financas.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon" style="background:linear-gradient(135deg,#e11d48,#fb7185)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3>Guia de Carreira em Comunicacao</h3>
+          <p>Jornalismo, RP, Comunicacao Corporativa, Marketing de Conteudo e Producao Multimidia.</p>
+          <a href="/guia-de-carreira-comunicacao.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3>Guia de Carreira em Administracao</h3>
+          <p>Gestao de Empresas, RH, Logistica, Consultoria, Gestao de Projetos e Empreendedorismo.</p>
+          <a href="/guia-de-carreira-administracao.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <h3>Guia de Carreira em Dados</h3>
+          <p>Ciencia de Dados, Engenharia de Dados, BI, Machine Learning e IA. Da formacao ao mercado.</p>
+          <a href="/guia-de-carreira-dados.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+        <div class="guide-card guide-card--primary">
+          <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3>Guia de Carreira em Produto</h3>
+          <p>Product Management, Product Ownership, Agile, Scrum e OKRs. Da estrategia a execucao.</p>
+          <a href="/guia-de-carreira-produto.php" class="guide-card-link">Ler guia completo &rarr;</a>
+        </div>
+      </div>
+    </section>
+
 <?php if ($dicaPost): ?>
     <div class="dica-expert">
       <div class="dica-expert-header">
