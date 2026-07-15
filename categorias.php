@@ -303,6 +303,40 @@ $categorias_mondywork = [
         'linkedin', 'greenhouse', 'lever', 'workday', 'ashby', 'gem',
         // Equivalentes em Inglês (Complemento)
         '"engineering recruiter"', '"developer recruiter"', '"IT recruitment"'
+    ],
+
+    'Comunicação' => [
+        // Comunicação Corporativa e Institucional
+        '"comunicação corporativa"', '"corporate communication"', '"comunicação interna"', '"internal communication"',
+        '"comunicação institucional"', '"institutional communication"', '"comunicação empresarial"',
+        '"relações públicas"', '"public relations"', '"pr corporativo"', '"corporate pr"',
+        '"assessoria de imprensa"', '"press office"', '"media relations"', '"relações com a imprensa"',
+        '"media analyst"', '"analista de mídia"',
+        // Gestão de Comunicação
+        '"gerente de comunicação"', '"communication manager"', '"diretor de comunicação"', '"communication director"',
+        '"head of communications"', '"head of corporate communications"', '"coordenador de comunicação"',
+        '"communication strategist"', '"estrategista de comunicação"',
+        '"communication specialist"', '"especialista em comunicação"',
+        '"analista de comunicação"', '"communication analyst"',
+        // Comunicação de Crise e Reputation
+        '"comunicação de crise"', '"crisis communication"', '"crisis management"',
+        '"gestão de reputação"', '"reputation management"', '"reputation manager"',
+        '"corporate affairs"', '"assessoria corporativa"', '"government relations"',
+        '"public affairs"', '"relações governamentais"',
+        // Comunicação Digital e Eventos
+        '"digital communication"', '"comunicação digital"',
+        '"corporate events"', '"eventos corporativos"', '"event planner"', '"planejador de eventos"',
+        '"brand communication"', '"comunicação de marca"', '"branding corporativo"',
+        '"employee communication"', '"comunicação com colaboradores"', '"comunicação com funcionários"',
+        '"change communication"', '"comunicação de mudanças"',
+        // Audiovisual Corporativo
+        '"corporate video"', '"vídeo corporativo"', '"audiovisual corporativo"',
+        '"internal newsletter"', '"newsletter interna"', '"boletim interno"',
+        '"corporate blog"', '"blog corporativo"',
+        // Equivalentes em Inglês (Complemento)
+        '"communications manager"', '"communications director"', '"corporate communications manager"',
+        '"internal comms"', '"external comms"', '"stakeholder communication"',
+        '"employee engagement"', '"engajamento de funcionários"'
     ]
 ];
 
@@ -376,6 +410,7 @@ function categoriaSlug(string $nome): string {
         'Jurídico' => 'juridico',
         'Talent Acquisition' => 'talent-acquisition',
         'Tech Recruiter' => 'tech-recruiter',
+        'Comunicação' => 'comunicacao',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
