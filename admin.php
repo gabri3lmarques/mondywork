@@ -60,6 +60,34 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
     exit;
 }
 
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_categorize'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $ids = array_map('intval', explode(',', $_POST['batch_ids']));
+        $catSlugs = array_filter(array_map('trim', explode(',', $_POST['batch_categorize'] ?? '')));
+        if (!empty($ids) && !empty($catSlugs)) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $stmtVagas = $pdo->prepare("SELECT id FROM vagas WHERE id IN ($placeholders)");
+            $stmtVagas->execute($ids);
+            $validIds = $stmtVagas->fetchAll(PDO::FETCH_COLUMN);
+
+            $stmtIns = $pdo->prepare("INSERT IGNORE INTO vaga_categorias (vaga_id, categoria_id) SELECT :vaga_id, id FROM categorias WHERE slug = :slug");
+            foreach ($validIds as $vagaId) {
+                foreach ($catSlugs as $slug) {
+                    $stmtIns->execute([':vaga_id' => $vagaId, ':slug' => $slug]);
+                }
+            }
+        }
+    } catch (Exception $e) {}
+    header('Location: admin.php?tab=novas' . (isset($_GET['mostrar']) && $_GET['mostrar'] === 'todas' ? '&mostrar=todas' : '') . (isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? '&ns=' . $_GET['ns'] : ''));
+    exit;
+}
+
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_id'])) {
     try {
         $pdo = new PDO(
@@ -1326,11 +1354,21 @@ try {
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
     <button type="button" class="btn-toggle ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('remover')">Remover Selecionadas</button>
+    <span style="border-left:1px solid #ccc;height:24px;margin:0 8px"></span>
+    <select id="batch-cat-select" multiple style="max-width:220px;font-size:12px;padding:4px;border:1px solid #ccc;border-radius:4px;min-height:28px">
+      <?php foreach ($todasCategorias as $cat): ?>
+        <?php if ($cat['slug'] !== 'sem-categoria'): ?>
+          <option value="<?php echo $cat['slug'] ?>"><?php echo htmlspecialchars($cat['nome_pt'], ENT_QUOTES, 'UTF-8') ?></option>
+        <?php endif; ?>
+      <?php endforeach; ?>
+    </select>
+    <button type="button" class="btn-toggle ativar" onclick="batchCategorize()" style="padding:7px 14px;font-size:12px">Categorizar</button>
   </template>
 
   <form id="batch-form" method="post" style="display:none">
     <input type="hidden" name="batch_ids" id="batch-ids">
     <input type="hidden" name="batch_action" id="batch-action">
+    <input type="hidden" name="batch_categorize" id="batch-cats">
   </form>
 </main>
 
@@ -1384,6 +1422,24 @@ try {
     if (!confirm(msg + ' ' + ids.length + ' vaga(s)?')) return;
     document.getElementById('batch-ids').value = ids.join(',');
     document.getElementById('batch-action').value = action;
+    document.getElementById('batch-cats').value = '';
+    document.getElementById('batch-form').submit();
+  };
+
+  window.batchCategorize = function() {
+    var ids = [];
+    document.querySelectorAll('.batch-check:checked').forEach(function(cb) {
+      ids.push(cb.value);
+    });
+    if (!ids.length) return alert('Selecione ao menos uma vaga.');
+    var sel = document.getElementById('batch-cat-select');
+    var cats = [];
+    sel.querySelectorAll('option:checked').forEach(function(opt) { cats.push(opt.value); });
+    if (!cats.length) return alert('Selecione ao menos uma categoria.');
+    if (!confirm('Categorizar ' + ids.length + ' vaga(s) com ' + cats.length + ' categoria(s)?')) return;
+    document.getElementById('batch-ids').value = ids.join(',');
+    document.getElementById('batch-action').value = '';
+    document.getElementById('batch-cats').value = cats.join(',');
     document.getElementById('batch-form').submit();
   };
 })();

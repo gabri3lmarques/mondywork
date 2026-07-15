@@ -21,9 +21,33 @@ $categorias_mondywork = [
         'desenvolvedor', 'desenvolvedora', 'programador', 'programadora', 'developer', 'dev', '"software engineer"', 
         '"engenheiro de software"', '"engenheira de software"', '"front end"', 'frontend', '"back end"', 'backend', 
         '"full stack"', 'fullstack', '"web developer"', '"desenvolvedor web"', '"desenvolvedora web"', 
-        '"mobile developer"', '"ios developer"', '"android developer"', 'ios', 'android', '"rest api"', 'dba',
+        '"rest api"', 'dba',
         // Equivalentes em Inglês (Complemento)
         'programmer', '"software developer"', '"systems developer"', '"application developer"'
+    ],
+
+    'Desenvolvedor Mobile' => [
+        // Frameworks e Tecnologias Mobile
+        'flutter', '"react native"', '"ionic"', '"capacitor"', '"kotlin multiplatform"', 'kmm',
+        'swiftui', 'uikit', 'jetpack compose', 'xamarin', 'maui', 'nativescript',
+        // Plataformas e Sistemas
+        'ios', 'android', '"windows phone"', 'wearos', 'watchos', 'tizen',
+        // Cargos e Funções
+        '"mobile developer"', '"desenvolvedor mobile"', '"desenvolvedora mobile"',
+        '"ios developer"', '"desenvolvedor ios"', '"desenvolvedor ios"',
+        '"android developer"', '"desenvolvedor android"', '"desenvolvedora android"',
+        '"mobile engineer"', '"engenheiro mobile"', '"engenheira mobile"',
+        '"mobile app developer"', '"app developer"', '"desenvolvedor de aplicativos"',
+        '"cross-platform developer"', '"desenvolvedor cross-platform"',
+        // Especialidades
+        '"mobile ux"', '"mobile ui"', '"mobile architecture"', '"arquitetura mobile"',
+        '"push notification"', '"mobile analytics"', '"mobile testing"',
+        '"app store optimization"', 'aso', '"google play"',
+        // Ferramentas e CI/CD
+        '"fastlane"', '"firebase"', '"bitrise"', '"appcenter"', '"codemagic"',
+        // Equivalentes em Inglês (Complemento)
+        '"mobile software engineer"', '"flutter developer"', '"react native developer"',
+        '"ios engineer"', '"android engineer"'
     ],
 
     'Engenharia' => [
@@ -332,6 +356,7 @@ function classificarVaga(string $titulo, array $categoriasDict): array {
 function categoriaSlug(string $nome): string {
     $map = [
         'Desenvolvimento' => 'desenvolvimento',
+        'Desenvolvedor Mobile' => 'desenvolvedor-mobile',
         'Engenharia' => 'engenharia',
         'Dados' => 'dados',
         'IA' => 'ia',
