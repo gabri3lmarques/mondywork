@@ -14,13 +14,19 @@ try {
 
     $stmtBlog = $pdo->query("SELECT slug, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC");
     $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmtVagas = $pdo->query("SELECT vaga_id_externo, publicado_em FROM vagas WHERE status = 'ativa' ORDER BY publicado_em DESC");
+    $vagas = $stmtVagas->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $blogPosts = [];
+    $vagas = [];
 }
 
+if (!function_exists('getLastmod')) {
 function getLastmod($file) {
     $path = __DIR__ . '/' . $file;
     return file_exists($path) ? date('Y-m-d', filemtime($path)) : date('Y-m-d');
+}
 }
 
 header('Content-Type: application/xml; charset=utf-8');
@@ -38,6 +44,12 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     <lastmod><?= getLastmod('sobre.php') ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://mondywork.com/vagas/</loc>
+    <lastmod><?= date('Y-m-d') ?></lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://mondywork.com/contato.php</loc>
@@ -137,6 +149,16 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     <lastmod><?= $blogLastmod ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+<?php endforeach; ?>
+<?php foreach ($vagas as $v):
+    $vagaLastmod = $v['publicado_em'] ? date('Y-m-d', strtotime($v['publicado_em'])) : date('Y-m-d');
+?>
+  <url>
+    <loc>https://mondywork.com/vaga/<?= htmlspecialchars($v['vaga_id_externo'], ENT_XML1, 'UTF-8') ?></loc>
+    <lastmod><?= $vagaLastmod ?></lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
 <?php endforeach; ?>
 </urlset>
