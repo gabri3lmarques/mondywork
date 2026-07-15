@@ -51,7 +51,7 @@ try {
             FROM categoria_conteudo cc
             JOIN vaga_categorias vc ON vc.categoria_id = cc.categoria_id
             WHERE vc.vaga_id = :vagaId
-            ORDER BY cc.id ASC LIMIT 3");
+            ORDER BY cc.id ASC");
         $stmtCatCont->execute([':vagaId' => $vaga['id']]);
         $catConteudos = $stmtCatCont->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -292,7 +292,7 @@ $score = min($score, 100);
       </div>
 
       <div class="vaga-page-body">
-        <?= $vaga['descricao'] ?: '<p>' . ($isExterior ? 'Description not available.' : 'Descrição não disponível.') . '</p>' ?>
+        <?= $vaga['descricao_reescrita'] ?: ($vaga['descricao'] ?: '<p>' . ($isExterior ? 'Description not available.' : 'Descrição não disponível.') . '</p>') ?>
       </div>
 
       <div class="vaga-page-footer">

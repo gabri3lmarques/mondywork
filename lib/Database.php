@@ -57,6 +57,9 @@ function setupSchema(PDO $pdo): void
     if (!in_array('revisada_em', $nomesColunas)) {
         $pdo->exec("ALTER TABLE vagas ADD COLUMN revisada_em DATETIME DEFAULT NULL AFTER created_at");
     }
+    if (!in_array('descricao_reescrita', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN descricao_reescrita TEXT DEFAULT NULL AFTER resumo");
+    }
 
     $indexExists = $pdo->query("SHOW INDEX FROM vagas WHERE Key_name = 'idx_busca'")->fetchAll();
     if (empty($indexExists)) {
@@ -110,6 +113,9 @@ function setupSchema(PDO $pdo): void
             ['financeiro', 'Financeiro', 'Finance'],
             ['administrativo', 'Administrativo', 'Administrative'],
             ['juridico', 'Jurídico', 'Legal'],
+            ['talent-acquisition', 'Talent Acquisition', 'Talent Acquisition'],
+            ['tech-recruiter', 'Tech Recruiter', 'Tech Recruiter'],
+            ['seguranca-informacao', 'Segurança da Informação', 'Information Security'],
         ];
         foreach ($novasCats as $nc) {
             $stmt = $pdo->prepare("INSERT IGNORE INTO categorias (slug, nome_pt, nome_en) VALUES (:slug, :pt, :en)");
@@ -291,16 +297,49 @@ function setupSchema(PDO $pdo): void
              'About Administrative',
              '<p>A área Administrativa é responsável por garantir o funcionamento eficiente de todas as operações organizacionais. Profissionais administrativos gerenciam processos, recursos humanos, compras e facility management.</p><p>As principais habilidades incluem gestão de processos, Office 365, ERPs administrativos, compliance e gestão de pessoas. O conhecimento de ferramentas de automação e IA está se tornando cada vez mais relevante.</p><p>A digitalização dos processos administrativos tem criado novas oportunidades para profissionais que dominam tecnologia e gestão.</p>',
              '<p>The Administrative area is responsible for ensuring the efficient functioning of all organizational operations. Administrative professionals manage processes, human resources, procurement, and facility management.</p><p>Key skills include process management, Office 365, administrative ERPs, compliance, and people management. Knowledge of automation and AI tools is becoming increasingly relevant.</p><p>The digitization of administrative processes has created new opportunities for professionals who master technology and management.</p>'],
-            ['juridico',
-             'Sobre a área Jurídica',
-             'About Legal',
-             '<p>A área Jurídica em empresas de tecnologia lida com contratos, compliance, proteção de dados (LGPD/GDPR), propriedade intelectual e regulação digital. É uma área estratégica para empresas que operam em múltiplos mercados.</p><p>As principais especializações incluem direito digital, proteção de dados, contratos de tecnologia, compliance e propriedade intelectual. Conhecimento de regulações internacionais é diferencial.</p><p>Advogados especializados em direito digital e tech law estão entre os profissionais jurídicos mais bem remunerados do mercado.</p>',
-             '<p>The Legal area in technology companies deals with contracts, compliance, data protection (LGPD/GDR), intellectual property, and digital regulation. It is a strategic area for companies operating in multiple markets.</p><p>Key specializations include digital law, data protection, technology contracts, compliance, and intellectual property. Knowledge of international regulations is a differentiator.</p><p>Lawyers specialized in digital law and tech law are among the highest-paid legal professionals in the market.</p>'],
+             ['juridico',
+              'Sobre a área Jurídica',
+              'About Legal',
+              '<p>A área Jurídica em empresas de tecnologia lida com contratos, compliance, proteção de dados (LGPD/GDPR), propriedade intelectual e regulação digital. É uma área estratégica para empresas que operam em múltiplos mercados.</p><p>As principais especializações incluem direito digital, proteção de dados, contratos de tecnologia, compliance e propriedade intelectual. Conhecimento de regulações internacionais é diferencial.</p><p>Advogados especializados em direito digital e tech law estão entre os profissionais jurídicos mais bem remunerados do mercado.</p>',
+              '<p>The Legal area in technology companies deals with contracts, compliance, data protection (LGPD/GDR), intellectual property, and digital regulation. It is a strategic area for companies operating in multiple markets.</p><p>Key specializations include digital law, data protection, technology contracts, compliance, and intellectual property. Knowledge of international regulations is a differentiator.</p><p>Lawyers specialized in digital law and tech law are among the highest-paid legal professionals in the market.</p>'],
+             ['talent-acquisition',
+              'Sobre a área de Talent Acquisition',
+              'About Talent Acquisition',
+              '<p>Talent Acquisition é a área estratégica responsável por atrair, selecionar e contratar os melhores profissionais para a organização. Diferente do recrutamento tradicional, o TA atua como parceiro estratégico do negócio, alinhando aquisição de talentos com os objetivos de longo prazo da empresa.</p><p>As principais habilidades incluem sourcing avançado, employer branding, análise de mercado de trabalho, gestão de pipeline de talentos e experiência do candidato (Candidate Experience). Ferramentas como LinkedIn Recruiter, ATS (Greenhouse, Lever, Ashby) e plataformas de assessments são essenciais.</p><p>Profissionais de TA em empresas de tecnologia são muito valorizados, especialmente aqueles que dominam tech sourcing, workforce planning e métricas de recrutamento como time-to-hire e cost-per-hire.</p>',
+              '<p>Talent Acquisition is the strategic area responsible for attracting, selecting, and hiring the best professionals for the organization. Unlike traditional recruitment, TA acts as a strategic business partner, aligning talent acquisition with the company\'s long-term objectives.</p><p>Key skills include advanced sourcing, employer branding, labor market analysis, talent pipeline management, and candidate experience. Tools like LinkedIn Recruiter, ATS (Greenhouse, Lever, Ashby), and assessment platforms are essential.</p><p>TA professionals in technology companies are highly valued, especially those who master tech sourcing, workforce planning, and recruitment metrics like time-to-hire and cost-per-hire.</p>'],
+             ['tech-recruiter',
+              'Sobre a área de Tech Recruiter',
+              'About Tech Recruiter',
+              '<p>O Tech Recruiter é um profissional especializado em recrutar talentos de tecnologia, desde desenvolvedores até engenheiros de IA e profissionais de DevOps. Ele combina conhecimento técnico com habilidades de recrutamento para avaliar e atrair candidatos altamente qualificados.</p><p>As principais habilidades incluem technical screening, análise de perfis técnicos (GitHub, portfólios, blogs), conhecimento de stacks e arquiteturas de software, networking em comunidades tech e eventos. Domínio de ferramentas como LinkedIn Recruiter, Gem, Ashby e plataformas de teste técnico é diferencial.</p><p>Tech Recruiters são profissionais escassos e muito bem remunerados, especialmente aqueles que conseguem mapear e acessar talentos passivos em mercados competitivos como IA, engenharia de dados e cloud computing.</p>',
+         '<p>The Tech Recruiter is a professional specialized in recruiting technology talent, from developers to AI engineers and DevOps professionals. They combine technical knowledge with recruitment skills to evaluate and attract highly qualified candidates.</p><p>Key skills include technical screening, analysis of technical profiles (GitHub, portfolios, blogs), knowledge of software stacks and architectures, networking in tech communities and events. Proficiency with tools like LinkedIn Recruiter, Gem, Ashby, and technical assessment platforms is a differentiator.</p><p>Tech Recruiters are scarce and highly paid professionals, especially those who can map and access passive talent in competitive markets like AI, data engineering, and cloud computing.</p>'],
+        ['seguranca-informacao',
+         'Sobre a área de Segurança da Informação',
+         'About Information Security',
+         '<p>A área de Segurança da Informação é uma das mais estratégicas e requisitadas no mercado de tecnologia. Com o aumento dos ataques cibernéticos, roubo de dados e regulações como LGPD e GDPR, empresas de todos os portes investem pesadamente em profissionais que protejam seus ativos digitais.</p><p>As principais especializações incluem Segurança de Redes, Segurança em Cloud (AWS, Azure, GCP), Segurança Ofensiva (Penetration Testing, Red Team), Segurança Defensiva (SOC, Blue Team), AppSec e Governança de Segurança. Ferramentas como SIEM (Splunk, QRadar), firewalls, EDR e plataformas de Vulnerability Management são essenciais.</p><p>Certificações como CISSP, CEH, OSCP, CompTIA Security+ e AWS Security Specialty são diferenciadores importantes. Profissionais de segurança da informação estão entre os mais bem remunerados do setor, com demanda crescente especialmente em fintechs, healthtechs e empresas de grande porte.</p>',
+         '<p>The Information Security area is one of the most strategic and in-demand fields in the technology market. With the rise of cyberattacks, data breaches, and regulations like LGPD and GDPR, companies of all sizes invest heavily in professionals who can protect their digital assets.</p><p>Key specializations include Network Security, Cloud Security (AWS, Azure, GCP), Offensive Security (Penetration Testing, Red Team), Defensive Security (SOC, Blue Team), AppSec, and Security Governance. Tools like SIEM (Splunk, QRadar), firewalls, EDR, and Vulnerability Management platforms are essential.</p><p>Certifications like CISSP, CEH, OSCP, CompTIA Security+, and AWS Security Specialty are important differentiators. Information security professionals are among the highest-paid in the sector, with growing demand especially in fintechs, healthtechs, and large enterprises.</p>'],
         ];
         foreach ($conteudos as $c) {
             $stmt = $pdo->prepare("INSERT IGNORE INTO categoria_conteudo (categoria_id, titulo_pt, titulo_en, conteudo_pt, conteudo_en)
                 SELECT c.id, :titulo_pt, :titulo_en, :conteudo_pt, :conteudo_en FROM categorias c WHERE c.slug = :slug");
             $stmt->execute([':slug' => $c[0], ':titulo_pt' => $c[1], ':titulo_en' => $c[2], ':conteudo_pt' => $c[3], ':conteudo_en' => $c[4]]);
         }
+    }
+
+    $novosConteudos = [
+        ['talent-acquisition',
+         'Sobre a área de Talent Acquisition',
+         'About Talent Acquisition',
+         '<p>Talent Acquisition é a área estratégica responsável por atrair, selecionar e contratar os melhores profissionais para a organização. Diferente do recrutamento tradicional, o TA atua como parceiro estratégico do negócio, alinhando aquisição de talentos com os objetivos de longo prazo da empresa.</p><p>As principais habilidades incluem sourcing avançado, employer branding, análise de mercado de trabalho, gestão de pipeline de talentos e experiência do candidato (Candidate Experience). Ferramentas como LinkedIn Recruiter, ATS (Greenhouse, Lever, Ashby) e plataformas de assessments são essenciais.</p><p>Profissionais de TA em empresas de tecnologia são muito valorizados, especialmente aqueles que dominam tech sourcing, workforce planning e métricas de recrutamento como time-to-hire e cost-per-hire.</p>',
+         '<p>Talent Acquisition is the strategic area responsible for attracting, selecting, and hiring the best professionals for the organization. Unlike traditional recruitment, TA acts as a strategic business partner, aligning talent acquisition with the company\'s long-term objectives.</p><p>Key skills include advanced sourcing, employer branding, labor market analysis, talent pipeline management, and candidate experience. Tools like LinkedIn Recruiter, ATS (Greenhouse, Lever, Ashby), and assessment platforms are essential.</p><p>TA professionals in technology companies are highly valued, especially those who master tech sourcing, workforce planning, and recruitment metrics like time-to-hire and cost-per-hire.</p>'],
+        ['tech-recruiter',
+         'Sobre a área de Tech Recruiter',
+         'About Tech Recruiter',
+         '<p>O Tech Recruiter é um profissional especializado em recrutar talentos de tecnologia, desde desenvolvedores até engenheiros de IA e profissionais de DevOps. Ele combina conhecimento técnico com habilidades de recrutamento para avaliar e atrair candidatos altamente qualificados.</p><p>As principais habilidades incluem technical screening, análise de perfis técnicos (GitHub, portfólios, blogs), conhecimento de stacks e arquiteturas de software, networking em comunidades tech e eventos. Domínio de ferramentas como LinkedIn Recruiter, Gem, Ashby e plataformas de teste técnico é diferencial.</p><p>Tech Recruiters são profissionais escassos e muito bem remunerados, especialmente aqueles que conseguem mapear e acessar talentos passivos em mercados competitivos como IA, engenharia de dados e cloud computing.</p>',
+         '<p>The Tech Recruiter is a professional specialized in recruiting technology talent, from developers to AI engineers and DevOps professionals. They combine technical knowledge with recruitment skills to evaluate and attract highly qualified candidates.</p><p>Key skills include technical screening, analysis of technical profiles (GitHub, portfolios, blogs), knowledge of software stacks and architectures, networking in tech communities and events. Proficiency with tools like LinkedIn Recruiter, Gem, Ashby, and technical assessment platforms is a differentiator.</p><p>Tech Recruiters are scarce and highly paid professionals, especially those who can map and access passive talent in competitive markets like AI, data engineering, and cloud computing.</p>'],
+    ];
+    foreach ($novosConteudos as $nc) {
+        $stmt = $pdo->prepare("INSERT IGNORE INTO categoria_conteudo (categoria_id, titulo_pt, titulo_en, conteudo_pt, conteudo_en)
+            SELECT c.id, :titulo_pt, :titulo_en, :conteudo_pt, :conteudo_en FROM categorias c WHERE c.slug = :slug");
+        $stmt->execute([':slug' => $nc[0], ':titulo_pt' => $nc[1], ':titulo_en' => $nc[2], ':conteudo_pt' => $nc[3], ':conteudo_en' => $nc[4]]);
     }
 }

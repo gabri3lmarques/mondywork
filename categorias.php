@@ -187,10 +187,36 @@ $categorias_mondywork = [
         'infraestrutura', 'infrastructure', '"analista de infraestrutura"', '"engenheiro de infraestrutura"', '"engenheiro de sistemas"', 
         '"systems engineer"', '"network engineer"', '"engenheiro de redes"', 'linux', 'unix', 'vmware', 
         'dba', '"database administrator"', '"administrador de banco de dados"',
-        // Segurança (Cibersegurança aglutinada aqui)
-        'devsecops', '"segurança da informação"', 'cybersecurity', '"cyber security"', '"segurança de redes"', '"cloud security"',
         // Equivalentes em Inglês (Complemento)
-        '"infrastructure analyst"', '"infrastructure engineer"', '"information security"', '"network security"'
+        '"infrastructure analyst"', '"infrastructure engineer"'
+    ],
+
+    'Segurança da Informação' => [
+        // Cargos e Funções
+        '"segurança da informação"', '"information security"', 'cybersecurity', '"cyber security"', 'cibersegurança',
+        '"analista de segurança"', '"security analyst"', '"security engineer"', '"engenheiro de segurança"',
+        '"analista de segurança da informação"', '"information security analyst"',
+        '"especialista em segurança"', '"security specialist"', '"security consultant"', '"consultor de segurança"',
+        // Liderança
+        '"chief information security officer"', 'ciso', '"diretor de segurança"', '"head of security"',
+        '"security manager"', '"gerente de segurança"', '"security architect"', '"arquiteto de segurança"',
+        // Segurança de Redes e Cloud
+        '"segurança de redes"', '"network security"', '"cloud security"', '"segurança em nuvem"',
+        '"firewall"', '"ids"', '"ips"', '"siem"', '"soc"',
+        // Segurança Ofensiva e Defensiva
+        '"penetration tester"', '"pentester"', '"testador de penetração"', '"ethical hacker"',
+        '"hacker ético"', '"red team"', '"blue team"', '"purple team"',
+        '"vulnerability analyst"', '"analista de vulnerabilidades"', '"bug bounty"',
+        // Compliance e Governança
+        '"security compliance"', '"compliance de segurança"', '"risco de segurança"',
+        'lgpd', 'gdpr', '"data protection"', '"proteção de dados"',
+        'iso 27001', 'nist', 'soc 2', 'itil',
+        // DevSecOps
+        'devsecops', '"shift left"', '"secure coding"', '"código seguro"',
+        '"sast"', '"dast"', '"devsecops engineer"',
+        // Equivalentes em Inglês (Complemento)
+        '"information security officer"', '"cybersecurity analyst"', '"cybersecurity engineer"',
+        '"security operations"', '"appsec"', '"application security"'
     ],
 
     'Financeiro' => [
@@ -212,10 +238,47 @@ $categorias_mondywork = [
         // Compras e Facilities
         'compras', 'procurement', '"analista de compras"', 'logística', '"supply chain"', 'facilities',
         // RH e Departamento Pessoal
-        'rh', '"recursos humanos"', '"human resources"', 'recruiter', '"tech recruiter"', 'recrutador', 'recrutadora', '"talent acquisition"',
+        'rh', '"recursos humanos"', '"human resources"',
         '"departamento pessoal"', 'dp', '"business partner"',
         // Equivalentes em Inglês (Complemento)
         '"administrative manager"', 'secretary', '"purchasing analyst"', 'logistics', '"personnel department"', 'administrative', 'purchasing', 'procurement'
+    ],
+
+    'Talent Acquisition' => [
+        // Cargos e Funções
+        '"talent acquisition"', '"talent acquisition specialist"', '"talent acquisition manager"', '"talent acquisition partner"',
+        '"talent acquisition analyst"', '"analista de aquisição de talentos"', '"especialista em aquisição de talentos"',
+        '"gerente de aquisição de talentos"', '"diretor de talent acquisition"', '"head of talent acquisition"',
+        // Recrutamento e Seleção
+        'recruiter', '"tech recruiter"', 'recrutador', 'recrutadora', '"recruitment specialist"', '"especialista em recrutamento"',
+        '"recruitment analyst"', '"analista de recrutamento"', '"recruitment manager"', '"gerente de recrutamento"',
+        '"recruitment coordinator"', '"coordenador de recrutamento"',
+        // Sourcing e Employeer Branding
+        'sourcer', '"sourcing specialist"', '"especialista em sourcing"', '"talent sourcer"',
+        '"employer branding"', '"marca empregadora"', '"employer brand manager"',
+        // Métricas e Estratégia
+        '"time to hire"', '"cost per hire"', '"recruitment funnel"', '"pipeline de talentos"',
+        '"workforce planning"', '"planejamento de workforce"', '"talent pipeline"',
+        // Equivalentes em Inglês (Complemento)
+        '"talent recruiter"', '"hiring manager"', '"talent partner"', '"recruitment lead"'
+    ],
+
+    'Tech Recruiter' => [
+        // Cargos Específicos de Tech Recruitment
+        '"tech recruiter"', '"technical recruiter"', '"recrutador técnico"', '"recrutadora técnica"',
+        '"tech recruitment specialist"', '"especialista em recrutamento técnico"', '"recrutamento de ti"',
+        '"technical recruitment"', '"it recruiter"', '"software recruiter"',
+        // Liderança de Tech Recruitment
+        '"tech recruiting manager"', '"head of tech recruiting"', '"gerente de recrutamento técnico"',
+        '"tech recruiting lead"', '"tech talent acquisition"',
+        // Skills e Atividades Específicas
+        '"technical screening"', '"entrevista técnica"', '"avaliação técnica"',
+        '"tech hiring"', '"hiring developers"', '"recruiting engineers"',
+        '"sourcing técnico"', '"tech sourcing"',
+        // Ferramentas e Plataformas
+        'linkedin', 'greenhouse', 'lever', 'workday', 'ashby', 'gem',
+        // Equivalentes em Inglês (Complemento)
+        '"engineering recruiter"', '"developer recruiter"', '"IT recruitment"'
     ]
 ];
 
@@ -286,6 +349,9 @@ function categoriaSlug(string $nome): string {
         'Financeiro' => 'financeiro',
         'Administrativo' => 'administrativo',
         'Jurídico' => 'juridico',
+        'Talent Acquisition' => 'talent-acquisition',
+        'Tech Recruiter' => 'tech-recruiter',
+        'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
     return $map[$nome] ?? 'sem-categoria';
