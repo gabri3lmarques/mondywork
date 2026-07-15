@@ -88,6 +88,27 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
     exit;
 }
 
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_remove_cats'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $ids = array_map('intval', explode(',', $_POST['batch_ids']));
+        $catSlugs = array_filter(array_map('trim', explode(',', $_POST['batch_remove_cats'] ?? '')));
+        if (!empty($ids) && !empty($catSlugs)) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $quoted = array_map(fn($s) => $pdo->quote($s), $catSlugs);
+            $stmt = $pdo->prepare("DELETE vc FROM vaga_categorias vc JOIN categorias c ON c.id = vc.categoria_id WHERE vc.vaga_id IN ($placeholders) AND c.slug IN (" . implode(',', $quoted) . ")");
+            $stmt->execute($ids);
+        }
+    } catch (Exception $e) {}
+    header('Location: admin.php?tab=novas' . (isset($_GET['mostrar']) && $_GET['mostrar'] === 'todas' ? '&mostrar=todas' : '') . (isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? '&ns=' . $_GET['ns'] : ''));
+    exit;
+}
+
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_id'])) {
     try {
         $pdo = new PDO(
@@ -871,7 +892,7 @@ try {
       $novasWhere .= " AND status = " . $pdo->quote($novasStatusFilter);
   }
 
-  $stmtNovas = $pdo->query("SELECT id, vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, descricao, resumo, status, origem, publicado_em, created_at, DATE_FORMAT(created_at, '%d/%m/%Y %H:%i') as created_at_fmt FROM vagas WHERE {$novasWhere} ORDER BY created_at DESC");
+  $stmtNovas = $pdo->query("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.publicado_em, vagas.created_at, DATE_FORMAT(vagas.created_at, '%d/%m/%Y %H:%i') as created_at_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id WHERE {$novasWhere} GROUP BY vagas.id ORDER BY vagas.created_at DESC");
   $novasVagas = $stmtNovas->fetchAll(PDO::FETCH_ASSOC);
 
   $totalNovas = count($novasVagas);
@@ -935,6 +956,13 @@ try {
           <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
           <span style="font-size:12px;color:#45464d">Inserida: <?php echo htmlspecialchars($v['created_at_fmt'], ENT_QUOTES, 'UTF-8') ?></span>
         </div>
+        <?php if (!empty($v['tags_str'])): ?>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 2px">
+            <?php foreach (explode(', ', $v['tags_str']) as $tag): ?>
+              <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#e8e8ff;color:#4b41e1;white-space:nowrap"><?php echo htmlspecialchars($tag, ENT_QUOTES, 'UTF-8') ?></span>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
         <div class="admin-card-actions">
           <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
           <form method="post" style="margin:0">
@@ -1363,12 +1391,14 @@ try {
       <?php endforeach; ?>
     </select>
     <button type="button" class="btn-toggle ativar" onclick="batchCategorize()" style="padding:7px 14px;font-size:12px">Categorizar</button>
+    <button type="button" class="btn-toggle inativar" onclick="batchRemoveCats()" style="padding:7px 14px;font-size:12px">Remover Categorias</button>
   </template>
 
   <form id="batch-form" method="post" style="display:none">
     <input type="hidden" name="batch_ids" id="batch-ids">
     <input type="hidden" name="batch_action" id="batch-action">
     <input type="hidden" name="batch_categorize" id="batch-cats">
+    <input type="hidden" name="batch_remove_cats" id="batch-remove-cats">
   </form>
 </main>
 
@@ -1423,6 +1453,7 @@ try {
     document.getElementById('batch-ids').value = ids.join(',');
     document.getElementById('batch-action').value = action;
     document.getElementById('batch-cats').value = '';
+    document.getElementById('batch-remove-cats').value = '';
     document.getElementById('batch-form').submit();
   };
 
@@ -1440,6 +1471,25 @@ try {
     document.getElementById('batch-ids').value = ids.join(',');
     document.getElementById('batch-action').value = '';
     document.getElementById('batch-cats').value = cats.join(',');
+    document.getElementById('batch-remove-cats').value = '';
+    document.getElementById('batch-form').submit();
+  };
+
+  window.batchRemoveCats = function() {
+    var ids = [];
+    document.querySelectorAll('.batch-check:checked').forEach(function(cb) {
+      ids.push(cb.value);
+    });
+    if (!ids.length) return alert('Selecione ao menos uma vaga.');
+    var sel = document.getElementById('batch-cat-select');
+    var cats = [];
+    sel.querySelectorAll('option:checked').forEach(function(opt) { cats.push(opt.value); });
+    if (!cats.length) return alert('Selecione ao menos uma categoria para remover.');
+    if (!confirm('Remover ' + cats.length + ' categoria(s) de ' + ids.length + ' vaga(s)?')) return;
+    document.getElementById('batch-ids').value = ids.join(',');
+    document.getElementById('batch-action').value = '';
+    document.getElementById('batch-cats').value = '';
+    document.getElementById('batch-remove-cats').value = cats.join(',');
     document.getElementById('batch-form').submit();
   };
 })();
