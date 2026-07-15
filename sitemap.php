@@ -9,8 +9,6 @@ try {
         $config['pass'],
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
-    require_once __DIR__ . '/lib/Database.php';
-    setupSchema($pdo);
 
     $stmtBlog = $pdo->query("SELECT slug, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC");
     $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
@@ -24,8 +22,7 @@ try {
 
 if (!function_exists('getLastmod')) {
 function getLastmod($file) {
-    $path = __DIR__ . '/' . $file;
-    return file_exists($path) ? date('Y-m-d', filemtime($path)) : date('Y-m-d');
+    return date('Y-m-d');
 }
 }
 
