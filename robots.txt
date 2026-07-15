@@ -1,7 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /vaga/
-Disallow: /vagas/
-Disallow: /usa/vaga/
 
 Sitemap: https://mondywork.com/sitemap.xml
