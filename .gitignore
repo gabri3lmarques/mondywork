@@ -6,3 +6,4 @@ config.php
 env.txt~
 uploads/blog/*
 !uploads/blog/.gitkeep
+scripts
