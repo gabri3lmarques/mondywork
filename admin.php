@@ -60,7 +60,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
     exit;
 }
 
-if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_categorize'])) {
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && !empty($_POST['batch_categorize'])) {
     try {
         $pdo = new PDO(
             "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
@@ -88,7 +88,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
     exit;
 }
 
-if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && isset($_POST['batch_remove_cats'])) {
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && !empty($_POST['batch_remove_cats'])) {
     try {
         $pdo = new PDO(
             "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
