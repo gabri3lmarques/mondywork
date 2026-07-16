@@ -603,6 +603,106 @@ $categorias_mondywork = [
         '"itsm analyst"', '"service management analyst"',
         '"it governance manager"', '"governance manager"',
         '"it director"', '"diretor de ti"', '"cto"', '"cio"'
+    ],
+
+    'Frontend' => [
+        // Linguagens e Fundamentos
+        '"front end"', 'frontend', '"front-end"', '"frontender"',
+        'html', 'css', 'javascript', 'typescript',
+        // Frameworks e Bibliotecas
+        'react', 'angular', 'vue', 'svelte', '"next.js"', '"nuxt.js"',
+        '"solid.js"', 'preact', 'lit', 'ember', 'backbone',
+        // CSS e Estilização
+        'sass', 'less', 'tailwind', '"tailwind css"', 'bootstrap', 'materialize',
+        '"styled-components"', '"emotion"', '"css modules"', '"css-in-js"',
+        '"postcss"', '"sass/scss"',
+        // Ferramentas de Build e Bundlers
+        'webpack', 'vite', 'parcel', 'esbuild', 'rollup', 'turbopack',
+        '"babel"', '"postcss"',
+        // Cargos e Funções
+        '"desenvolvedor front end"', '"desenvolvedora front end"',
+        '"frontend developer"', '"front end developer"',
+        '"frontend engineer"', '"engenheiro frontend"',
+        '"ui developer"', '"desenvolvedor ui"',
+        '"react developer"', '"angular developer"', '"vue developer"',
+        // Performance e Acessibilidade
+        '"web performance"', '"performance web"', '"core web vitals"',
+        'accessibility', '"acessibilidade web"', 'wcag', 'a11y',
+        // Testes
+        '"frontend testing"', '"testes frontend"',
+        'jest', 'cypress', 'playwright', '"vitest"',
+        // Equivalentes em Inglês (Complemento)
+        '"senior frontend"', '"frontend lead"', '"frontend architect"',
+        '"ui engineer"', '"web developer"', '"javascript developer"',
+        '"react engineer"', '"vue engineer"'
+    ],
+
+    'Backend' => [
+        // Linguagens e Stacks
+        'php', 'java', 'python', 'ruby', 'golang', 'rust', 'c#', 'node',
+        '"node.js"', 'dotnet', '".net"', 'delphi', 'elixir', 'scala',
+        // Frameworks
+        'laravel', '"spring boot"', 'django', 'flask', 'rails', '"ruby on rails"',
+        'nestjs', 'express', 'fastapi', 'symfony', 'adonis',
+        // Bancos de Dados
+        'sql', 'mysql', 'postgresql', 'oracle', '"sql server"',
+        'mongodb', 'redis', 'elasticsearch', 'cassandra', 'dynamodb',
+        'firebase', 'supabase', 'planetscale',
+        // Cargos e Funções
+        '"desenvolvedor back end"', '"desenvolvedora back end"',
+        '"backend developer"', '"back end developer"',
+        '"backend engineer"', '"engenheiro backend"',
+        '"server side"', '"lado do servidor"',
+        '"api developer"', '"desenvolvedor de api"',
+        '"desenvolvedor php"', '"php developer"',
+        '"desenvolvedor java"', '"java developer"',
+        '"desenvolvedor python"', '"python developer"',
+        '"desenvolvedor node"', '"node developer"',
+        // Arquitetura e Padrões
+        '"arquitetura de software"', '"software architecture"',
+        '"clean architecture"', '"arquitetura limpa"',
+        '"design patterns"', '"padrões de projeto"',
+        '"domain driven design"', 'ddd', '"microservices"', '"microsserviços"',
+        '"serverless"', '"event driven"',
+        // Segurança e Performance
+        '"api security"', '"segurança de api"',
+        '"oauth"', '"jwt"', '"rate limiting"',
+        '"caching"', '"cache"',
+        // Equivalentes em Inglês (Complemento)
+        '"senior backend"', '"backend lead"', '"backend architect"',
+        '"api engineer"', '"server engineer"',
+        '"full stack developer"', '"fullstack developer"'
+    ],
+
+    'Office Suite' => [
+        // Microsoft Office
+        'excel', 'word', 'powerpoint', 'outlook', 'teams',
+        '"microsoft office"', '"ms office"', '"office 365"', '"microsoft 365"',
+        '"excel avançado"', '"advanced excel"', '"excel intermediário"',
+        'vba', '"macros vba"', '"power query"', '"power pivot"',
+        'access', '"microsoft access"',
+        // Google Workspace
+        '"google sheets"', '"google docs"', '"google slides"',
+        '"google workspace"', '"gsuite"', '"google drive"',
+        '"google forms"', '"google meet"',
+        // Outros
+        'notion', 'airtable', 'trello', 'asana', 'monday',
+        '"microsoft project"', '"ms project"',
+        'canva', '"figma"', '"miro"',
+        // Cargos e Funções
+        '"analista de ti"', '"it analyst"', '"analista de sistemas"',
+        '"analista administrativo"', '"analista de dados"',
+        '"assistente administrativo"', '"administrative assistant"',
+        '"auxiliar administrativo"',
+        // Habilidades
+        '"pacote office"', '"office suite"', '"pacote microsoft"',
+        '"planilha"', '"spreadsheet"', '"apresentação"', '"presentation"',
+        '"documento"', '"document"', '"email"', '"email marketing"',
+        // Equivalentes em Inglês (Complemento)
+        '"microsoft excel specialist"', '"office specialist"',
+        '"administrative specialist"', '"office coordinator"',
+        '"office manager"', '"gerente administrativo"',
+        '"executive assistant"', '"assistente executivo"'
     ]
 ];
 
@@ -684,6 +784,9 @@ function categoriaSlug(string $nome): string {
         'Gerente de Projetos' => 'gerente-de-projetos',
         'Analista de Sistemas' => 'analista-de-sistemas',
         'Governança de TI' => 'governanca-de-ti',
+        'Frontend' => 'frontend',
+        'Backend' => 'backend',
+        'Office Suite' => 'office-suite',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
