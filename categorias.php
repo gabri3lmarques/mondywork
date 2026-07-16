@@ -782,6 +782,51 @@ $categorias_mondywork = [
         '"data visualization"', '"visualização de dados"',
         '"business analyst"', '"analista de negócios"',
         '"decision support"', '"suporte à decisão"'
+    ],
+
+    'Account Manager' => [
+        // Cargos e Funções
+        '"account manager"', '"gerente de contas"', '"gestor de contas"',
+        '"account executive"', '"executivo de contas"', '"executiva de contas"',
+        '"account director"', '"diretor de contas"',
+        '"key account manager"', '"gerente de contas-chave"',
+        '"key account"', '"contas-chave"', '"grandes contas"',
+        '"senior account manager"', '"junior account manager"',
+        // Relacionamento e Retenção
+        '"relationship manager"', '"gerente de relacionamento"',
+        '"client relationship"', '"relacionamento com clientes"',
+        '"client success"', '"sucesso do cliente"',
+        '"client retention"', '"retenção de clientes"',
+        '"churn prevention"', '"prevenção de churn"',
+        '"client satisfaction"', '"satisfação do cliente"',
+        '"nps"', '"net promoter score"',
+        // Expansão e Vendas
+        '"upsell"', '"cross-sell"', '"expansão de contas"',
+        '"renewal"', '"renovação"', '"renovação de contratos"',
+        '"account growth"', '"crescimento de contas"',
+        '"revenue growth"', '"crescimento de receita"',
+        '"quota"', '"meta"', '"target"', '"objetivo"',
+        '"proposal"', '"proposta"', '"proposta comercial"',
+        '"negociação"', '"negotiation"', '"closing"', '"fechamento"',
+        // Operação e Processo
+        '"account planning"', '"planejamento de contas"',
+        '"account review"', '"review de contas"',
+        '"business review"', '"revisão de negócio"',
+        '"sla"', '"service level agreement"',
+        '"onboarding"', '"handoff"', '"transição"',
+        '"ticket"', '"chamado"', '"demanda"',
+        // Ferramentas
+        'salesforce', 'hubspot', 'zendesk', 'intercom', 'gainsight',
+        'pipedrive', 'zoho', 'freshdesk', 'crms',
+        // Setores e Tipos
+        '"b2b"', '"b2c"', '"enterprise"', '"mid-market"',
+        '"smb"', '"pmes"', '"grandes empresas"',
+        '"saas"', '"tech"', '"fintech"', '"healthtech"',
+        // Equivalentes em Inglês (Complemento)
+        '"account director"', '"client director"', '"strategic account manager"',
+        '"enterprise account manager"', '"commercial manager"',
+        '"business account manager"', '"corporate account manager"',
+        '"client partner"', '"customer success manager"'
     ]
 ];
 
@@ -868,6 +913,7 @@ function categoriaSlug(string $nome): string {
         'Office Suite' => 'office-suite',
         'Fullstack' => 'fullstack',
         'Business Intelligence' => 'business-intelligence',
+        'Account Manager' => 'account-manager',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
