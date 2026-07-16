@@ -703,6 +703,85 @@ $categorias_mondywork = [
         '"administrative specialist"', '"office coordinator"',
         '"office manager"', '"gerente administrativo"',
         '"executive assistant"', '"assistente executivo"'
+    ],
+
+    'Fullstack' => [
+        // Cargos e Funções
+        '"full stack"', 'fullstack', '"full-stack"', '"full stack developer"',
+        '"fullstack developer"', '"desenvolvedor full stack"', '"desenvolvedora full stack"',
+        '"full stack engineer"', '"engenheiro full stack"',
+        '"full stack javascript"', '"javascript full stack"',
+        // Stacks Completas
+        '"react + node"', '"react + node.js"', '"vue + node"', '"angular + node"',
+        '"next.js + prisma"', '"next.js + node"',
+        '"laravel + vue"', '"laravel + react"', '"laravel + angular"',
+        '"django + react"', '"django + vue"', '"flask + react"',
+        '"spring + angular"', '"spring + react"', '"spring + vue"',
+        '"rails + react"', '"rails + vue"', '"rails + angular"',
+        '"php + javascript"', '"python + javascript"', '"java + javascript"',
+        '"dotnet + angular"', '"dotnet + react"', '".net + angular"', '".net + react"',
+        // Frontend + Backend Juntos
+        '"html css javascript php"', '"html css javascript node"',
+        '"html css javascript python"', '"html css javascript java"',
+        '"react php"', '"vue php"', '"angular php"',
+        '"react python"', '"vue python"', '"angular python"',
+        '"react java"', '"vue java"', '"angular java"',
+        // Metodologias e Arquitetura
+        '"clean architecture"', '"arquitetura limpa"',
+        '"domain driven design"', 'ddd',
+        '"microservices"', '"microsserviços"', '"serverless"',
+        '"rest api"', '"restful"', '"graphql"', '"grpc"',
+        // DevOps e Infra Básica
+        '"git"', '"github"', '"gitlab"', '"bitbucket"',
+        '"docker"', '"ci/cd"', '"github actions"',
+        'aws', 'azure', 'gcp',
+        // Equivalentes em Inglês (Complemento)
+        '"senior fullstack"', '"fullstack lead"', '"fullstack architect"',
+        '"polyglot developer"', '"swiss army knife developer"',
+        '"end to end developer"', '"e2e developer"'
+    ],
+
+    'Business Intelligence' => [
+        // Ferramentas de BI
+        '"power bi"', '"powerbi"', '"microsoft power bi"',
+        'tableau', 'looker', 'qlikview', 'qliksense',
+        'metabase', 'superset', '"google data studio"', '"looker studio"',
+        '"ibm cognos"', '"sap business objects"', '"oracle bi"',
+        'microstrategy', 'sisense', 'domo',
+        // Cargos e Funções
+        '"business intelligence"', 'bi', '"bi analyst"', '"analista de bi"',
+        '"analista de business intelligence"',
+        '"bi developer"', '"desenvolvedor bi"', '"bi engineer"',
+        '"bi manager"', '"gerente de bi"', '"bi director"',
+        '"diretor de bi"', '"head of bi"',
+        '"data analyst"', '"analista de dados"',
+        '"analytics engineer"', '"engenheiro de analytics"',
+        '"reporting analyst"', '"analista de relatórios"',
+        '"reporting developer"', '"desenvolvedor de relatórios"',
+        // Modelagem e ETL
+        '"data warehouse"', '"data lake"', '"data mart"',
+        '"etl developer"', '"etl engineer"', '"etl"',
+        '"data pipeline"', '"pipeline de dados"',
+        '"data modeling"', '"modelagem de dados"',
+        '"star schema"', '"snowflake schema"',
+        'dbt', 'talend', 'informatica', 'ssis', '"sql server integration services"',
+        'airflow', 'prefect', 'dagster',
+        // SQL e Análise
+        'sql', '"advanced sql"', '"sql avançado"',
+        '"window functions"', '"funções de janela"',
+        '"cubes"', '"olap"', '"oltp"',
+        '"kpi"', '"dashboards"', '"relatórios"',
+        // Métricas e Negócio
+        '"revenue"', '"receita"', '"mrr"', '"arr"',
+        '"churn"', '"retention"', '"retenção"',
+        '"conversion"', '"conversão"',
+        '"funnel"', '"funil"',
+        '"cohort"', '"cohort analysis"',
+        // Equivalentes em Inglês (Complemento)
+        '"bi specialist"', '"bi consultant"',
+        '"data visualization"', '"visualização de dados"',
+        '"business analyst"', '"analista de negócios"',
+        '"decision support"', '"suporte à decisão"'
     ]
 ];
 
@@ -787,6 +866,8 @@ function categoriaSlug(string $nome): string {
         'Frontend' => 'frontend',
         'Backend' => 'backend',
         'Office Suite' => 'office-suite',
+        'Fullstack' => 'fullstack',
+        'Business Intelligence' => 'business-intelligence',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
