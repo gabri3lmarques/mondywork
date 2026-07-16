@@ -1061,6 +1061,94 @@ $categorias_mondywork = [
         '"global brand manager"',
         '"brand and communications"',
         '"visual identity designer"'
+    ],
+
+    'Redação' => [
+        // Redação e Criação de Texto
+        '"redação"', '"redação publicitária"', '"redação criativa"',
+        '"redator"', '"redator publicitário"', '"redator criativo"',
+        '"copywriter"', '"copy"', '"redação de texto"',
+        '"textos para web"', '"web copy"',
+        '"textos publicitários"', '"ad copy"',
+        '"redação de artigos"', '"artigos"',
+        '"redação de posts"', '"posts para redes sociais"',
+        '"roteiro"', '"roteirista"', '"script writer"',
+        '"roteiro de vídeo"', '"roteiro para reels"',
+        '"roteiro de podcast"', '"roteiro de apresentação"',
+        // Conteúdo e SEO
+        '"redação para SEO"', '"SEO writing"',
+        '"blog writing"', '"redação de blog"',
+        '"ghostwriting"', '"escritor fantasma"',
+        '"white paper"', '"ebook"',
+        '"case study"', '"estudo de caso"',
+        '"newsletter"', '"redação de newsletter"',
+        '"email marketing copy"',
+        // Estilo e Tom de Voz
+        '"brand voice"', '"tom de voz"',
+        '"estilo editorial"', '"guidelines editoriais"',
+        '"tone of voice"', '"escrita persuasiva"',
+        '"copy persuasiva"', '"escrita emotiva"',
+        // Ferramentas
+        '"grammarly"', '"hemingway editor"',
+        '"google docs"', '"notion"',
+        // Equivalentes em Inglês (Complemento)
+        '"content writer"', '"copy editor"',
+        '"technical writer"', '"medical writer"',
+        '"creative writer"', '"staff writer"',
+        '"senior copywriter"', '"head of copy"',
+        '"lead copywriter"', '"copy lead"',
+        '"brand copywriter"', '"marketing copywriter"'
+    ],
+
+    'Content Writer' => [
+        // Escrita e Conteúdo
+        '"content writer"', '"escritor de conteúdo"',
+        '"escritor de conteúdo digital"',
+        '"redação de conteúdo"', '"content creation"',
+        '"criação de conteúdo"', '"criador de conteúdo"',
+        '"digital writer"', '"escritor digital"',
+        '"content creator"', '"criador de conteúdo"',
+        '"blog writer"', '"escritor de blog"',
+        '"web writer"', '"escritor web"',
+        // Tipos de Conteúdo
+        '"artigos"', '"articles"', '"posts"',
+        '"blog posts"', '"páginas de vendas"',
+        '"landing pages"', '"landing page copy"',
+        '"case studies"', '"white papers"',
+        '"ebooks"', '"guias"', '"guides"',
+        '"tutoriais"', '"tutorials"',
+        '"newsletters"', '"email sequences"',
+        '"social media content"',
+        '"conteúdo para redes sociais"',
+        '"scripts para vídeos"',
+        '"video scripts"',
+        '"product descriptions"',
+        '"descrições de produto"',
+        // SEO e Performance
+        '"SEO content"', '"conteúdo para SEO"',
+        '"keyword research"', '"pesquisa de palavras-chave"',
+        '"content strategy"', '"estratégia de conteúdo"',
+        '"content calendar"', '"calendário editorial"',
+        '"content audit"', '"auditoria de conteúdo"',
+        '"pillar content"', '"evergreen content"',
+        // Ferramentas
+        '"grammarly"', '"hemingway"',
+        '"surfer seo"', '"semrush"',
+        '"ahrefs"', '"answerthepublic"',
+        '"google docs"', '"notion"', '"wordpress"',
+        '"trello"', '"asana"',
+        // Equivalentes em Inglês (Complemento)
+        '"senior content writer"',
+        '"staff content writer"',
+        '"lead content writer"',
+        '"content specialist"',
+        '"content marketing writer"',
+        '"UX writer"',
+        '"technical content writer"',
+        '"product content writer"',
+        '"enterprise content writer"',
+        '"freelance content writer"',
+        '"content and copywriter"'
     ]
 ];
 
@@ -1152,6 +1240,8 @@ function categoriaSlug(string $nome): string {
         'People Analyst' => 'people-analyst',
         'Audiovisual' => 'audiovisual',
         'Branding' => 'branding',
+        'Redação' => 'redacao',
+        'Content Writer' => 'content-writer',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
