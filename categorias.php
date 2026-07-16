@@ -827,6 +827,129 @@ $categorias_mondywork = [
         '"enterprise account manager"', '"commercial manager"',
         '"business account manager"', '"corporate account manager"',
         '"client partner"', '"customer success manager"'
+    ],
+
+    'Recursos Humanos' => [
+        // Gestão de Pessoas
+        '"recursos humanos"', '"human resources"', '"rh"',
+        '"gestão de pessoas"', '"people management"',
+        '"gerente de rh"', '"rh manager"', '"hr manager"',
+        '"diretor de rh"', '"rh director"', '"hr director"',
+        '"head of people"', '"head of hr"', '"chief people officer"', '"cpo"',
+        '"vp of people"', '"vp of hr"',
+        // Cargos e Funções
+        '"analista de rh"', '"hr analyst"', '"analista de recursos humanos"',
+        '"assistente de rh"', '"hr assistant"',
+        '"coordenador de rh"', '"hr coordinator"',
+        '"especialista de rh"', '"hr specialist"',
+        '"business partner"', '"hr business partner"', '"hrbp"',
+        '"people partner"', '"people business partner"',
+        // Atração e Recrutamento
+        '"recrutamento e seleção"', '"recruitment and selection"',
+        '"recrutador"', '"recruiter"', '"recrutador interno"',
+        '"headhunter"', '"head hunting"',
+        '"employer branding"', '"marca empregadora"',
+        '"candidate experience"', '"experiência do candidato"',
+        '"job description"', '"descrição de vaga"',
+        // Desenvolvimento e Treinamento
+        '"treinamento e desenvolvimento"', '"training and development"',
+        '"t&d"', '"l&d"', '"learning and development"',
+        '"plano de desenvolvimento individual"', '"pdi"',
+        '"plano de carreira"', '"career plan"',
+        '"sucessão"', '"succession planning"',
+        '"mentoring"', '"mentoria"', '"coaching"',
+        '"onboarding"', '"integração"',
+        // Compensação e Benefícios
+        '"comp & ben"', '"compensation and benefits"',
+        '"remuneração"', '"remuneration"', '"compensação"',
+        '"benefícios"', '"benefits"',
+        '"cargo e salário"', '"job pricing"',
+        '"survey salarial"', '"salary survey"',
+        '"payroll"', '"folha de pagamento"',
+        // Clima e Cultura
+        '"clima organizacional"', '"organizational climate"',
+        '"engajamento"', '"employee engagement"',
+        '"cultura organizacional"', '"organizational culture"',
+        '"e-nps"', '"employee nps"',
+        '"retenção de talentos"', '"talent retention"',
+        '"turnover"', '"rotatividade"',
+        '"wellbeing"', '"bem-estar"', '"saúde ocupacional"',
+        // Processos e Compliance
+        '"legislação trabalhista"', '"labor law"',
+        '"relações trabalhistas"', '"labor relations"',
+        '"dp"', '"departamento pessoal"',
+        '"admissão"', '"demissão"', '"avaliação de desempenho"',
+        '"okrs"', '"kpis de rh"',
+        // Ferramentas
+        'workday', 'sap successfactors', 'bamboo hr', 'factorial',
+        'totvs', '"linguagem corporativa"', '"gupy"', '"kenoby"',
+        // Equivalentes em Inglês (Complemento)
+        '"people operations"', '"people ops"',
+        '"talent manager"', '"people manager"',
+        '"hr operations"', '"rh operations"',
+        '"organizational development"', '"desenvolvimento organizacional"'
+    ],
+
+    'People Analyst' => [
+        // Cargos e Funções
+        '"people analyst"', '"analista de pessoas"',
+        '"people operations analyst"', '"analista de people operations"',
+        '"people data analyst"', '"analista de dados de pessoas"',
+        '"hr analyst"', '"analista de rh"',
+        '"hr data analyst"', '"analista de dados de rh"',
+        '"people analytics specialist"', '"especialista em people analytics"',
+        '"people analytics manager"', '"gerente de people analytics"',
+        '"workforce analyst"', '"analista de workforce"',
+        '"hr metrics analyst"', '"analista de métricas de rh"',
+        // People Analytics
+        '"people analytics"', '"analytics de pessoas"',
+        '"workforce analytics"', '"analytics de workforce"',
+        '"hr analytics"', '"analytics de rh"',
+        '"talent analytics"', '"analytics de talentos"',
+        '"employee analytics"', '"analytics de funcionários"',
+        '"people insights"', '"insights de pessoas"',
+        '"data driven hr"', '"rh baseado em dados"',
+        // Métricas e KPIs
+        '"turnover rate"', '"taxa de rotatividade"',
+        '"attrition rate"', '"taxa de atrito"',
+        '"time to hire"', '"tempo para contratar"',
+        '"time to fill"', '"tempo para preencher"',
+        '"cost per hire"', '"custo por contratação"',
+        '"employee lifetime value"', '"valor vitalício do funcionário"',
+        '"engagement score"', '"score de engajamento"',
+        '"e-nps"', '"employee nps"',
+        '"absenteeism"', '"absenteísmo"',
+        '"headcount"', '"quadro de funcionários"',
+        '"headcount planning"', '"planejamento de headcount"',
+        '"pay equity"', '"equidade salarial"',
+        '"diversity metrics"', '"métricas de diversidade"',
+        '"inclusion index"', '"índice de inclusão"',
+        // Visualização e Relatórios
+        '"dashboard de rh"', '"hr dashboard"',
+        '"people dashboard"', '"dashboard de pessoas"',
+        '"relatório de rh"', '"hr report"',
+        '"workforce report"', '"relatório de workforce"',
+        '"executive report"', '"relatório executivo"',
+        '"data visualization"', '"visualização de dados"',
+        '"power bi"', '"tableau"', '"google data studio"',
+        // Ferramentas e Plataformas
+        'workday', 'bamboo hr', 'sap successfactors', 'factorial',
+        'lattice', '15five', 'culture amp', 'leapsome', 'peakon',
+        'visier', 'one model', 'orgnostic',
+        // Projetos e Programas
+        '"attrition analysis"', '"análise de turnover"',
+        '"retention analysis"', '"análise de retenção"',
+        '"compensation analysis"', '"análise de compensação"',
+        '"salary benchmarking"', '"benchmark salarial"',
+        '"diversity report"', '"relatório de diversidade"',
+        '"people strategy"', '"estratégia de pessoas"',
+        '"workforce planning"', '"planejamento de workforce"',
+        '"organizational design"', '"design organizacional"',
+        // Equivalentes em Inglês (Complemento)
+        '"people operations analyst"', '"workforce planning analyst"',
+        '"talent analytics analyst"', '"hr business intelligence"',
+        '"people insights analyst"', '"organizational analytics"',
+        '"strategic workforce planning"', '"people data scientist"'
     ]
 ];
 
@@ -914,6 +1037,8 @@ function categoriaSlug(string $nome): string {
         'Fullstack' => 'fullstack',
         'Business Intelligence' => 'business-intelligence',
         'Account Manager' => 'account-manager',
+        'Recursos Humanos' => 'recursos-humanos',
+        'People Analyst' => 'people-analyst',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
