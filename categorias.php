@@ -949,7 +949,118 @@ $categorias_mondywork = [
         '"people operations analyst"', '"workforce planning analyst"',
         '"talent analytics analyst"', '"hr business intelligence"',
         '"people insights analyst"', '"organizational analytics"',
-        '"strategic workforce planning"', '"people data scientist"'
+        '"strategic workforce planning"',         '"people data scientist"'
+    ],
+
+    'Audiovisual' => [
+        // Produção e Criação
+        '"produção audiovisual"', '"audiovisual"', '"audio visual"',
+        '"produção de vídeo"', '"video production"',
+        '"videomaker"', '"videographer"', '"cinegrafista"',
+        '"diretor de fotografia"', '"director of photography"',
+        '"câmera"', '"camera operator"',
+        // Edição e Pós-Produção
+        '"edição de vídeo"', '"video editing"',
+        '"editor de vídeo"', '"video editor"',
+        '"final cut"', '"davinci resolve"', '"premiere pro"',
+        '"after effects"', '"motion graphics"',
+        '"color grading"', '"colorista"',
+        '"mixagem de áudio"', '"audio mixing"',
+        '"sound design"', '"design de som"',
+        // Animação e Motion
+        '"animação"', '"animation"', '"animator"',
+        '"motion designer"', '"motion graphics designer"',
+        '"2d animation"', '"animação 2d"',
+        '"3d animation"', '"animação 3d"',
+        '"blender"', '"cinema 4d"', '"maya"',
+        '"after effects"',
+        // Podcast e Áudio
+        '"podcast"', '"podcaster"', '"produção de podcast"',
+        '" locução"', '"locutor"', '"voice over"',
+        '"áudio"', '"audio production"',
+        '"garrafa de som"', '"home studio"',
+        // Streaming e Live
+        '"live"', '"live streaming"', '"transmissão ao vivo"',
+        '"obs studio"', '"streamlabs"',
+        '"transmissao"', '"live production"',
+        // Cargos e Funções
+        '"produzidor audiovisual"', '"audiovisual producer"',
+        '"diretor de arte"', '"art director"',
+        '"diretor criativo"', '"creative director"',
+        '"motion lead"', '"head of audiovisual"',
+        '"content producer"', '"produtor de conteúdo"',
+        '"social media video"', '"vídeo para redes sociais"',
+        // Fotografia
+        '"fotografia"', '"photography"', '"fotógrafo"',
+        '"editor de imagem"', '"image editor"',
+        '"photoshop"', '"lightroom"',
+        // Equivalentes em Inglês (Complemento)
+        '"multimedia producer"', '"digital content producer"',
+        '"video specialist"', '"multimedia specialist"',
+        '"creative producer"', '"video content creator"'
+    ],
+
+    'Branding' => [
+        // Identidade e Estratégia
+        '"branding"', '"brand identity"', '"identidade de marca"',
+        '"brand strategy"', '"estratégia de marca"',
+        '"brand management"', '"gestão de marca"',
+        '"brand positioning"', '"posicionamento de marca"',
+        '"brand architecture"', '"arquitetura de marca"',
+        '"rebranding"', '"repozição de marca"',
+        // Cargos e Funções
+        '"brand manager"', '"gerente de marca"',
+        '"brand director"', '"diretor de marca"',
+        '"brand strategist"', '"estrategista de marca"',
+        '"brand designer"', '"designer de marca"',
+        '"brand specialist"', '"especialista em marca"',
+        '"brand analyst"', '"analista de marca"',
+        '"creative director"', '"diretor criativo"',
+        '"art director"', '"diretor de arte"',
+        // Visual e Design
+        '"logo"', '"logotipo"', '"logomarca"',
+        '"manual de marca"', '"brand guideline"',
+        '"brand book"', '"guia de marca"',
+        '"paleta de cores"', '"color palette"',
+        '"tipografia"', '"typography"',
+        '"elementos visuais"', '"visual elements"',
+        '"design gráfico"', '"graphic design"',
+        '"ilustração"', '"illustration"',
+        '"branding visual"', '"visual branding"',
+        // Branding Digital
+        '"branding digital"', '"digital branding"',
+        '"social media branding"',
+        '"personal branding"', '"branding pessoal"',
+        '"employer branding"', '"marca empregadora"',
+        '"brand experience"', '"experiência de marca"',
+        '"brand touchpoint"', '"ponto de contato da marca"',
+        '"brand consistency"', '"consistência da marca"',
+        // Pesquisa e Análise
+        '"brand research"', '"pesquisa de marca"',
+        '"brand equity"', '"valor de marca"',
+        '"brand awareness"', '"notoriedade de marca"',
+        '"brand perception"', '"percepção de marca"',
+        '"brand tracking"', '"monitoramento de marca"',
+        '"brand audit"', '"auditoria de marca"',
+        '"naming"', '"nomenclatura"',
+        '"brand valuation"', '"avaliação de marca"',
+        // Branding e Cultura
+        '"brand culture"', '"cultura de marca"',
+        '"brand voice"', '"tom de voz da marca"',
+        '"brand tone"', '"tom da marca"',
+        '"brand personality"', '"personalidade da marca"',
+        '"brand story"', '"história da marca"',
+        '"brand purpose"', '"propósito da marca"',
+        '"brand values"', '"valores da marca"',
+        // Ferramentas
+        'figma', 'canva', 'adobe illustrator', 'photoshop',
+        '"indesign"', '"corel draw"',
+        // Equivalentes em Inglês (Complemento)
+        '"brand lead"', '"head of brand"',
+        '"corporate brand manager"',
+        '"global brand manager"',
+        '"brand and communications"',
+        '"visual identity designer"'
     ]
 ];
 
@@ -1039,6 +1150,8 @@ function categoriaSlug(string $nome): string {
         'Account Manager' => 'account-manager',
         'Recursos Humanos' => 'recursos-humanos',
         'People Analyst' => 'people-analyst',
+        'Audiovisual' => 'audiovisual',
+        'Branding' => 'branding',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];
