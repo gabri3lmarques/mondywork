@@ -305,7 +305,7 @@ $categorias_mondywork = [
         '"engineering recruiter"', '"developer recruiter"', '"IT recruitment"'
     ],
 
-    'Comunicação' => [
+        'Comunicação' => [
         // Comunicação Corporativa e Institucional
         '"comunicação corporativa"', '"corporate communication"', '"comunicação interna"', '"internal communication"',
         '"comunicação institucional"', '"institutional communication"', '"comunicação empresarial"',
@@ -337,6 +337,272 @@ $categorias_mondywork = [
         '"communications manager"', '"communications director"', '"corporate communications manager"',
         '"internal comms"', '"external comms"', '"stakeholder communication"',
         '"employee engagement"', '"engajamento de funcionários"'
+    ],
+
+    'Social Mídia' => [
+        // Plataformas e Gestão
+        '"social media"', '"redes sociais"', '"gestão de redes sociais"', '"social media management"',
+        '"social media manager"', '"gestor de redes sociais"', '"social media specialist"',
+        '"analista de redes sociais"', '"social media analyst"', '"social media coordinator"',
+        '"social media strategist"', '"estrategista de redes sociais"',
+        // Criação e Produção
+        '"social media content"', '"conteúdo para redes sociais"', '"criador de conteúdo digital"',
+        '"content creator"', '"criador de conteúdo"', '"social media creator"',
+        '"produção de conteúdo para redes sociais"', '"social media production"',
+        // Community Management
+        '"community manager"', '"gerente de comunidade"', '"gestor de comunidade"',
+        '"moderador de redes sociais"', '"social media moderator"',
+        '"community specialist"', '"especialista em comunidade"',
+        // Pago e Performance
+        '"social media ads"', '"anúncios em redes sociais"', '"facebook ads"', '"meta ads"',
+        '"instagram ads"', '"linkedin ads"', '"tiktok ads"', '"twitter ads"', '"x ads"',
+        '"social media paid"', '"mídia paga social"', '"paid social"',
+        '"social media performance"', '"performance de redes sociais"',
+        // Métricas e Analytics
+        '"social media metrics"', '"métricas de redes sociais"', '"social media analytics"',
+        '"social media reporting"', '"relatórios de redes sociais"',
+        '"engajamento"', '"engagement"', '" alcance"', '"reach"', '"impressões"', '"impressions"',
+        // Estratégia e Planejamento
+        '"social media strategy"', '"estratégia de redes sociais"', '"social media plan"',
+        '"planejamento de redes sociais"', '"content calendar"', '"calendário editorial"',
+        '"social media campaign"', '"campanha de redes sociais"',
+        // Plataformas Específicas
+        'instagram', 'tiktok', 'facebook', 'linkedin', 'twitter', 'youtube', 'pinterest',
+        'threads', 'bluesky', 'mastodon', '"google my business"',
+        // Equivalentes em Inglês (Complemento)
+        '"social media director"', '"head of social media"', '"social media lead"',
+        '"digital community manager"', '"brand social media"', '"corporate social media"'
+    ],
+
+    'Marketing' => [
+        // Marketing Tradicional e Estratégico
+        '"marketing manager"', '"gerente de marketing"', '"marketing director"', '"diretor de marketing"',
+        '"head of marketing"', '"vp of marketing"', '"chief marketing officer"', 'cmo',
+        '"marketing strategist"', '"estrategista de marketing"', '"marketing consultant"',
+        '"consultor de marketing"', '"marketing analyst"', '"analista de marketing"',
+        // Brand Management
+        '"brand manager"', '"gerente de marca"', '"branding manager"',
+        '"brand strategist"', '"estrategista de marca"', '"brand analyst"',
+        '"gerente de produto"', '"product manager"', '"product marketing manager"',
+        '"product marketing"', '"marketing de produto"',
+        // Market Research e Inteligência de Mercado
+        '"market research"', '"pesquisa de mercado"', '"market analyst"', '"analista de mercado"',
+        '"market intelligence"', '"inteligência de mercado"', '"competitive intelligence"',
+        '"consumer insights"', '"insights do consumidor"', '"market specialist"',
+        '"especialista de mercado"',
+        // Trade Marketing e Varejo
+        '"trade marketing"', '"trade marketing manager"', '"gerente de trade marketing"',
+        '"shopper marketing"', '"category manager"', '"gestor de categoria"',
+        '"visual merchandising"', '"merchandising"', '"trade analyst"',
+        // Eventos e Relações Institucionais
+        '"event marketing"', '"marketing de eventos"', '"event manager"', '"gerente de eventos"',
+        '"corporate events"', '"eventos corporativos"', '"event planner"',
+        '"marketing relacional"', '"relational marketing"',
+        // Branding e Identidade
+        '"brand identity"', '"identidade de marca"', '"brand experience"', '"experiência de marca"',
+        '"brand positioning"', '"posicionamento de marca"', '"brand equity"',
+        '"valor de marca"', '"brand culture"', '"cultura de marca"',
+        // Pricing e Canal
+        '"pricing strategy"', '"estratégia de precificação"', '"pricing analyst"',
+        '"channel marketing"', '"marketing de canal"', '"field marketing"',
+        '"marketing operacional"', '"marketing tático"',
+        // Equivalentes em Inglês (Complemento)
+        '"marketing specialist"', '"brand director"', '"marketing operations"',
+        '"marketing coordinator"', '"marketing communications"', '"marcom"',
+        '"go-to-market"', '"gtm strategy"', '"market development"',
+        '"business development manager"', '"b2b marketing manager"'
+    ],
+
+    'Analista de SEO' => [
+        // SEO On-Page e Técnico
+        'seo', '"search engine optimization"', '"otimização para mecanismos de busca"',
+        '"seo on-page"', '"on-page seo"', '"seo off-page"', '"off-page seo"',
+        '"seo técnico"', '"technical seo"', '"seo técnico"',
+        '"keyword research"', '"pesquisa de palavras-chave"', '" keyword planning"',
+        '"keyword mapping"', '"keyword clustering"', '"keyword gap"',
+        // Auditoria e Análise
+        '"seo audit"', '"auditoria seo"', '"seo analysis"', '"análise seo"',
+        '"seo report"', '"relatório seo"', '"seo metrics"', '"métricas seo"',
+        '"seo performance"', '"performance seo"', '"seo dashboard"',
+        // Conteúdo e Estratégia
+        '"seo content"', '"conteúdo para seo"', '"content seo"', '"seo copywriting"',
+        '"content strategy"', '"estratégia de conteúdo"', '"content optimization"',
+        '"topic cluster"', '"pillar page"', '"cluster de conteúdo"',
+        '"seo strategy"', '"estratégia seo"', '"seo plan"', '"plano seo"',
+        // Link Building e Off-Page
+        '"link building"', '"construção de links"', '"backlink"', '"backlinks"',
+        '"guest post"', '"guest posting"', '"digital pr"', '"pr digital"',
+        '"link earning"', '"earning de links"', '"domain authority"', '"autoridade de domínio"',
+        // SEO Local e E-commerce
+        '"local seo"', '"seo local"', '"google my business"', '"google business profile"',
+        '"maps seo"', '"seo para e-commerce"', '"ecommerce seo"',
+        // Ferramentas
+        '"google search console"', '"gsc"', '"google analytics"', '"ga4"',
+        'ahrefs', 'semrush', 'moz', '"screaming frog"', '"screaming frog seo"',
+        '"sitebulb"', 'screaming', 'frog',
+        // Core Web Vitals e Performance
+        '"core web vitals"', '"cwv"', '"page speed"', '"velocidade da página"',
+        '"lcp"', '"fid"', '"cls"', '"INP"',
+        // Equivalentes em Inglês (Complemento)
+        '"seo specialist"', '"seo analyst"', '"seo manager"', '"seo consultant"',
+        '"search engine marketing specialist"', '"sem specialist"',
+        '"technical seo specialist"', '"content seo specialist"', '"link building specialist"'
+    ],
+
+    'Gestor de Tráfego' => [
+        // Gestão de Tráfego Pago
+        '"gestor de tráfego"', '"traffic manager"', '"traffic specialist"',
+        '"gestão de tráfego pago"', '"paid traffic management"',
+        '"tráfego pago"', '"paid traffic"', '"mídia paga"', '"paid media"',
+        '"paid media manager"', '"gestor de mídia paga"',
+        // Plataformas de Anúncios
+        '"google ads"', '"google ads manager"', '"google ads specialist"',
+        '"meta ads"', '"facebook ads"', '"instagram ads"', '"meta business"',
+        '"linkedin ads"', '"linkedin campaign manager"',
+        '"tiktok ads"', '"tiktok advertising"',
+        '"twitter ads"', '"x ads"', '"x advertising"',
+        '"pinterest ads"', '"snapchat ads"', '"reddit ads"',
+        '"microsoft ads"', '"bing ads"', '"microsoft advertising"',
+        // Estratégia e Planejamento
+        '"paid media strategy"', '"estratégia de mídia paga"',
+        '"media plan"', '"planejamento de mídia"', '"midia plan"',
+        '"budget management"', '"gestão de orçamento"', '"gestão de verba"',
+        '"campaign strategy"', '"estratégia de campanha"',
+        '"performance marketing"', '"marketing de performance"',
+        // Análise e Otimização
+        '"roas"', '"roi"', '"cac"', '"cpa"', '"cpc"', '"cpm"', '"ctr"',
+        '"conversion rate"', '"taxa de conversão"', '"cost per lead"', '"cpl"',
+        '"cost per acquisition"', '"custo por aquisição"',
+        '"a/b testing"', '"teste a/b"', '"split testing"',
+        '"remarketing"', '"retargeting"', '"retargeting ads"',
+        // Funis e Conversão
+        '"funil de vendas"', '"sales funnel"', '"marketing funnel"',
+        '"conversion funnel"', '"funil de conversão"',
+        '"landing page"', '"página de destino"', '"lp"',
+        '"lead generation"', '"geração de leads"', '"lead gen"',
+        // Automação e Ferramentas
+        '"marketing automation"', '"automação de marketing"',
+        '"google tag manager"', '"gtm"', '"utm parameters"', '"utm"',
+        '"google analytics"', '"ga4"', '"hotjar"', '"clarity"',
+        '"hubspot"', '"rd station"', '"resultados digitais"',
+        // Equivalentes em Inglês (Complemento)
+        '"paid media specialist"', '"paid media analyst"', '"ppc specialist"',
+        '"ppc manager"', '"ads specialist"', '"advertising specialist"',
+        '"performance specialist"', '"performance analyst"',
+        '"media buyer"', '"comprador de mídia"', '"digital media planner"'
+    ],
+
+    'Gerente de Projetos' => [
+        // Cargos e Funções
+        '"gerente de projetos"', '"project manager"', '"pm"', '"gestor de projetos"',
+        '"gestora de projetos"', '"project coordinator"', '"coordenador de projetos"',
+        '"project analyst"', '"analista de projetos"',
+        // Liderança e Direção
+        '"director of projects"', '"diretor de projetos"', '"head of projects"',
+        '"program manager"', '"gerente de programas"', '"portfolio manager"',
+        '"gerente de portfólio"', '"delivery manager"', '"gerente de entrega"',
+        '"it project manager"', '"gerente de projetos de ti"',
+        // Metodologias e Frameworks
+        '"gestão de projetos"', '"project management"', '"pmo"',
+        '"pmp"', '"prince2"', '"certified associate in project management"', '"capm"',
+        '"lean project management"', '"six sigma"', '"lean six sigma"',
+        '"waterfall"', '"cascata"', '"hibrido"', '"hybrid project management"',
+        // Planejamento e Controle
+        '"cronograma"', '"schedule management"', '"gestão de prazos"',
+        '"orçamento de projetos"', '"budget management"', '"gestão de custos"',
+        '"risco"', '"risk management"', '"gestão de riscos"',
+        '"alcance"', '"scope management"', '"gestão de escopo"',
+        '"qualidade"', '"quality management"', '"gestão de qualidade"',
+        '"recursos"', '"resource management"', '"gestão de recursos"',
+        // Comunicação e Stakeholders
+        '"stakeholder management"', '"gestão de stakeholders"',
+        '"comunicação de projetos"', '"project communication"',
+        '"reporting"', '"relatórios de projetos"',
+        // Ferramentas
+        'jira', 'asana', 'trello', 'monday', '"microsoft project"', '"ms project"',
+        'clickup', 'notion', 'basecamp', 'wrike', '"smartsheet"',
+        'power bi', 'excel',
+        // Métricas e KPIs
+        '"earned value"', '"valor agregado"', '"evm"',
+        '"burn rate"', '"velocity"', '"lead time"', '"cycle time"',
+        '"on time"', '"on budget"', '"scope creep"',
+        // Equivalentes em Inglês (Complemento)
+        '"project director"', '"project leader"', '"project lead"',
+        '"technical project manager"', '"tpm"', '"scrum master"',
+        '"agile project manager"', '"apm"', '"project management office"',
+        '"project controls manager"', '"project scheduler"'
+    ],
+
+    'Analista de Sistemas' => [
+        // Cargos e Funções
+        '"analista de sistemas"', '"systems analyst"', '"analista de system"',
+        '"analista de requisitos"', '"requirements analyst"', '"business analyst"',
+        '"analista de negócios"', '"analista funcional"', '"functional analyst"',
+        '"systems engineer"', '"engenheiro de sistemas"',
+        // Análise e Design
+        '"análise de sistemas"', '"system analysis"', '"análise de requisitos"',
+        '"requirements gathering"', '"levantamento de requisitos"',
+        '"modelagem de processos"', '"process modeling"', '"modelagem de dados"',
+        '"data modeling"', '"use case"', '"caso de uso"', '"user story"',
+        '"história de usuário"', '"backlog"', '"specification"', '"especificação"',
+        // Desenvolvimento e Integração
+        '"desenvolvimento de sistemas"', '"system development"',
+        '"integração de sistemas"', '"system integration"',
+        '"api"', '"web service"', '"microservices"', '"microsserviços"',
+        '"middleware"', '"erp"', '"crm"', '"sap"', '"salesforce"',
+        // Infraestrutura e Operação
+        '"infraestrutura de ti"', '"it infrastructure"',
+        '"administração de bancos de dados"', '"database administration"',
+        '"sql server"', '"oracle"', '"mysql"', '"postgresql"',
+        '"linux"', '"windows server"', '"active directory"',
+        // Segurança e Compliance
+        '"segurança da informação"', '"information security"',
+        '"controles internos"', '"internal controls"',
+        '"política de ti"', '"it policy"', '"pliance de ti"',
+        // Equivalentes em Inglês (Complemento)
+        '"application analyst"', '"analista de aplicações"',
+        '"it analyst"', '"analista de ti"', '"technical analyst"',
+        '"solution architect"', '"arquiteto de soluções"',
+        '"it consultant"', '"consultor de ti"'
+    ],
+
+    'Governança de TI' => [
+        // Frameworks e Normas
+        '"governança de ti"', '"it governance"', '"it governança"',
+        '"itil"', '"itil v4"', '"cobit"', '"cobit 2019"',
+        '"iso 27001"', '"iso 27002"', '"iso 20000"',
+        '"tic q"', '"tic q"', '"ticq"',
+        // Gestão de Serviços
+        '"gestão de serviços de ti"', '"itsm"', '"it service management"',
+        '"service desk"', '"help desk"', '"mesa de ajuda"',
+        '"gestão de incidentes"', '"incident management"',
+        '"gestão de problemas"', '"problem management"',
+        '"gestão de mudanças"', '"change management"',
+        '"gestão de configuração"', '"configuration management"',
+        '"gestão de continuidade"', '"business continuity"',
+        '"disaster recovery"', '"recuperação de desastres"',
+        // Auditoria e Compliance
+        '"auditoria de ti"', '"it audit"', '"it auditing"',
+        '"compliance de ti"', '"it compliance"',
+        '"controles de ti"', '"it controls"',
+        '"risco de ti"', '"it risk management"',
+        '"gestão de riscos de ti"', '"it risk"',
+        // Métricas e Indicadores
+        '"slas"', '"service level agreement"', '"acordo de nível de serviço"',
+        '"ola"', '"operational level agreement"',
+        '"kpi de ti"', '"it kpi"', '"balanced scorecard"',
+        '"valor de ti"', '"it value"', '"value of it"',
+        // Estratégia e Alinhamento
+        '"alinhamento de ti"', '"it alignment"', '"it-business alignment"',
+        '"estratégia de ti"', '"it strategy"', '"roadmap de ti"',
+        '"portfolio de ti"', '"it portfolio management"',
+        '"arquitetura corporativa"', '"enterprise architecture"',
+        // Equivalentes em Inglês (Complemento)
+        '"governance analyst"', '"it governance analyst"',
+        '"compliance analyst"', '"it compliance analyst"',
+        '"itsm analyst"', '"service management analyst"',
+        '"it governance manager"', '"governance manager"',
+        '"it director"', '"diretor de ti"', '"cto"', '"cio"'
     ]
 ];
 
@@ -411,6 +677,13 @@ function categoriaSlug(string $nome): string {
         'Talent Acquisition' => 'talent-acquisition',
         'Tech Recruiter' => 'tech-recruiter',
         'Comunicação' => 'comunicacao',
+        'Social Mídia' => 'social-midia',
+        'Marketing' => 'marketing',
+        'Analista de SEO' => 'analista-de-seo',
+        'Gestor de Tráfego' => 'gestor-de-trafego',
+        'Gerente de Projetos' => 'gerente-de-projetos',
+        'Analista de Sistemas' => 'analista-de-sistemas',
+        'Governança de TI' => 'governanca-de-ti',
         'Segurança da Informação' => 'seguranca-informacao',
         'Sem Categoria' => 'sem-categoria',
     ];

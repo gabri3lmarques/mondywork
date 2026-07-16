@@ -73,7 +73,7 @@ $ch = curl_init();
     );
     if (!empty($todasEmpresas)) {
         $placeholders = implode(',', array_fill(0, count($todasEmpresas), '?'));
-        $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE empresa NOT IN ($placeholders) AND status = 'ativa'");
+        $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE empresa NOT IN ($placeholders) AND status = 'ativa' AND vaga_id_externo NOT LIKE 'manual-%'");
         $stmt->execute($todasEmpresas);
         $afetadas = $stmt->rowCount();
         if ($afetadas > 0) {
