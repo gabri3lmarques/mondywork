@@ -1627,6 +1627,17 @@ $categorias_mondywork = [
         '"automation solutions engineer"'
     ],
 
+    'Analista de Automação' => [
+        // Cargo e Identidade
+        '"analista de automação"', '"analista de automacao"', '"automation analyst"',
+        '"analista de rpa"', '"rpa analyst"', '"analista de testes automatizados"',
+        '"analista de automação de testes"', '"qa automation analyst"', '"test automation analyst"',
+        '"analista de automação de processos"', '"process automation analyst"',
+        '"analista de processos e automação"', '"process and automation analyst"',
+        // Ferramentas / Tecnologias principais (focando em analista)
+        '"uipath"', '"power automate"', '"zapier"', '"n8n"', '"selenium"', '"cypress"', '"playwright"'
+    ],
+
     'Scrum Master' => [
         // Cargo e Identidade
         '"scrum master"', '" scrum master"',
@@ -2267,6 +2278,7 @@ function categoriaSlug(string $nome): string {
         'Analista de Negócios' => 'analista-de-negocios',
         'Blockchain' => 'blockchain',
         'Web3' => 'web3',
+        'Analista de Automação' => 'analista-de-automacao',
         'Sem Categoria' => 'sem-categoria',
     ];
     return $map[$nome] ?? 'sem-categoria';

@@ -154,6 +154,7 @@ function setupSchema(PDO $pdo): void
             ['analista-de-negocios', 'Analista de Negócios', 'Business Analyst'],
             ['blockchain', 'Blockchain', 'Blockchain'],
             ['web3', 'Web3', 'Web3'],
+            ['analista-de-automacao', 'Analista de Automação', 'Automation Analyst'],
         ];
         foreach ($novasCats as $nc) {
             $stmt = $pdo->prepare("INSERT IGNORE INTO categorias (slug, nome_pt, nome_en) VALUES (:slug, :pt, :en)");
