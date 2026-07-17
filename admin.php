@@ -376,7 +376,7 @@ if ($isLoggedIn && $tab === 'categorias') {
             }
         }
 
-        $categoriasLista = $pdoCat->query("SELECT c.*, (SELECT COUNT(*) FROM vaga_categorias vc WHERE vc.categoria_id = c.id) as total_vagas FROM categorias c ORDER BY c.id")->fetchAll(PDO::FETCH_ASSOC);
+        $categoriasLista = $pdoCat->query("SELECT c.*, (SELECT COUNT(*) FROM vaga_categorias vc WHERE vc.categoria_id = c.id) as total_vagas FROM categorias c ORDER BY c.nome_pt")->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
         $erroCategoria = 'Erro ao acessar o banco de dados.';
         $categoriasLista = [];
@@ -594,7 +594,7 @@ try {
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $todasCategorias = $pdo->query("SELECT * FROM categorias ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+    $todasCategorias = $pdo->query("SELECT * FROM categorias ORDER BY nome_pt")->fetchAll(PDO::FETCH_ASSOC);
 
     $newsletters = [];
     $totalNewsletters = 0;
