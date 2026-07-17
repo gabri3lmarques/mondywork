@@ -87,6 +87,20 @@ $categorias_mondywork = [
         '"ai researcher"', '"machine learning specialist"', '"machine learning researcher"'
     ],
 
+    'Blockchain' => [
+        // Cargo e Identidade
+        'blockchain', '"block chain"', 'solidity', 'rust', 'ethereum', 'bitcoin', '"smart contract"', '"smart contracts"', 'defi', '"decentralized finance"', 'solana', 'nft', '"non-fungible token"', '"non fungible token"', 'hyperledger', 'truffle', 'hardhat', '"ethers.js"', '"web3.js"', 'web3',
+        // Equivalentes em Inglês (Complemento)
+        '"blockchain developer"', '"blockchain engineer"', '"smart contract developer"'
+    ],
+
+    'Web3' => [
+        // Cargo e Identidade
+        'web3', '"web3.js"', 'blockchain', 'solidity', '"smart contract"', '"smart contracts"', 'defi', 'dapp', '"decentralized application"', '"decentralized applications"', 'solana', 'nft', 'crypto', '"cryptocurrency"', '"crypto currency"',
+        // Equivalentes em Inglês (Complemento)
+        '"web3 developer"', '"web3 engineer"', '"decentralized web"'
+    ],
+
     'Design' => [
         // Design de Produto e Interfaces
         'ux', 'ui', '"ux/ui"', 'designer', 'motion', '"product design"', '"product designer"', '"designer de produto"', '"ui designer"', '"ux designer"', 
@@ -2251,6 +2265,8 @@ function categoriaSlug(string $nome): string {
         'UI' => 'ui',
         'UX' => 'ux',
         'Analista de Negócios' => 'analista-de-negocios',
+        'Blockchain' => 'blockchain',
+        'Web3' => 'web3',
         'Sem Categoria' => 'sem-categoria',
     ];
     return $map[$nome] ?? 'sem-categoria';
