@@ -143,6 +143,32 @@ $categorias_mondywork = [
         '"product management"'
     ],
 
+    'Product Owner' => [
+        // Cargo e Identidade
+        '"product owner"', '"po"', '"dono do produto"', '"dona do produto"',
+        '"certified scrum product owner"', '"cspo"', '"pspo"', '"professional scrum product owner"',
+        '"product owner de squads"', '"product owner de tribes"', '"product owner de chapters"', '"product owner de guilds"',
+        '"delivery product owner"', '"technical product owner"', '"program product owner"', '"enterprise product owner"',
+        '"product owner para startups"', '"product owner remoto"', '"product owner distribuído"', '"multi-team product owner"',
+        '"product owner de produto"', '"senior product owner"', '"lead product owner"', '"principal product owner"',
+        '"chief product owner"', '"product owner coach"', '"product ownership"',
+        // Equivalentes em Inglês (Complemento)
+        '"po analyst"', '"analista de product owner"'
+    ],
+
+    'Product Manager' => [
+        // Cargo e Identidade
+        '"product manager"', '"pm"', '"gerente de produto"', '"gerente de produtos"',
+        '"associate product manager"', '"apm"', '"group product manager"', '"gpm"',
+        '"vp of product"', '"cpo"', '"chief product officer"', '"director of product"',
+        '"diretor de produto"', '"product leader"', '"líder de produto"', '"product management"',
+        '"product lead"', '"senior product manager"', '"lead product manager"', '"principal product manager"',
+        '"chief product manager"', '"product manager coach"', '"technical product manager"', '"tpm"',
+        '"product marketing manager"', '"pmm"', '"head of product"', '"product growth manager"', '"growth product manager"',
+        // Equivalentes em Inglês (Complemento)
+        '"pm analyst"', '"analista de product manager"'
+    ],
+
     'Ágil' => [
         '"scrum master"', '"agile coach"', 'agilista', '"consultor ágil"', '"consultora ágil"', 'agilidade', '"agile master"', 
         '"agile expert"', '"agile delivery manager"', '"agile project manager"', '"facilitador ágil"', '"enterprise agile coach"',
@@ -2173,6 +2199,8 @@ function categoriaSlug(string $nome): string {
         'Designer Gráfico' => 'designer-grafico',
         'Cloud Solutions' => 'cloud-solutions',
         'Segurança da Informação' => 'seguranca-informacao',
+        'Product Owner' => 'product-owner',
+        'Product Manager' => 'product-manager',
         'Sem Categoria' => 'sem-categoria',
     ];
     return $map[$nome] ?? 'sem-categoria';
