@@ -148,6 +148,9 @@ function setupSchema(PDO $pdo): void
             ['cloud-solutions', 'Cloud Solutions', 'Cloud Solutions'],
             ['product-owner', 'Product Owner', 'Product Owner'],
             ['product-manager', 'Product Manager', 'Product Manager'],
+            ['atendimento', 'Atendimento', 'Customer Service'],
+            ['ui', 'UI', 'UI'],
+            ['ux', 'UX', 'UX'],
         ];
         foreach ($novasCats as $nc) {
             $stmt = $pdo->prepare("INSERT IGNORE INTO categorias (slug, nome_pt, nome_en) VALUES (:slug, :pt, :en)");

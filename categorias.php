@@ -101,6 +101,26 @@ $categorias_mondywork = [
         'prototyping', '"information architecture"', '"experience designer"'
     ],
 
+    'UI' => [
+        // Cargo e Identidade
+        'ui', '"user interface"', '"ui designer"', '"designer ui"', '"designer de interface"', '"designer de interfaces"',
+        '"ui developer"', '"ui engineer"', '"visual designer"', '"designer visual"', '"interaction designer"',
+        '"designer de interação"', '"design de interface"', '"design de interfaces"', '"ui/ux"', '"ux/ui"',
+        // Equivalentes em Inglês (Complemento)
+        '"ui specialist"', '"ui analyst"', '"senior ui designer"'
+    ],
+
+    'UX' => [
+        // Cargo e Identidade
+        'ux', '"user experience"', '"ux designer"', '"designer ux"', '"designer de experiência"', '"designer de experiencia"',
+        '"ux researcher"', '"ux research"', '"pesquisador de ux"', '"pesquisadora de ux"', '"ux writer"', '"ux writing"',
+        '"redator de ux"', '"redatora de ux"', '"experience designer"', '"service design"', '"designer de serviço"',
+        '"designer de serviços"', '"design de experiência"', '"design de experiencia"', '"product researcher"',
+        '"ux specialist"', '"ux/ui"', '"ui/ux"',
+        // Equivalentes em Inglês (Complemento)
+        '"ux lead"', '"ux manager"', '"senior ux designer"'
+    ],
+
     'Marketing Digital' => [
         // Marketing Moderno e Growth
         '"marketing digital"', '"growth hacker"', '"growth hacking"', '"growth marketing"', '"growth manager"', '"analista de marketing"', 
@@ -167,6 +187,20 @@ $categorias_mondywork = [
         '"product marketing manager"', '"pmm"', '"head of product"', '"product growth manager"', '"growth product manager"',
         // Equivalentes em Inglês (Complemento)
         '"pm analyst"', '"analista de product manager"'
+    ],
+
+    'Atendimento' => [
+        // Cargo e Identidade
+        'atendimento', '"atendimento ao cliente"', '"atendimento a clientes"', '"suporte ao cliente"', '"suporte a clientes"',
+        '"contato com o cliente"', '"contato com clientes"', '"help desk"', '"helpdesk"', '"analista de atendimento"',
+        '"gerente de atendimento"', '"coordenador de atendimento"', '"coordenadora de atendimento"',
+        '"supervisor de atendimento"', '"supervisora de atendimento"', '"atendente"', '"recepcionista"',
+        '"customer service"', '"client service"', '"client relations"', '"customer relations"',
+        '"relacionamento com o cliente"', '"relacionamento com clientes"', '"suporte ao usuário"',
+        '"customer support"', '"support agent"', '"support representative"', '"atendimento ao consumidor"',
+        '"atendimento b2c"', '"atendimento b2b"', '"agente de atendimento"', '"atendimento ao usuário"',
+        // Equivalentes em Inglês (Complemento)
+        '"customer service analyst"', '"customer service representative"', '"customer service agent"'
     ],
 
     'Ágil' => [
@@ -2201,6 +2235,9 @@ function categoriaSlug(string $nome): string {
         'Segurança da Informação' => 'seguranca-informacao',
         'Product Owner' => 'product-owner',
         'Product Manager' => 'product-manager',
+        'Atendimento' => 'atendimento',
+        'UI' => 'ui',
+        'UX' => 'ux',
         'Sem Categoria' => 'sem-categoria',
     ];
     return $map[$nome] ?? 'sem-categoria';
