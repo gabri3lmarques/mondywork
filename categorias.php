@@ -499,6 +499,36 @@ $categorias_mondywork = [
         '"business development manager"', '"b2b marketing manager"'
     ],
 
+    'Relações Públicas' => [
+        // Cargo e Identidade
+        '"relações públicas"', '"relacoes publicas"', 'rp', '"public relations"', '"pr"',
+        '"comunicação corporativa"', '"corporate communication"', '"media relations"',
+        '"assessoria de imprensa"', '"assessor de imprensa"', '"assessora de imprensa"',
+        '"press relations"', '"comunicação institucional"', '"reputação institucional"',
+        // Equivalentes em Inglês (Complemento)
+        '"pr specialist"', '"pr manager"', '"public relations officer"', '"pr coordinator"'
+    ],
+
+    'Publicidade e Propaganda' => [
+        // Cargo e Identidade
+        '"publicidade e propaganda"', '"publicidade"', '"propaganda"', '"advertising"', '"ad"', '"ads"',
+        '"creative director"', '"diretor de criação"', '"redator publicitário"', '"redatora publicitária"',
+        '"copywriter"', '"copywriting"', '"copy"', '"planejamento publicitário"', '"agência de publicidade"',
+        '"advertising agency"', '"art director"', '"diretor de arte"', '"social media marketing"',
+        // Equivalentes em Inglês (Complemento)
+        '"copy analyst"', '"advertising analyst"', '"ad specialist"', '"advertising manager"'
+    ],
+
+    'Fotografia' => [
+        // Cargo e Identidade
+        '"fotografia"', '"fotógrafo"', '"fotógrafa"', '"photography"', '"photographer"',
+        '"foto"', '"photo"', '"photos"', '"lightroom"', '"photoshop"', '"tratamento de imagem"',
+        '"image editing"', '"direção de fotografia"', '"camera operator"', '"operador de câmera"',
+        '"estúdio fotográfico"', '"photo studio"',
+        // Equivalentes em Inglês (Complemento)
+        '"photo editor"', '"photographer assistant"', '"image retoucher"'
+    ],
+
     'Analista de SEO' => [
         // SEO On-Page e Técnico
         'seo', '"search engine optimization"', '"otimização para mecanismos de busca"',
@@ -576,6 +606,18 @@ $categorias_mondywork = [
         '"ppc manager"', '"ads specialist"', '"advertising specialist"',
         '"performance specialist"', '"performance analyst"',
         '"media buyer"', '"comprador de mídia"', '"digital media planner"'
+    ],
+
+    'Analista de Tráfego' => [
+        // Cargo e Identidade
+        '"analista de tráfego"', '"analista de trafego"', '"traffic analyst"',
+        '"analista de tráfego pago"', '"analista de trafego pago"', '"paid traffic analyst"',
+        '"analista de mídia paga"', '"analista de midia paga"', '"paid media analyst"',
+        '"analista de performance"', '"performance analyst"', '"analista de mídia"',
+        '"analista de midia"', '"media analyst"', '"analista de links patrocinados"',
+        '"analista de search engine marketing"', '"analista de sem"', '"sem analyst"',
+        // Ferramentas principais
+        '"google ads"', '"meta ads"', '"facebook ads"', '"linkedin ads"', '"tiktok ads"'
     ],
 
     'Gerente de Projetos' => [
@@ -2279,6 +2321,10 @@ function categoriaSlug(string $nome): string {
         'Blockchain' => 'blockchain',
         'Web3' => 'web3',
         'Analista de Automação' => 'analista-de-automacao',
+        'Analista de Tráfego' => 'analista-de-trafego',
+        'Relações Públicas' => 'relacoes-publicas',
+        'Publicidade e Propaganda' => 'publicidade-e-propaganda',
+        'Fotografia' => 'fotografia',
         'Sem Categoria' => 'sem-categoria',
     ];
     return $map[$nome] ?? 'sem-categoria';
