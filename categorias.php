@@ -203,6 +203,18 @@ $categorias_mondywork = [
         '"customer service analyst"', '"customer service representative"', '"customer service agent"'
     ],
 
+    'Analista de Negócios' => [
+        // Cargo e Identidade
+        '"analista de negócios"', '"analista de negocios"', '"business analyst"', '"ba"',
+        '"analista de processo"', '"analista de processos"', '"process analyst"', '"business processes analyst"',
+        '"analista de requisitos de negócio"', '"business requirements analyst"', '"analista de negócios sênior"',
+        '"analista de negócios pleno"', '"analista de negócios júnior"', '"senior business analyst"',
+        '"lead business analyst"', '"principal business analyst"', '"analista de negócios de ti"',
+        '"it business analyst"',
+        // Equivalentes em Inglês (Complemento)
+        '"business analyst specialist"', '"business analysis"'
+    ],
+
     'Ágil' => [
         '"scrum master"', '"agile coach"', 'agilista', '"consultor ágil"', '"consultora ágil"', 'agilidade', '"agile master"', 
         '"agile expert"', '"agile delivery manager"', '"agile project manager"', '"facilitador ágil"', '"enterprise agile coach"',
@@ -2238,6 +2250,7 @@ function categoriaSlug(string $nome): string {
         'Atendimento' => 'atendimento',
         'UI' => 'ui',
         'UX' => 'ux',
+        'Analista de Negócios' => 'analista-de-negocios',
         'Sem Categoria' => 'sem-categoria',
     ];
     return $map[$nome] ?? 'sem-categoria';
