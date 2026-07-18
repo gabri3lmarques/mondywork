@@ -266,12 +266,25 @@ gtag('config', 'G-RPQ9FFFNP1');
   </section>
 
   <?php if (!empty($randomCats)): ?>
+  <style>
+  .vaga-cat-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  @media (min-width: 768px) {
+    .vaga-cat-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  </style>
   <section class="section">
     <div class="section-header">
       <h2 class="section-title">Discover Other Areas</h2>
     </div>
     <p class="section-description">Understand the scope of work, key skills, and tools used in different career areas.</p>
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 24px;">
+    <div class="vaga-cat-grid">
       <?php foreach ($randomCats as $cat): ?>
         <div class="vaga-cat-block" style="margin: 0; display: flex; flex-direction: column;">
           <h3 class="vaga-cat-title"><?= esc($cat['titulo']) ?></h3>
