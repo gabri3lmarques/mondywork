@@ -298,12 +298,12 @@ if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && i
         }
         $categoria = trim($_POST['categoria'] ?? '');
         if (isset($_POST['id']) && $_POST['id']) {
-            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status, lang=:lang, published_at=IF(:status='publicado' AND published_at IS NULL, NOW(), published_at) WHERE id=:id");
-            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':lang' => $lang, ':id' => (int)$_POST['id']]);
+            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status, lang=:lang, published_at=IF(:status_check='publicado' AND published_at IS NULL, NOW(), published_at) WHERE id=:id");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':lang' => $lang, ':status_check' => $status, ':id' => (int)$_POST['id']]);
             $blogMsg = 'Post atualizado com sucesso!';
         } else {
-            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, content, excerpt, image, categoria, author, status, lang, published_at) VALUES (:slug, :title, :content, :excerpt, :image, :categoria, :author, :status, :lang, IF(:status='publicado', NOW(), NULL))");
-            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':lang' => $lang]);
+            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, content, excerpt, image, categoria, author, status, lang, published_at) VALUES (:slug, :title, :content, :excerpt, :image, :categoria, :author, :status, :lang, IF(:status_check='publicado', NOW(), NULL))");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':lang' => $lang, ':status_check' => $status]);
             $blogMsg = 'Post criado com sucesso!';
         }
     } catch (Exception $e) {
