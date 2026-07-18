@@ -34,14 +34,10 @@ try {
     foreach ($vagas as &$v) { $v['titulo'] = capitalizeTitle($v['titulo']); }
     unset($v);
     $hasMore = $total > 20;
-
-    $stmtCats = $pdo->query("SELECT cc.titulo_en as titulo, cc.conteudo_en as conteudo FROM categoria_conteudo cc ORDER BY RAND() LIMIT 10");
-    $randomCats = $stmtCats->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $vagas = [];
     $total = 0;
     $hasMore = false;
-    $randomCats = [];
 }
 
 try {
@@ -264,36 +260,6 @@ gtag('config', 'G-RPQ9FFFNP1');
     </div>
     <div id="sentinel" style="height:1px"></div>
   </section>
-
-  <?php if (!empty($randomCats)): ?>
-  <style>
-  .vaga-cat-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-    margin-top: 24px;
-  }
-  @media (min-width: 768px) {
-    .vaga-cat-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  </style>
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Discover Other Areas</h2>
-    </div>
-    <p class="section-description">Understand the scope of work, key skills, and tools used in different career areas.</p>
-    <div class="vaga-cat-grid">
-      <?php foreach ($randomCats as $cat): ?>
-        <div class="vaga-cat-block" style="margin: 0; display: flex; flex-direction: column;">
-          <h3 class="vaga-cat-title"><?= esc($cat['titulo']) ?></h3>
-          <div class="vaga-cat-body" style="flex-grow: 1;"><?= $cat['conteudo'] ?></div>
-        </div>
-      <?php endforeach; ?>
-    </div>
-  </section>
-  <?php endif; ?>
 
   <?php if (!empty($blogPosts)): ?>
   <section class="section">

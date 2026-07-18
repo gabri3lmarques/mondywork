@@ -38,6 +38,7 @@ try {
 $dicaPost = null;
 $relatedPosts = [];
 $catConteudos = [];
+$randomCats = [];
 try {
     if ($vaga) {
         $blogLang = $isExterior ? 'en' : 'pt';
@@ -50,18 +51,31 @@ try {
         $relatedPosts = $stmtRelated->fetchAll(PDO::FETCH_ASSOC);
 
         $langField = $isExterior ? 'en' : 'pt';
-        $stmtCatCont = $pdo->prepare("SELECT cc.titulo_{$langField} as titulo, cc.conteudo_{$langField} as conteudo
+        $stmtCatCont = $pdo->prepare("SELECT cc.categoria_id, cc.titulo_{$langField} as titulo, cc.conteudo_{$langField} as conteudo
             FROM categoria_conteudo cc
             JOIN vaga_categorias vc ON vc.categoria_id = cc.categoria_id
             WHERE vc.vaga_id = :vagaId
             ORDER BY cc.id ASC");
         $stmtCatCont->execute([':vagaId' => $vaga['id']]);
         $catConteudos = $stmtCatCont->fetchAll(PDO::FETCH_ASSOC);
+
+        $relatedIds = array_column($catConteudos, 'categoria_id');
+        $notInSql = "";
+        if (!empty($relatedIds)) {
+            $notInSql = "WHERE cc.categoria_id NOT IN (" . implode(',', array_map('intval', $relatedIds)) . ")";
+        }
+        $stmtRandomCats = $pdo->query("SELECT cc.titulo_{$langField} as titulo, cc.conteudo_{$langField} as conteudo
+            FROM categoria_conteudo cc
+            $notInSql
+            ORDER BY RAND()
+            LIMIT 10");
+        $randomCats = $stmtRandomCats->fetchAll(PDO::FETCH_ASSOC);
     }
 } catch (Exception $e) {
     $dicaPost = null;
     $relatedPosts = [];
     $catConteudos = [];
+    $randomCats = [];
 }
 
 if (!$vaga) {
@@ -307,6 +321,37 @@ $score = min($score, 100);
         <div class="vaga-cat-body"><?= $cc['conteudo'] ?></div>
       </div>
 <?php endforeach; ?>
+<?php endif; ?>
+
+<?php if (!empty($randomCats)): ?>
+      <style>
+      .vaga-cat-grid-vaga {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-top: 32px;
+        margin-bottom: 24px;
+      }
+      @media (min-width: 768px) {
+        .vaga-cat-grid-vaga {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      </style>
+      <div style="margin-top: 48px; margin-bottom: 32px;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #0b1c30; margin-bottom: 8px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px;">
+          <?= $isExterior ? 'Discover Other Areas' : 'Conheça Outras Áreas' ?>
+        </h2>
+        <p style="color:#666;font-size:0.95rem;margin-bottom:20px"><?= $isExterior ? 'Understand the scope of work, key skills, and tools used in different career areas.' : 'Entenda melhor o escopo de atuação, habilidades necessárias e ferramentas utilizadas em diferentes áreas de carreira.' ?></p>
+        <div class="vaga-cat-grid-vaga">
+          <?php foreach ($randomCats as $cat): ?>
+            <div class="vaga-cat-block" style="margin: 0; display: flex; flex-direction: column;">
+              <h3 class="vaga-cat-title" style="margin: 0 0 12px 0; font-size: 1.15rem; font-weight: 700; color: #0b1c30;"><?= esc($cat['titulo']) ?></h3>
+              <div class="vaga-cat-body" style="flex-grow: 1; font-size: 0.95rem; line-height: 1.6; color: #45464d;"><?= $cat['conteudo'] ?></div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
 <?php endif; ?>
     </article>
 
