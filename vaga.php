@@ -314,41 +314,6 @@ $score = min($score, 100);
         <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
       </div>
 
-<?php if (!empty($catConteudos)): ?>
-<?php foreach ($catConteudos as $cc): ?>
-      <div class="vaga-cat-block">
-        <h3 class="vaga-cat-title"><?= esc($cc['titulo']) ?></h3>
-        <div class="vaga-cat-body"><?= $cc['conteudo'] ?></div>
-      </div>
-<?php endforeach; ?>
-<?php endif; ?>
-
-<?php if (!empty($randomCats)): ?>
-      <style>
-      .vaga-cat-grid-vaga {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 24px;
-        margin-top: 32px;
-        margin-bottom: 24px;
-      }
-      </style>
-      <div style="margin-top: 48px; margin-bottom: 32px;">
-        <h2 style="font-size: 1.5rem; font-weight: 700; color: #0b1c30; margin-bottom: 8px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px;">
-          <?= $isExterior ? 'Discover Other Areas' : 'Conheça Outras Áreas' ?>
-        </h2>
-        <p style="color:#666;font-size:0.95rem;margin-bottom:20px"><?= $isExterior ? 'Understand the scope of work, key skills, and tools used in different career areas.' : 'Entenda melhor o escopo de atuação, habilidades necessárias e ferramentas utilizadas em diferentes áreas de carreira.' ?></p>
-        <div class="vaga-cat-grid-vaga">
-          <?php foreach ($randomCats as $cat): ?>
-            <div class="vaga-cat-block" style="margin: 0; display: flex; flex-direction: column;">
-              <h3 class="vaga-cat-title" style="margin: 0 0 12px 0; font-size: 1.15rem; font-weight: 700; color: #0b1c30;"><?= esc($cat['titulo']) ?></h3>
-              <div class="vaga-cat-body" style="flex-grow: 1; font-size: 0.95rem; line-height: 1.6; color: #45464d;"><?= $cat['conteudo'] ?></div>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
-<?php endif; ?>
-
       <!-- Formulário de Cadastro Semanal -->
       <div class="sidebar-card" style="margin-top: 48px; top: 0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
         <div class="sidebar-icon" style="color: #4b41e1;">
@@ -465,6 +430,41 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<?php if (!empty($catConteudos)): ?>
+<?php foreach ($catConteudos as $cc): ?>
+      <div class="vaga-cat-block">
+        <h3 class="vaga-cat-title"><?= esc($cc['titulo']) ?></h3>
+        <div class="vaga-cat-body"><?= $cc['conteudo'] ?></div>
+      </div>
+<?php endforeach; ?>
+<?php endif; ?>
+
+<?php if (!empty($randomCats)): ?>
+      <style>
+      .vaga-cat-grid-vaga {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-top: 32px;
+        margin-bottom: 24px;
+      }
+      </style>
+      <div style="margin-top: 48px; margin-bottom: 32px;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #0b1c30; margin-bottom: 8px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px;">
+          <?= $isExterior ? 'Discover Other Areas' : 'Conheça Outras Áreas' ?>
+        </h2>
+        <p style="color:#666;font-size:0.95rem;margin-bottom:20px"><?= $isExterior ? 'Understand the scope of work, key skills, and tools used in different career areas.' : 'Entenda melhor o escopo de atuação, habilidades necessárias e ferramentas utilizadas em diferentes áreas de carreira.' ?></p>
+        <div class="vaga-cat-grid-vaga">
+          <?php foreach ($randomCats as $cat): ?>
+            <div class="vaga-cat-block" style="margin: 0; display: flex; flex-direction: column;">
+              <h3 class="vaga-cat-title" style="margin: 0 0 12px 0; font-size: 1.15rem; font-weight: 700; color: #0b1c30;"><?= esc($cat['titulo']) ?></h3>
+              <div class="vaga-cat-body" style="flex-grow: 1; font-size: 0.95rem; line-height: 1.6; color: #45464d;"><?= $cat['conteudo'] ?></div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+<?php endif; ?>
     </article>
 
     <section class="section" style="margin-top: 48px;">
