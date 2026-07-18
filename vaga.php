@@ -97,7 +97,7 @@ function blogExcerpt($text, $max = 350) {
 if ($vaga) {
     $pageTitle = $vaga['titulo'] . ' na ' . $vaga['empresa'] . ' | Mondywork';
     $pageDesc = $vaga['resumo'] ?: 'Vaga de ' . $vaga['titulo'] . ' na ' . $vaga['empresa'] . '. ' . ($vaga['localizacao'] ?: 'Remoto') . '.';
-    $ogUrl = 'https://mondywork.com/vaga/' . urlencode($vaga['vaga_id_externo']);
+    $ogUrl = 'https://mondywork.com/' . ($isExterior ? 'job/' : 'vaga/') . urlencode($vaga['vaga_id_externo']);
     $canonical = $ogUrl;
 
     $modeloLabel = $vaga['modelo_trabalho'] ? formatModelo($vaga['modelo_trabalho']) : null;
@@ -186,7 +186,7 @@ if ($vaga) {
 <?php endif; ?>
 <?php if ($vaga): ?>
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
-<link rel="alternate" hreflang="en" href="https://mondywork.com/usa/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
+<link rel="alternate" hreflang="en" href="https://mondywork.com/job/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
 <link rel="stylesheet" href="/css/style.css?v=1.8.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">

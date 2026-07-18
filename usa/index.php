@@ -207,7 +207,7 @@ gtag('config', 'G-RPQ9FFFNP1');
 ?>
         <article class="job-card" data-vaga-id="<?= esc($v['vaga_id_externo']) ?>">
           <div>
-            <h3 class="job-card-title"><a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-link"><?= esc($v['titulo']) ?></a></h3>
+            <h3 class="job-card-title"><a href="/job/<?= esc($v['vaga_id_externo']) ?>" class="job-card-link"><?= esc($v['titulo']) ?></a></h3>
             <p class="job-card-company"><?= esc($v['empresa']) ?></p>
           </div>
           <div class="job-card-info">
@@ -219,7 +219,7 @@ gtag('config', 'G-RPQ9FFFNP1');
           </div>
           <p class="job-card-resumo line-clamp-2"><?= $resumo ?></p>
           <div class="job-card-footer">
-            <a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-btn">View Details</a>
+            <a href="/job/<?= esc($v['vaga_id_externo']) ?>" class="job-card-btn">View Details</a>
           </div>
         </article>
 <?php endforeach; ?>

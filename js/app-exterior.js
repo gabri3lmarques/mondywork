@@ -185,7 +185,7 @@
 
         card.innerHTML =
             '<div>' +
-                '<h3 class="job-card-title"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-link">' + escapeHtml(v.titulo) + '</a></h3>' +
+                '<h3 class="job-card-title"><a href="/job/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-link">' + escapeHtml(v.titulo) + '</a></h3>' +
                 '<p class="job-card-company">' + escapeHtml(v.empresa) + '</p>' +
             '</div>' +
             '<div class="job-card-info">' +
@@ -194,7 +194,7 @@
                 dateHtml +
             '</div>' +
             '<p class="job-card-resumo line-clamp-2">' + escapeHtml(resumo) + '</p>' +
-            '<div class="job-card-footer"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">View Details</a></div>';
+            '<div class="job-card-footer"><a href="/job/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">View Details</a></div>';
 
         container.appendChild(card);
         cardsRendered++;
@@ -322,14 +322,14 @@
         function handleHash() {
             if (location.hash) {
                 var id = decodeURIComponent(location.hash.substring(1));
-                window.location.href = '/vaga/' + encodeURIComponent(id);
+                window.location.href = '/job/' + encodeURIComponent(id);
             }
         }
 
         window.addEventListener('hashchange', function() {
             if (location.hash) {
                 var id = decodeURIComponent(location.hash.substring(1));
-                window.location.href = '/vaga/' + encodeURIComponent(id);
+                window.location.href = '/job/' + encodeURIComponent(id);
             }
         });
 

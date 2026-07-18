@@ -13,7 +13,7 @@ try {
     $stmtBlog = $pdo->query("SELECT slug, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC");
     $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtVagas = $pdo->query("SELECT vaga_id_externo, publicado_em FROM vagas WHERE status = 'ativa' ORDER BY publicado_em DESC");
+    $stmtVagas = $pdo->query("SELECT vaga_id_externo, publicado_em, origem FROM vagas WHERE status = 'ativa' ORDER BY publicado_em DESC");
     $vagas = $stmtVagas->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $blogPosts = [];
@@ -148,7 +148,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $vagaLastmod = $v['publicado_em'] ? date('Y-m-d', strtotime($v['publicado_em'])) : $today;
 ?>
   <url>
-    <loc>https://mondywork.com/vaga/<?= htmlspecialchars($v['vaga_id_externo'], ENT_XML1, 'UTF-8') ?></loc>
+    <loc>https://mondywork.com/<?= ($v['origem'] === 'exterior') ? 'job' : 'vaga' ?>/<?= htmlspecialchars($v['vaga_id_externo'], ENT_XML1, 'UTF-8') ?></loc>
     <lastmod><?= $vagaLastmod ?></lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

@@ -5,6 +5,7 @@ RewriteRule ^vaga/(.+)$ vaga.php?id=$1 [L,QSA]
 
 # Pagina individual de vaga (exterior)
 RewriteRule ^usa/vaga/(.+)$ vaga.php?id=$1 [L,QSA]
+RewriteRule ^job/(.+)$ vaga.php?id=$1 [L,QSA]
 
 # Pagina de vagas
 RewriteRule ^vagas/?$ vagas/index.php [L,QSA]
