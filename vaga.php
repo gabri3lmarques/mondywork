@@ -311,72 +311,72 @@ $score = min($score, 100);
 
     <section class="section" style="margin-top: 48px;">
       <div class="section-header">
-        <h2 class="section-title">Guias de Carreira</h2>
+        <h2 class="section-title"><?= $isExterior ? 'Career Guides' : 'Guias de Carreira' ?></h2>
       </div>
       <div class="guide-grid">
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
           </div>
-          <h3>Guia de Carreira em Tecnologia</h3>
-          <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.</p>
-          <a href="/guia-de-carreira.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Technology Career Guide' : 'Guia de Carreira em Tecnologia' ?></h3>
+          <p><?= $isExterior ? 'Planning, skills, interviews, and professional growth in IT, Data Science, DevOps, and Product.' : 'Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide.php' : '/guia-de-carreira.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </div>
-          <h3>Guia de Carreira em Design</h3>
-          <p>UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.</p>
-          <a href="/guia-de-carreira-design.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Design Career Guide' : 'Guia de Carreira em Design' ?></h3>
+          <p><?= $isExterior ? 'UX/UI, Graphic Design, Product Design. Portfolio, tools, interviews, and growth in the Design field.' : 'UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide-design.php' : '/guia-de-carreira-design.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M12 6v12"/></svg>
           </div>
-          <h3>Guia de Carreira em Marketing</h3>
-          <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
-          <a href="/guia-de-carreira-marketing.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Marketing Career Guide' : 'Guia de Carreira em Marketing' ?></h3>
+          <p><?= $isExterior ? 'SEO, Paid Media, Growth, Content Marketing. Certifications, tools, and strategies to grow in Digital Marketing.' : 'SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide-marketing.php' : '/guia-de-carreira-marketing.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
-          <h3>Guia de Carreira em Finanças</h3>
-          <p>Mercado financeiro, investimentos, finanças corporativas, certificações e estratégias para crescer na área financeira.</p>
-          <a href="/guia-de-carreira-financas.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Finance Career Guide' : 'Guia de Carreira em Finanças' ?></h3>
+          <p><?= $isExterior ? 'Financial market, investments, corporate finance, certifications, and strategies to grow in the financial field.' : 'Mercado financeiro, investimentos, finanças corporativas, certificações e estratégias para crescer na área financeira.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide-finance.php' : '/guia-de-carreira-financas.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon" style="background:linear-gradient(135deg,#e11d48,#fb7185)">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
-          <h3>Guia de Carreira em Comunicacao</h3>
-          <p>Jornalismo, RP, Comunicacao Corporativa, Marketing de Conteudo e Producao Multimidia.</p>
-          <a href="/guia-de-carreira-comunicacao.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Communication Career Guide' : 'Guia de Carreira em Comunicacao' ?></h3>
+          <p><?= $isExterior ? 'Journalism, PR, Corporate Communication, Content Marketing, and Multimedia Production.' : 'Jornalismo, RP, Comunicacao Corporativa, Marketing de Conteudo e Producao Multimidia.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide-communication.php' : '/guia-de-carreira-comunicacao.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </div>
-          <h3>Guia de Carreira em Administracao</h3>
-          <p>Gestao de Empresas, RH, Logistica, Consultoria, Gestao de Projetos e Empreendedorismo.</p>
-          <a href="/guia-de-carreira-administracao.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Administration Career Guide' : 'Guia de Carreira em Administracao' ?></h3>
+          <p><?= $isExterior ? 'Business Management, HR, Logistics, Consulting, Project Management, and Entrepreneurship.' : 'Gestao de Empresas, RH, Logistica, Consultoria, Gestao de Projetos e Empreendedorismo.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide-administration.php' : '/guia-de-carreira-administracao.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
           </div>
-          <h3>Guia de Carreira em Dados</h3>
-          <p>Ciencia de Dados, Engenharia de Dados, BI, Machine Learning e IA. Da formacao ao mercado.</p>
-          <a href="/guia-de-carreira-dados.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Data Career Guide' : 'Guia de Carreira em Dados' ?></h3>
+          <p><?= $isExterior ? 'Data Science, Data Engineering, BI, Machine Learning, and AI. From training to the job market.' : 'Ciencia de Dados, Engenharia de Dados, BI, Machine Learning e IA. Da formacao ao mercado.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide-data.php' : '/guia-de-carreira-dados.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
         <div class="guide-card guide-card--primary">
           <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
-          <h3>Guia de Carreira em Produto</h3>
-          <p>Product Management, Product Ownership, Agile, Scrum e OKRs. Da estrategia a execucao.</p>
-          <a href="/guia-de-carreira-produto.php" class="guide-card-link">Ler guia completo &rarr;</a>
+          <h3><?= $isExterior ? 'Product Career Guide' : 'Guia de Carreira em Produto' ?></h3>
+          <p><?= $isExterior ? 'Product Management, Product Ownership, Agile, Scrum, and OKRs. From strategy to execution.' : 'Product Management, Product Ownership, Agile, Scrum e OKRs. Da estrategia a execucao.' ?></p>
+          <a href="<?= $isExterior ? '/usa/career-guide-product.php' : '/guia-de-carreira-produto.php' ?>" class="guide-card-link"><?= $isExterior ? 'Read full guide' : 'Ler guia completo' ?> &rarr;</a>
         </div>
       </div>
     </section>
@@ -386,7 +386,7 @@ $score = min($score, 100);
       <div class="dica-expert-header">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;color:#4b41e1;flex-shrink:0"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
         <div>
-          <h3 class="dica-expert-title">Dica do Especialista</h3>
+          <h3 class="dica-expert-title"><?= $isExterior ? 'Expert Tip' : 'Dica do Especialista' ?></h3>
           <p class="dica-expert-subtitle"><?= esc($dicaPost['title']) ?></p>
         </div>
       </div>
@@ -394,14 +394,14 @@ $score = min($score, 100);
         <?= $dicaPost['content'] ?>
       </div>
       <div class="dica-expert-footer">
-        <a href="/blog/<?= esc($dicaPost['slug']) ?>" class="dica-expert-link">Ler artigo completo &rarr;</a>
+        <a href="/blog/<?= esc($dicaPost['slug']) ?>" class="dica-expert-link"><?= $isExterior ? 'Read full article' : 'Ler artigo completo' ?> &rarr;</a>
       </div>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($relatedPosts)): ?>
     <div class="related-posts">
-      <h3 class="related-posts-title">Artigos Relacionados</h3>
+      <h3 class="related-posts-title"><?= $isExterior ? 'Related Articles' : 'Artigos Relacionados' ?></h3>
       <div class="related-posts-grid">
         <?php foreach ($relatedPosts as $p):
           $rImg = $p['image'] ?: '';
