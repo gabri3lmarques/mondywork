@@ -21,6 +21,7 @@ try {
     $stmt = $pdo->prepare("SELECT * FROM vagas WHERE vaga_id_externo = :id AND status = 'ativa' LIMIT 1");
     $stmt->execute([':id' => $id]);
     $vaga = $stmt->fetch(PDO::FETCH_ASSOC);
+    $isExterior = ($vaga ? $vaga['origem'] : 'nacional') === 'exterior';
 
     if ($vaga) {
         $vaga['titulo'] = capitalizeTitle($vaga['titulo']);
@@ -31,6 +32,7 @@ try {
 } catch (Exception $e) {
     $vaga = null;
     $categorias = [];
+    $isExterior = false;
 }
 
 $dicaPost = null;
@@ -90,8 +92,6 @@ function blogExcerpt($text, $max = 350) {
     if (mb_strlen($text) <= $max) return $text;
     return mb_substr($text, 0, $max) . '...';
 }
-
-$isExterior = ($vaga ? $vaga['origem'] : 'nacional') === 'exterior';
 
 if ($vaga) {
     $pageTitle = $vaga['titulo'] . ' na ' . $vaga['empresa'] . ' | Mondywork';
