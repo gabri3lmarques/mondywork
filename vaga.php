@@ -348,6 +348,123 @@ $score = min($score, 100);
         </div>
       </div>
 <?php endif; ?>
+
+      <!-- Formulário de Cadastro Semanal -->
+      <div class="sidebar-card" style="margin-top: 48px; top: 0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
+        <div class="sidebar-icon" style="color: #4b41e1;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+        </div>
+        <h3 class="sidebar-title" style="font-size: 1.35rem; font-weight: 700; color: #0b1c30; margin: 0;"><?= $isExterior ? 'Get our weekly job compilation' : 'Receba nosso compilado semanal de vagas' ?></h3>
+        <p class="sidebar-text" style="font-size: 0.95rem; line-height: 1.6; color: #45464d; margin: 0;"><?= $isExterior ? 'Sign up your email to receive our weekly digest with the best jobs of the week in your area of interest.' : 'Cadastre seu email para receber nosso compilado com as melhores vaga da semana na sua área de interesse.' ?></p>
+        <form class="sidebar-form" id="newsletter-form" style="margin-top: 8px;">
+          <input class="sidebar-input" placeholder="<?= $isExterior ? 'Name' : 'Nome' ?>" type="text" required>
+          <input class="sidebar-input" placeholder="<?= $isExterior ? 'Email' : 'E-mail' ?>" type="email" required>
+          <select class="sidebar-select" id="newsletter-area" required>
+            <?php if ($isExterior): ?>
+              <option value="">Area of interest</option>
+              <option value="dev">Software Development</option>
+              <option value="engenharia">Engineering</option>
+              <option value="dados">Data / BI</option>
+              <option value="ia">AI / Machine Learning</option>
+              <option value="design">UX / UI / Product Design</option>
+              <option value="marketing">Digital Marketing / Growth</option>
+              <option value="social-media">Social Media / Content</option>
+              <option value="produto">Product (PM/PO)</option>
+              <option value="agile">Agile / Scrum</option>
+              <option value="gestao">Management / Projects</option>
+              <option value="vendas">Sales / Business Development</option>
+              <option value="customer-success">Customer Success / CX</option>
+              <option value="suporte">Technical Support / Help Desk</option>
+              <option value="qa">QA / Testing</option>
+              <option value="infra">Infrastructure / Cloud / DevOps</option>
+            <?php else: ?>
+              <option value="">Área de interesse</option>
+              <option value="dev">Desenvolvimento / Software</option>
+              <option value="engenharia">Engenharia</option>
+              <option value="dados">Dados / BI</option>
+              <option value="ia">IA / Machine Learning</option>
+              <option value="design">UX / UI / Product Design</option>
+              <option value="marketing">Marketing Digital / Growth</option>
+              <option value="social-media">Social Media / Conteúdo</option>
+              <option value="produto">Produto (PM/PO)</option>
+              <option value="agile">Agilidade / Scrum</option>
+              <option value="gestao">Gestão / Projetos</option>
+              <option value="vendas">Comercial / Vendas</option>
+              <option value="customer-success">Customer Success / CX</option>
+              <option value="suporte">Suporte Técnico / Help Desk</option>
+              <option value="qa">QA / Testes</option>
+              <option value="infra">Infraestrutura / Cloud / DevOps</option>
+            <?php endif; ?>
+          </select>
+          <button class="sidebar-btn" type="submit"><?= $isExterior ? 'Subscribe Now' : 'Cadastrar Agora' ?></button>
+        </form>
+      </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const newsletterForm = document.getElementById('newsletter-form');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var nomeInput = newsletterForm.querySelector('input[type="text"]');
+            var emailInput = newsletterForm.querySelector('input[type="email"]');
+            var areaSelect = document.getElementById('newsletter-area');
+            var btn = newsletterForm.querySelector('button');
+            var nome = nomeInput.value.trim();
+            var email = emailInput.value.trim();
+            var area = areaSelect ? areaSelect.value : '';
+
+            if (!nome || !email || !area) return;
+
+            btn.disabled = true;
+            btn.textContent = '<?= $isExterior ? "Subscribing..." : "Enviando..." ?>';
+
+            var params = 'nome=' + encodeURIComponent(nome) + '&email=' + encodeURIComponent(email) + '&area=' + encodeURIComponent(area) + '&origem=<?= $isExterior ? "usa" : "brasil" ?>';
+
+            var msgs = {
+                success: '<?= $isExterior ? "Subscription successful!" : "Cadastro realizado com sucesso!" ?>',
+                duplicate_email: '<?= $isExterior ? "This email is already subscribed" : "Este email já está cadastrado" ?>',
+                missing_fields: '<?= $isExterior ? "Name and email are required" : "Nome e email são obrigatórios" ?>',
+                invalid_email: '<?= $isExterior ? "Invalid email address" : "Email inválido" ?>',
+                invalid_area: '<?= $isExterior ? "Please select an area of interest" : "Selecione uma área de interesse" ?>',
+                _default: '<?= $isExterior ? "Error subscribing" : "Erro ao cadastrar" ?>',
+                _network: '<?= $isExterior ? "Connection error. Please try again." : "Erro de conexão. Tente novamente." ?>'
+            };
+
+            function showFormError(msg) {
+                var oldErr = newsletterForm.querySelector('.form-error');
+                if (oldErr) oldErr.remove();
+                var errEl = document.createElement('p');
+                errEl.className = 'form-error';
+                errEl.style.cssText = 'color:#ba1a1a;font-weight:500;text-align:center;padding:12px 0;margin:0';
+                errEl.textContent = msg;
+                newsletterForm.insertBefore(errEl, newsletterForm.firstChild);
+                btn.disabled = false;
+                btn.textContent = '<?= $isExterior ? "Subscribe Now" : "Cadastrar Agora" ?>';
+            }
+
+            fetch('/subscribe.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            })
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+                var json;
+                try { json = JSON.parse(text); } catch(e) { json = null; }
+                if (json && json.success) {
+                    newsletterForm.innerHTML = '<p style="color:#4b41e1;font-weight:600;text-align:center;padding:12px 0;">' + msgs.success + '</p>';
+                } else {
+                    showFormError(json && msgs[json.code] ? msgs[json.code] : msgs._default);
+                }
+            })
+            .catch(function() {
+                showFormError(msgs._network);
+            });
+        });
+    }
+});
+</script>
     </article>
 
     <section class="section" style="margin-top: 48px;">
