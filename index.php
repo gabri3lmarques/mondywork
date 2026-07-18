@@ -17,7 +17,7 @@ try {
     $limit = 24;
     $offset = ($page - 1) * $limit;
 
-    $whereBlog = "status='publicado'";
+    $whereBlog = "status='publicado' AND lang='pt'";
     $paramsBlog = [];
     if ($categoriaFiltro) {
         $whereBlog .= " AND categoria = :cat";
@@ -36,10 +36,10 @@ try {
     $stmt->execute();
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $todasCategorias = $pdo->query("SELECT DISTINCT categoria FROM blog_posts WHERE status='publicado' AND categoria IS NOT NULL AND categoria != '' ORDER BY categoria")->fetchAll(PDO::FETCH_COLUMN);
+    $todasCategorias = $pdo->query("SELECT DISTINCT categoria FROM blog_posts WHERE status='publicado' AND lang='pt' AND categoria IS NOT NULL AND categoria != '' ORDER BY categoria")->fetchAll(PDO::FETCH_COLUMN);
 
     $totalVagas = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE status='ativa'")->fetchColumn();
-    $totalArtigos = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts WHERE status='publicado'")->fetchColumn();
+    $totalArtigos = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts WHERE status='publicado' AND lang='pt'")->fetchColumn();
     $empresas = (int)$pdo->query("SELECT COUNT(DISTINCT empresa) FROM vagas WHERE status='ativa'")->fetchColumn();
 } catch (Exception $e) {
     $posts = [];

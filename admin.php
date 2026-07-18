@@ -281,6 +281,7 @@ if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && i
         $excerpt = trim($_POST['excerpt'] ?? '');
         $author = trim($_POST['author'] ?? 'Mondywork');
         $status = $_POST['status'] ?? 'rascunho';
+        $lang = $_POST['lang'] ?? 'pt';
         $image = trim($_POST['image'] ?? '');
         if (isset($_POST['remover_imagem'])) {
             $image = '';
@@ -297,12 +298,12 @@ if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && i
         }
         $categoria = trim($_POST['categoria'] ?? '');
         if (isset($_POST['id']) && $_POST['id']) {
-            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status, published_at=IF(:status='publicado' AND published_at IS NULL, NOW(), published_at) WHERE id=:id");
-            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':id' => (int)$_POST['id']]);
+            $stmt = $pdo->prepare("UPDATE blog_posts SET slug=:slug, title=:title, content=:content, excerpt=:excerpt, image=:image, categoria=:categoria, author=:author, status=:status, lang=:lang, published_at=IF(:status='publicado' AND published_at IS NULL, NOW(), published_at) WHERE id=:id");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':lang' => $lang, ':id' => (int)$_POST['id']]);
             $blogMsg = 'Post atualizado com sucesso!';
         } else {
-            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, content, excerpt, image, categoria, author, status, published_at) VALUES (:slug, :title, :content, :excerpt, :image, :categoria, :author, :status, IF(:status='publicado', NOW(), NULL))");
-            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status]);
+            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, content, excerpt, image, categoria, author, status, lang, published_at) VALUES (:slug, :title, :content, :excerpt, :image, :categoria, :author, :status, :lang, IF(:status='publicado', NOW(), NULL))");
+            $stmt->execute([':slug' => $slug, ':title' => $title, ':content' => $content, ':excerpt' => $excerpt, ':image' => $image ?: null, ':categoria' => $categoria ?: null, ':author' => $author, ':status' => $status, ':lang' => $lang]);
             $blogMsg = 'Post criado com sucesso!';
         }
     } catch (Exception $e) {
@@ -984,13 +985,23 @@ try {
   <div class="batch-bar" id="batch-bar-bottom"></div>
 
   <?php elseif ($tab === 'blog'): ?>
+  <?php
+  $blogLangFilter = isset($_GET['blang']) && in_array($_GET['blang'], ['pt', 'en']) ? $_GET['blang'] : '';
+  $blangParam = $blogLangFilter ? '&blang=' . urlencode($blogLangFilter) : '';
+  ?>
 
   <div class="admin-header">
     <div>
       <h1>Blog</h1>
       <span>Gerenciar posts do blog</span>
     </div>
-    <a href="?tab=blog&editar=novo" class="btn-search" style="text-decoration:none;font-size:14px;padding:10px 24px">+ Novo Post</a>
+    <a href="?tab=blog&editar=novo<?php echo $blangParam ?>" class="btn-search" style="text-decoration:none;font-size:14px;padding:10px 24px">+ Novo Post</a>
+  </div>
+
+  <div class="admin-tabs" style="margin-bottom: 20px;">
+    <a class="admin-tab <?php echo $blogLangFilter === '' ? 'active' : '' ?>" href="?tab=blog">Todos os Idiomas</a>
+    <a class="admin-tab <?php echo $blogLangFilter === 'pt' ? 'active' : '' ?>" href="?tab=blog&blang=pt">Português (PT)</a>
+    <a class="admin-tab <?php echo $blogLangFilter === 'en' ? 'active' : '' ?>" href="?tab=blog&blang=en">Inglês (EN)</a>
   </div>
 
   <?php if ($blogMsg): ?>
@@ -1080,6 +1091,13 @@ try {
             <?php endforeach; ?>
           </select>
         </div>
+        <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Idioma</label>
+          <select name="lang" class="admin-search-input" style="width:100%">
+            <option value="pt" <?php echo ($post['lang'] ?? 'pt') === 'pt' ? 'selected' : '' ?>>Português (pt)</option>
+            <option value="en" <?php echo ($post['lang'] ?? 'pt') === 'en' ? 'selected' : '' ?>>Inglês (en)</option>
+          </select>
+        </div>
       </div>
       <div>
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo</label>
@@ -1092,7 +1110,7 @@ try {
       </div>
       <div style="display:flex;gap:12px">
         <button type="submit" name="salvar_blog" class="btn-search" style="font-size:15px;padding:12px 32px"><?php echo $post ? 'Salvar Alterações' : 'Criar Post' ?></button>
-        <a href="?tab=blog" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
+        <a href="?tab=blog<?php echo $blangParam ?>" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
       </div>
     </form>
   </div>
@@ -1101,9 +1119,21 @@ try {
     $pageBlog = max(1, (int)($_GET['bp'] ?? 1));
     $limitBlog = 20;
     $offsetBlog = ($pageBlog - 1) * $limitBlog;
-    $totalBlog = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts")->fetchColumn();
+    
+    $whereBlog = "1=1";
+    $paramsBlog = [];
+    if ($blogLangFilter) {
+        $whereBlog .= " AND lang = :lang";
+        $paramsBlog[':lang'] = $blogLangFilter;
+    }
+    
+    $totalBlogStmt = $pdo->prepare("SELECT COUNT(*) FROM blog_posts WHERE $whereBlog");
+    $totalBlogStmt->execute($paramsBlog);
+    $totalBlog = (int)$totalBlogStmt->fetchColumn();
     $totalBlogPages = max(1, (int)ceil($totalBlog / $limitBlog));
-    $stmtBlog = $pdo->prepare("SELECT id, slug, title, author, status, published_at, created_at, categoria FROM blog_posts ORDER BY created_at DESC LIMIT :lim OFFSET :off");
+    
+    $stmtBlog = $pdo->prepare("SELECT id, slug, title, author, status, published_at, created_at, categoria, lang FROM blog_posts WHERE $whereBlog ORDER BY created_at DESC LIMIT :lim OFFSET :off");
+    foreach ($paramsBlog as $k => $v) $stmtBlog->bindValue($k, $v);
     $stmtBlog->bindValue(':lim', $limitBlog, PDO::PARAM_INT);
     $stmtBlog->bindValue(':off', $offsetBlog, PDO::PARAM_INT);
     $stmtBlog->execute();
@@ -1111,7 +1141,7 @@ try {
   ?>
 
   <?php if (empty($blogPosts)): ?>
-    <div class="admin-empty">Nenhum post ainda. <a href="?tab=blog&editar=novo" style="color:#4b41e1">Criar primeiro post</a></div>
+    <div class="admin-empty">Nenhum post ainda. <a href="?tab=blog&editar=novo<?php echo $blangParam ?>" style="color:#4b41e1">Criar primeiro post</a></div>
   <?php else: ?>
     <?php foreach ($blogPosts as $bp): ?>
       <div class="admin-card" style="margin-bottom:12px">
@@ -1123,6 +1153,7 @@ try {
         </div>
         <div class="admin-card-meta">
           <span class="badge-status <?php echo $bp['status'] ?>"><?php echo $bp['status'] === 'publicado' ? 'Publicado' : 'Rascunho' ?></span>
+          <span style="font-size:12px;font-weight:600;color:#0b1c30;text-transform:uppercase;background:#e2e8f0;padding:2px 6px;border-radius:4px"><?php echo htmlspecialchars($bp['lang'] ?? 'pt', ENT_QUOTES, 'UTF-8') ?></span>
           <?php if (!empty($bp['categoria'])): ?>
             <span style="font-size:12px;color:#4b41e1;font-weight:600"><?php echo htmlspecialchars($bp['categoria'], ENT_QUOTES, 'UTF-8') ?></span>
           <?php endif; ?>
@@ -1140,17 +1171,17 @@ try {
     <?php if ($totalBlogPages > 1): ?>
       <div class="admin-pagination">
         <?php if ($pageBlog > 1): ?>
-          <a href="?tab=blog&bp=<?php echo $pageBlog - 1 ?>">&laquo;</a>
+          <a href="?tab=blog<?php echo $blangParam ?>&bp=<?php echo $pageBlog - 1 ?>">&laquo;</a>
         <?php endif; ?>
         <?php for ($i = 1; $i <= $totalBlogPages; $i++): ?>
           <?php if ($i === $pageBlog): ?>
             <span class="current"><?php echo $i ?></span>
           <?php else: ?>
-            <a href="?tab=blog&bp=<?php echo $i ?>"><?php echo $i ?></a>
+            <a href="?tab=blog<?php echo $blangParam ?>&bp=<?php echo $i ?>"><?php echo $i ?></a>
           <?php endif; ?>
         <?php endfor; ?>
         <?php if ($pageBlog < $totalBlogPages): ?>
-          <a href="?tab=blog&bp=<?php echo $pageBlog + 1 ?>">&raquo;</a>
+          <a href="?tab=blog<?php echo $blangParam ?>&bp=<?php echo $pageBlog + 1 ?>">&raquo;</a>
         <?php endif; ?>
       </div>
     <?php endif; ?>

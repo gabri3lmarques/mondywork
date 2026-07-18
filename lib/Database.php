@@ -216,6 +216,7 @@ function setupSchema(PDO $pdo): void
         author VARCHAR(100) DEFAULT 'Mondywork',
         published_at DATETIME,
         status VARCHAR(20) DEFAULT 'rascunho',
+        lang VARCHAR(5) NOT NULL DEFAULT 'pt',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
@@ -240,6 +241,9 @@ function setupSchema(PDO $pdo): void
     }
     if (!in_array('categoria', $blogColNames)) {
         $pdo->exec("ALTER TABLE blog_posts ADD COLUMN categoria VARCHAR(100) DEFAULT NULL AFTER image");
+    }
+    if (!in_array('lang', $blogColNames)) {
+        $pdo->exec("ALTER TABLE blog_posts ADD COLUMN lang VARCHAR(5) NOT NULL DEFAULT 'pt' AFTER status");
     }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS categoria_conteudo (

@@ -45,7 +45,7 @@ try {
 }
 
 try {
-    $stmtBlog = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC LIMIT 9");
+    $stmtBlog = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' AND lang = 'en' ORDER BY published_at DESC LIMIT 9");
     $stmtBlog->execute();
     $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {

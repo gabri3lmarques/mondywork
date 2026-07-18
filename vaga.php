@@ -40,12 +40,13 @@ $relatedPosts = [];
 $catConteudos = [];
 try {
     if ($vaga) {
-        $stmtDica = $pdo->prepare("SELECT slug, title, excerpt, content, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY RAND() LIMIT 1");
-        $stmtDica->execute();
+        $blogLang = $isExterior ? 'en' : 'pt';
+        $stmtDica = $pdo->prepare("SELECT slug, title, excerpt, content, author, published_at FROM blog_posts WHERE status = 'publicado' AND lang = :lang ORDER BY RAND() LIMIT 1");
+        $stmtDica->execute([':lang' => $blogLang]);
         $dicaPost = $stmtDica->fetch(PDO::FETCH_ASSOC);
 
-        $stmtRelated = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC LIMIT 3");
-        $stmtRelated->execute();
+        $stmtRelated = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' AND lang = :lang ORDER BY published_at DESC LIMIT 3");
+        $stmtRelated->execute([':lang' => $blogLang]);
         $relatedPosts = $stmtRelated->fetchAll(PDO::FETCH_ASSOC);
 
         $langField = $isExterior ? 'en' : 'pt';

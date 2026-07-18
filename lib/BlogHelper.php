@@ -1,7 +1,8 @@
 <?php
-function getBlogPosts($pdo, $limit = 9) {
+function getBlogPosts($pdo, $limit = 9, $lang = 'pt') {
     try {
-        $stmt = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC LIMIT :lim");
+        $stmt = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' AND lang = :lang ORDER BY published_at DESC LIMIT :lim");
+        $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
         $stmt->bindValue(':lim', (int)$limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

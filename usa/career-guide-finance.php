@@ -6,7 +6,7 @@ require_once __DIR__ . '/../lib/BlogHelper.php';
 try {
     $pdo = new PDO("mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4", $config['user'], $config['pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     setupSchema($pdo);
-    $blogPosts = getBlogPosts($pdo);
+    $blogPosts = getBlogPosts($pdo, 9, 'en');
 } catch (Exception $e) { $blogPosts = []; }
 ?>
 <!DOCTYPE html>
