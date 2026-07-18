@@ -68,7 +68,7 @@ try {
             FROM categoria_conteudo cc
             $notInSql
             ORDER BY RAND()
-            LIMIT 10");
+            LIMIT 5");
         $randomCats = $stmtRandomCats->fetchAll(PDO::FETCH_ASSOC);
     }
 } catch (Exception $e) {
@@ -331,11 +331,6 @@ $score = min($score, 100);
         gap: 24px;
         margin-top: 32px;
         margin-bottom: 24px;
-      }
-      @media (min-width: 768px) {
-        .vaga-cat-grid-vaga {
-          grid-template-columns: 1fr 1fr;
-        }
       }
       </style>
       <div style="margin-top: 48px; margin-bottom: 32px;">
