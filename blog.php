@@ -45,6 +45,7 @@ $dateFormatted = $publishedAt ? date('d/m/Y', strtotime($publishedAt)) : '';
 $isoDate = $publishedAt ? date('Y-m-d', strtotime($publishedAt)) : '';
 
 $relacionados = [];
+$randomCats = [];
 if ($post && $pdo) {
     try {
         $stmtRel = $pdo->prepare("SELECT slug, title, excerpt, image, published_at FROM blog_posts WHERE status='publicado' AND lang = :lang AND id != :id AND categoria = :cat ORDER BY published_at DESC LIMIT 3");
@@ -55,6 +56,11 @@ if ($post && $pdo) {
             $stmtRel->execute([':id' => $post['id'], ':lang' => $post['lang'] ?? 'pt']);
             $relacionados = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
         }
+
+        $blogLang = $post['lang'] ?? 'pt';
+        $stmtCats = $pdo->prepare("SELECT cc.titulo_{$blogLang} as titulo, cc.conteudo_{$blogLang} as conteudo FROM categoria_conteudo cc ORDER BY RAND() LIMIT 5");
+        $stmtCats->execute();
+        $randomCats = $stmtCats->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 }
 ?><!DOCTYPE html>
@@ -186,8 +192,36 @@ gtag('config', 'G-RPQ9FFFNP1');
         <?= $content ?>
       </div>
 
-      <?php if (!empty($relacionados)): ?>
+      <?php if (!empty($randomCats)): ?>
+      <style>
+      .vaga-cat-grid-blog {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-top: 24px;
+      }
+      @media (min-width: 768px) {
+        .vaga-cat-grid-blog {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      </style>
       <div style="margin-top:64px;padding-top:32px;border-top:1px solid #c6c6cd">
+        <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:20px"><?= ($post['lang'] ?? 'pt') === 'en' ? 'Discover Other Areas' : 'Conheça Outras Áreas' ?></h3>
+        <p style="color:#666;font-size:0.95rem;margin-bottom:20px"><?= ($post['lang'] ?? 'pt') === 'en' ? 'Understand the scope of work, key skills, and tools used in different career areas.' : 'Entenda melhor o escopo de atuação, habilidades necessárias e ferramentas utilizadas em diferentes áreas de carreira.' ?></p>
+        <div class="vaga-cat-grid-blog">
+          <?php foreach ($randomCats as $cat): ?>
+            <div class="vaga-cat-block" style="margin: 0; display: flex; flex-direction: column;">
+              <h4 class="vaga-cat-title" style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700; color: #0b1c30;"><?= esc($cat['titulo']) ?></h4>
+              <div class="vaga-cat-body" style="flex-grow: 1; font-size: 0.95rem; line-height: 1.6; color: #45464d;"><?= $cat['conteudo'] ?></div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <?php endif; ?>
+
+      <?php if (!empty($relacionados)): ?>
+      <div style="margin-top:64px;padding-top:32px;<?= empty($randomCats) ? 'border-top:1px solid #c6c6cd' : '' ?>">
         <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:20px"><?= ($post && ($post['lang'] ?? 'pt') === 'en') ? 'Related Articles' : 'Artigos Relacionados' ?></h3>
         <div class="blog-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
           <?php foreach ($relacionados as $r):
