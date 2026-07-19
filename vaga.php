@@ -539,6 +539,13 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </section>
 
+    <?php
+    $glossarioFile = $isExterior ? __DIR__ . '/glossario-en.html' : __DIR__ . '/glossario-pt.html';
+    if (file_exists($glossarioFile)) {
+        include $glossarioFile;
+    }
+    ?>
+
 <?php if ($dicaPost): ?>
     <div class="dica-expert">
       <div class="dica-expert-header">
