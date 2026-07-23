@@ -261,7 +261,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
     }
 }
 
-$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas', 'categorias']) ? $_GET['tab'] : 'lista';
+$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas', 'categorias', 'por-categorias']) ? $_GET['tab'] : 'lista';
 
 $blogMsg = '';
 if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_blog'])) {
@@ -513,6 +513,18 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 .cat-filter-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #c6c6cd; border-radius: 0.5rem; background: #f8f9fa; transition: all 0.2s; }
 .cat-filter-checkbox:hover { border-color: #4b41e1; }
 .cat-filter-checkbox input { width: 16px; height: 16px; cursor: pointer; }
+.cat-grid-wrapper { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.cat-tile { background: #fff; border: 1px solid #c6c6cd; border-radius: 0.75rem; padding: 14px 18px; text-decoration: none; color: #0b1c30; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease-in-out; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.cat-tile:hover { border-color: #4b41e1; box-shadow: 0 4px 12px rgba(75, 65, 225, 0.15); transform: translateY(-2px); }
+.cat-tile.active { background: #4b41e1; border-color: #4b41e1; color: #fff; box-shadow: 0 4px 12px rgba(75, 65, 225, 0.3); }
+.cat-tile-name { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.cat-tile.active .cat-tile-name { color: #fff; }
+.cat-tile-count { font-size: 12px; font-weight: 600; color: #64656c; margin-top: 10px; }
+.cat-tile.active .cat-tile-count { color: #e0e0ff; }
+.cat-tile-sem-cat { border-color: #f5baba; background: #fffafa; }
+.cat-tile-sem-cat .cat-tile-name { color: #ba1a1a; }
+.cat-tile-sem-cat.active { background: #ba1a1a; border-color: #ba1a1a; }
+.cat-tile-sem-cat.active .cat-tile-name, .cat-tile-sem-cat.active .cat-tile-count { color: #fff; }
 </style>
 </head>
 <body>
@@ -629,6 +641,85 @@ try {
         }
     }
 
+    $catSelected = isset($_GET['cat']) ? trim($_GET['cat']) : '';
+    $categoriasAtivasList = [];
+    $totalSemCategoriaAtivas = 0;
+    $vagasPorCat = [];
+    $totalVagasCat = 0;
+    $totalPagesCat = 1;
+    $pageCat = 1;
+    $catNomeAtual = '';
+
+    if ($tab === 'por-categorias') {
+        $stmtCatsAtivas = $pdo->query("
+            SELECT c.*, 
+              (SELECT COUNT(DISTINCT v.id) 
+               FROM vaga_categorias vc 
+               JOIN vagas v ON v.id = vc.vaga_id 
+               WHERE vc.categoria_id = c.id AND v.status = 'ativa') AS total_ativas
+            FROM categorias c 
+            ORDER BY c.nome_pt ASC
+        ");
+        $categoriasAtivasList = $stmtCatsAtivas->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalSemCategoriaAtivas = (int)$pdo->query("
+            SELECT COUNT(*) 
+            FROM vagas v 
+            WHERE v.status = 'ativa' 
+              AND NOT EXISTS (SELECT 1 FROM vaga_categorias vc WHERE vc.vaga_id = v.id)
+        ")->fetchColumn();
+
+        if ($catSelected !== '') {
+            $whereClausesCat = ["vagas.status = 'ativa'"];
+
+            if ($catSelected === 'sem-categoria') {
+                $whereClausesCat[] = "NOT EXISTS (SELECT 1 FROM vaga_categorias vc WHERE vc.vaga_id = vagas.id)";
+                $catNomeAtual = 'Sem Categoria';
+            } else {
+                $whereClausesCat[] = "EXISTS (SELECT 1 FROM vaga_categorias vc JOIN categorias c ON c.id = vc.categoria_id WHERE vc.vaga_id = vagas.id AND c.slug = " . $pdo->quote($catSelected) . ")";
+                foreach ($categoriasAtivasList as $ca) {
+                    if ($ca['slug'] === $catSelected) {
+                        $catNomeAtual = $ca['nome_pt'];
+                        break;
+                    }
+                }
+            }
+
+            if ($searchQuery !== '') {
+                $escaped = str_replace(['%', '_'], ['\%', '\_'], $searchQuery);
+                $like = $pdo->quote('%' . $escaped . '%');
+                $whereClausesCat[] = "(vagas.titulo LIKE $like OR vagas.empresa LIKE $like OR vagas.localizacao LIKE $like)";
+            }
+
+            $whereCatSql = " WHERE " . implode(" AND ", $whereClausesCat);
+
+            $pageCat = max(1, (int)($_GET['page'] ?? 1));
+            $limitCat = 30;
+            $offsetCat = ($pageCat - 1) * $limitCat;
+
+            $totalVagasCat = (int)$pdo->query("SELECT COUNT(DISTINCT vagas.id) FROM vagas " . $whereCatSql)->fetchColumn();
+            $totalPagesCat = $totalVagasCat > 0 ? (int)ceil($totalVagasCat / $limitCat) : 1;
+
+            $stmtVagasCat = $pdo->prepare("
+                SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, 
+                       vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, 
+                       vagas.area, vagas.publicado_em, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, 
+                       GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str 
+                FROM vagas 
+                LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id 
+                LEFT JOIN categorias c ON c.id = vc.categoria_id 
+                {$whereCatSql} 
+                GROUP BY vagas.id 
+                ORDER BY vagas.publicado_em DESC, vagas.id DESC 
+                LIMIT :limit OFFSET :offset
+            ");
+            $stmtVagasCat->bindValue(':limit', $limitCat, PDO::PARAM_INT);
+            $stmtVagasCat->bindValue(':offset', $offsetCat, PDO::PARAM_INT);
+            $stmtVagasCat->execute();
+            $vagasPorCat = $stmtVagasCat->fetchAll(PDO::FETCH_ASSOC);
+        }
+    }
+
 } catch (Exception $e) {
     echo '<div class="admin-main"><p style="color:#ba1a1a;">Erro ao conectar ao banco de dados.</p></div>';
     exit;
@@ -646,6 +737,7 @@ try {
     <a class="admin-tab <?php echo $statusFilter === 'ativa' ? 'active' : '' ?>" href="admin.php?status=ativa<?php echo $origemParam . $qParam ?>">Ativas</a>
     <a class="admin-tab <?php echo $statusFilter === 'inativa' ? 'active' : '' ?>" href="admin.php?status=inativa<?php echo $origemParam . $qParam ?>">Inativas</a>
     <span style="flex:1"></span>
+    <a class="admin-tab <?php echo $tab === 'por-categorias' ? 'active' : '' ?>" href="admin.php?tab=por-categorias">Pesquisar por Categorias</a>
     <a class="admin-tab <?php echo $tab === 'emails' ? 'active' : '' ?>" href="admin.php?tab=emails">Emails</a>
     <a class="admin-tab <?php echo $tab === 'novas' ? 'active' : '' ?>" href="admin.php?tab=novas">Novas (24h)</a>
     <a class="admin-tab <?php echo $tab === 'blog' ? 'active' : '' ?>" href="admin.php?tab=blog">Blog</a>
@@ -1188,6 +1280,132 @@ try {
   <?php endif; ?>
   <?php endif; ?>
 
+  <?php elseif ($tab === 'por-categorias'): ?>
+
+  <div class="admin-header">
+    <div>
+      <h1>Pesquisar Vagas Ativas por Categoria</h1>
+      <span>Clique em qualquer uma das categorias abaixo para listar todas as vagas ativas correspondentes</span>
+    </div>
+  </div>
+
+  <div class="cat-grid-wrapper">
+    <?php foreach ($categoriasAtivasList as $catItem): ?>
+      <a href="admin.php?tab=por-categorias&cat=<?php echo urlencode($catItem['slug']) ?>" 
+         class="cat-tile <?php echo $catSelected === $catItem['slug'] ? 'active' : '' ?>">
+        <div class="cat-tile-name"><?php echo htmlspecialchars($catItem['nome_pt'], ENT_QUOTES, 'UTF-8') ?></div>
+        <div class="cat-tile-count"><?php echo (int)$catItem['total_ativas'] ?> vaga(s) ativas</div>
+      </a>
+    <?php endforeach; ?>
+    <a href="admin.php?tab=por-categorias&cat=sem-categoria" 
+       class="cat-tile cat-tile-sem-cat <?php echo $catSelected === 'sem-categoria' ? 'active' : '' ?>">
+      <div class="cat-tile-name">Sem Categoria</div>
+      <div class="cat-tile-count"><?php echo $totalSemCategoriaAtivas ?> vaga(s) ativas</div>
+    </a>
+  </div>
+
+  <?php if ($catSelected === ''): ?>
+    <div class="admin-empty" style="background:#fff;border:1px solid #c6c6cd;border-radius:0.75rem;padding:48px 24px;margin-top:16px;">
+      <p style="font-size:16px;font-weight:600;color:#0b1c30;margin-bottom:4px">Selecione uma Categoria</p>
+      <p style="font-size:14px;color:#45464d;margin:0">Clique em qualquer um dos blocos acima para exibir as vagas ativas correspondentes.</p>
+    </div>
+  <?php else: ?>
+
+    <div class="admin-header" style="margin-top:24px;margin-bottom:16px">
+      <div>
+        <h2 style="font-size:1.25rem;font-weight:700;margin:0">
+          Vagas Ativas em <span style="color:#4b41e1"><?php echo htmlspecialchars($catNomeAtual, ENT_QUOTES, 'UTF-8') ?></span>
+        </h2>
+        <span style="font-size:14px;color:#45464d"><?php echo $totalVagasCat ?> vaga(s) encontrada(s)</span>
+      </div>
+    </div>
+
+    <form class="admin-search" method="get">
+      <input type="hidden" name="tab" value="por-categorias">
+      <input type="hidden" name="cat" value="<?php echo htmlspecialchars($catSelected, ENT_QUOTES, 'UTF-8') ?>">
+      <input type="search" name="q" class="admin-search-input" placeholder="Filtrar por título, empresa ou localização nesta categoria..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>">
+      <button type="submit" class="btn-search">Buscar</button>
+      <?php if ($searchQuery !== ''): ?>
+        <a href="admin.php?tab=por-categorias&cat=<?php echo urlencode($catSelected) ?>" class="btn-clear">Limpar busca</a>
+      <?php endif; ?>
+    </form>
+
+    <div class="batch-bar" id="batch-bar-top"></div>
+
+    <?php if (empty($vagasPorCat)): ?>
+      <div class="admin-empty">Nenhuma vaga ativa encontrada para a categoria "<?php echo htmlspecialchars($catNomeAtual, ENT_QUOTES, 'UTF-8') ?>".</div>
+    <?php else: ?>
+      <?php foreach ($vagasPorCat as $v): ?>
+        <div class="admin-card" style="margin-bottom:12px">
+          <div class="admin-card-header">
+            <label class="admin-check-wrap">
+              <input type="checkbox" class="batch-check" value="<?php echo (int)$v['id'] ?>" data-status="<?php echo $v['status'] ?>">
+            </label>
+            <div style="flex:1">
+              <div class="admin-card-title"><?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="admin-card-company"><?php echo htmlspecialchars($v['empresa'], ENT_QUOTES, 'UTF-8') ?><?php echo $v['localizacao'] ? ' • ' . htmlspecialchars($v['localizacao'], ENT_QUOTES, 'UTF-8') : '' ?></div>
+            </div>
+          </div>
+          <div class="admin-card-meta">
+            <span class="<?php echo $v['origem'] === 'exterior' ? 'badge-origem exterior' : 'badge-origem' ?>"><?php echo $v['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span>
+            <?php if ($v['modelo_trabalho']): ?>
+              <span class="badge badge-<?php echo htmlspecialchars(strtolower($v['modelo_trabalho']), ENT_QUOTES, 'UTF-8') === 'remote' ? 'remote' : (strtolower($v['modelo_trabalho']) === 'hybrid' ? 'hybrid' : 'onsite') ?>"><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
+            <?php endif; ?>
+            <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
+            <?php if (!empty($v['tags_str'])): ?>
+              <span style="font-size:12px;color:#4b41e1;font-weight:600"><?php echo htmlspecialchars($v['tags_str'], ENT_QUOTES, 'UTF-8') ?></span>
+            <?php endif; ?>
+            <?php if ($v['publicado_em']): ?>
+              <?php $isOld = strtotime($v['publicado_em']) < strtotime('-90 days'); ?>
+              <span><?php echo htmlspecialchars($v['publicado_em_fmt'], ENT_QUOTES, 'UTF-8') ?></span>
+              <?php if ($isOld): ?>
+                <span class="badge-velha">90+ dias</span>
+              <?php endif; ?>
+            <?php endif; ?>
+          </div>
+          <?php if ($v['resumo']): ?>
+            <p style="font-size:14px;line-height:20px;color:#45464d;margin-top:12px"><?php echo htmlspecialchars(mb_substr($v['resumo'], 0, 200), ENT_QUOTES, 'UTF-8') ?><?php echo mb_strlen($v['resumo']) > 200 ? '...' : '' ?></p>
+          <?php endif; ?>
+          <div class="admin-card-actions">
+            <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
+            <form method="post" style="margin:0">
+              <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
+              <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
+            </form>
+            <?php if ($v['vaga_id_externo']): ?>
+              <a href="/#<?php echo urlencode($v['vaga_id_externo']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver no site</a>
+            <?php endif; ?>
+          </div>
+        </div>
+      <?php endforeach; ?>
+
+      <?php if ($totalPagesCat > 1): ?>
+        <div class="admin-pagination">
+          <?php if ($pageCat > 1): ?>
+            <a href="?tab=por-categorias&cat=<?php echo urlencode($catSelected) ?>&page=<?php echo $pageCat - 1 ?><?php echo $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '' ?>">&laquo;</a>
+          <?php endif; ?>
+          <?php
+          $startPage = max(1, $pageCat - 4);
+          $endPage = min($totalPagesCat, $pageCat + 4);
+          for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <?php if ($i === $pageCat): ?>
+              <span class="current"><?php echo $i ?></span>
+            <?php else: ?>
+              <a href="?tab=por-categorias&cat=<?php echo urlencode($catSelected) ?>&page=<?php echo $i ?><?php echo $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '' ?>"><?php echo $i ?></a>
+            <?php endif; ?>
+          <?php endfor; ?>
+          <?php if ($pageCat < $totalPagesCat): ?>
+            <a href="?tab=por-categorias&cat=<?php echo urlencode($catSelected) ?>&page=<?php echo $pageCat + 1 ?><?php echo $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '' ?>">&raquo;</a>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
+
+    <?php endif; ?>
+
+    <div class="batch-bar" id="batch-bar-bottom"></div>
+
+  <?php endif; ?>
+
   <?php elseif ($tab === 'categorias'): ?>
 
   <div class="admin-header">
@@ -1448,8 +1666,8 @@ try {
   var tpl = document.getElementById('batch-bar-tpl');
   var topBar = document.getElementById('batch-bar-top');
   var bottomBar = document.getElementById('batch-bar-bottom');
-  topBar.appendChild(tpl.content.cloneNode(true));
-  bottomBar.appendChild(tpl.content.cloneNode(true));
+  if (tpl && topBar) topBar.appendChild(tpl.content.cloneNode(true));
+  if (tpl && bottomBar) bottomBar.appendChild(tpl.content.cloneNode(true));
 
   var checks = document.querySelectorAll('.batch-check');
   var countEls = document.querySelectorAll('.batch-count');
