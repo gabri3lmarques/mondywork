@@ -7,3 +7,4 @@ env.txt~
 uploads/blog/*
 !uploads/blog/.gitkeep
 scripts
+refatorar.md

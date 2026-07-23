@@ -9,6 +9,21 @@ require_once __DIR__ . '/categorias.php';
 require_once __DIR__ . '/lib/Database.php';
 require_once __DIR__ . '/lib/VagaRepository.php';
 
+function agendarTempoRestante($dtStr) {
+    if (!$dtStr) return '';
+    $timestamp = strtotime($dtStr);
+    $diff = $timestamp - time();
+    if ($diff <= 0) return 'Processando...';
+    $dias = floor($diff / 86400);
+    $horas = floor(($diff % 86400) / 3600);
+    $minutos = floor(($diff % 3600) / 60);
+    $partes = [];
+    if ($dias > 0) $partes[] = "{$dias}d";
+    if ($horas > 0) $partes[] = "{$horas}h";
+    if ($minutos > 0 || empty($partes)) $partes[] = "{$minutos}min";
+    return 'em ' . implode(' ', $partes);
+}
+
 if ($adminPassword === '') {
     http_response_code(500);
     exit('Admin password not configured.');
@@ -49,6 +64,17 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             if ($_POST['batch_action'] === 'remover') {
                 $stmt = $pdo->prepare("UPDATE vagas SET revisada_em = NOW() WHERE id IN ($placeholders) AND revisada_em IS NULL");
                 $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'cancelar_agendamento') {
+                $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'agendar_ativar' && !empty($_POST['batch_offset_minutes'])) {
+                $mins = max(1, (int)$_POST['batch_offset_minutes']);
+                $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
+                $stmt->execute(array_merge([$mins], $ids));
+            } elseif ($_POST['batch_action'] === 'agendar_desativar' && !empty($_POST['batch_offset_minutes'])) {
+                $mins = max(1, (int)$_POST['batch_offset_minutes']);
+                $stmt = $pdo->prepare("UPDATE vagas SET agendado_desativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
+                $stmt->execute(array_merge([$mins], $ids));
             } else {
                 $targetStatus = $_POST['batch_action'] === 'ativar' ? 'ativa' : 'inativa';
                 $stmt = $pdo->prepare("UPDATE vagas SET status = ? WHERE id IN ($placeholders)");
@@ -124,6 +150,38 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
     exit;
 }
 
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['executar_agendamento_id'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $vId = (int)$_POST['executar_agendamento_id'];
+        $stmt = $pdo->prepare("UPDATE vagas SET status = CASE WHEN agendado_ativar_em IS NOT NULL THEN 'ativa' WHEN agendado_desativar_em IS NOT NULL THEN 'inativa' ELSE status END, agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
+        $stmt->execute([':id' => $vId]);
+    } catch (Exception $e) {}
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
+    exit;
+}
+
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancelar_agendamento_id'])) {
+    try {
+        $pdo = new PDO(
+            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+            $config['user'],
+            $config['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        $vId = (int)$_POST['cancelar_agendamento_id'];
+        $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
+        $stmt->execute([':id' => $vId]);
+    } catch (Exception $e) {}
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
+    exit;
+}
+
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remover_vaga_id'])) {
     try {
         $pdo = new PDO(
@@ -178,19 +236,39 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadast
 
         $primeiraArea = !empty($categoriasSlugs) ? $categoriasSlugs[0] : null;
 
-        $stmt = $pdo->prepare("INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, area) VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'inativa', :origem, :area)");
+        $agendadoAtivarVal = null;
+        $ativarOffset = isset($_POST['agendado_ativar_offset']) && $_POST['agendado_ativar_offset'] !== '' ? (int)$_POST['agendado_ativar_offset'] : null;
+        if ($ativarOffset !== null && $ativarOffset > 0) {
+            $agendadoAtivarVal = date('Y-m-d H:i:s', time() + ($ativarOffset * 60));
+        } elseif (!empty($_POST['agendado_ativar_em'])) {
+            $ts = strtotime($_POST['agendado_ativar_em']);
+            if ($ts) $agendadoAtivarVal = date('Y-m-d H:i:s', $ts);
+        }
+
+        $agendadoDesativarVal = null;
+        $desativarOffset = isset($_POST['agendado_desativar_offset']) && $_POST['agendado_desativar_offset'] !== '' ? (int)$_POST['agendado_desativar_offset'] : null;
+        if ($desativarOffset !== null && $desativarOffset > 0) {
+            $agendadoDesativarVal = date('Y-m-d H:i:s', time() + ($desativarOffset * 60));
+        } elseif (!empty($_POST['agendado_desativar_em'])) {
+            $ts = strtotime($_POST['agendado_desativar_em']);
+            if ($ts) $agendadoDesativarVal = date('Y-m-d H:i:s', $ts);
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, area, agendado_ativar_em, agendado_desativar_em) VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'inativa', :origem, :area, :agendado_ativar, :agendado_desativar)");
         $stmt->execute([
-            ':id'        => $vagaId,
-            ':titulo'    => $titulo,
-            ':empresa'   => $empresa,
-            ':local'     => $localizacao ?: null,
-            ':modelo'    => $modeloTrabalho ?: null,
-            ':url'       => $urlVaga ?: null,
-            ':desc'      => $descricao,
-            ':resumo'    => $resumo,
-            ':publicado' => $publicadoEm ?: null,
-            ':origem'    => $origem,
-            ':area'      => $primeiraArea,
+            ':id'                 => $vagaId,
+            ':titulo'             => $titulo,
+            ':empresa'            => $empresa,
+            ':local'              => $localizacao ?: null,
+            ':modelo'             => $modeloTrabalho ?: null,
+            ':url'                => $urlVaga ?: null,
+            ':desc'               => $descricao,
+            ':resumo'             => $resumo,
+            ':publicado'          => $publicadoEm ?: null,
+            ':origem'             => $origem,
+            ':area'               => $primeiraArea,
+            ':agendado_ativar'    => $agendadoAtivarVal,
+            ':agendado_desativar' => $agendadoDesativarVal,
         ]);
 
         $novoId = (int)$pdo->lastInsertId();
@@ -249,6 +327,34 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
             $params[':publicado'] = $publicadoEm;
         }
 
+        if (isset($_POST['limpar_agendamento_ativar'])) {
+            $setParts[] = 'agendado_ativar_em = NULL';
+        } else {
+            $ativarOffset = isset($_POST['agendado_ativar_offset']) && $_POST['agendado_ativar_offset'] !== '' ? (int)$_POST['agendado_ativar_offset'] : null;
+            if ($ativarOffset !== null && $ativarOffset > 0) {
+                $setParts[] = "agendado_ativar_em = DATE_ADD(NOW(), INTERVAL {$ativarOffset} MINUTE)";
+            } elseif (!empty($_POST['agendado_ativar_em'])) {
+                $ts = strtotime($_POST['agendado_ativar_em']);
+                if ($ts) {
+                    $setParts[] = 'agendado_ativar_em = ' . $pdo->quote(date('Y-m-d H:i:s', $ts));
+                }
+            }
+        }
+
+        if (isset($_POST['limpar_agendamento_desativar'])) {
+            $setParts[] = 'agendado_desativar_em = NULL';
+        } else {
+            $desativarOffset = isset($_POST['agendado_desativar_offset']) && $_POST['agendado_desativar_offset'] !== '' ? (int)$_POST['agendado_desativar_offset'] : null;
+            if ($desativarOffset !== null && $desativarOffset > 0) {
+                $setParts[] = "agendado_desativar_em = DATE_ADD(NOW(), INTERVAL {$desativarOffset} MINUTE)";
+            } elseif (!empty($_POST['agendado_desativar_em'])) {
+                $ts = strtotime($_POST['agendado_desativar_em']);
+                if ($ts) {
+                    $setParts[] = 'agendado_desativar_em = ' . $pdo->quote(date('Y-m-d H:i:s', $ts));
+                }
+            }
+        }
+
         $sql = "UPDATE vagas SET " . implode(', ', $setParts) . " WHERE id = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -261,7 +367,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
     }
 }
 
-$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas', 'categorias', 'por-categorias']) ? $_GET['tab'] : 'lista';
+$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas', 'categorias', 'por-categorias', 'agendadas']) ? $_GET['tab'] : 'lista';
 
 $blogMsg = '';
 if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_blog'])) {
@@ -601,11 +707,30 @@ try {
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $totalAgendadasCount = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE agendado_ativar_em IS NOT NULL OR agendado_desativar_em IS NOT NULL")->fetchColumn();
+    $vagasAgendadas = [];
+    if ($tab === 'agendadas') {
+        $stmtAg = $pdo->query("
+            SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.resumo,
+                   vagas.status, vagas.origem, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em,
+                   DATE_FORMAT(vagas.agendado_ativar_em, '%d/%m/%Y %H:%i') as agendado_ativar_fmt,
+                   DATE_FORMAT(vagas.agendado_desativar_em, '%d/%m/%Y %H:%i') as agendado_desativar_fmt,
+                   GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str
+            FROM vagas
+            LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id
+            LEFT JOIN categorias c ON c.id = vc.categoria_id
+            WHERE vagas.agendado_ativar_em IS NOT NULL OR vagas.agendado_desativar_em IS NOT NULL
+            GROUP BY vagas.id
+            ORDER BY COALESCE(vagas.agendado_ativar_em, vagas.agendado_desativar_em) ASC
+        ");
+        $vagasAgendadas = $stmtAg ? $stmtAg->fetchAll(PDO::FETCH_ASSOC) : [];
+    }
 
     $todasCategorias = $pdo->query("SELECT * FROM categorias ORDER BY nome_pt")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -740,6 +865,7 @@ try {
     <a class="admin-tab <?php echo $tab === 'por-categorias' ? 'active' : '' ?>" href="admin.php?tab=por-categorias">Pesquisar por Categorias</a>
     <a class="admin-tab <?php echo $tab === 'emails' ? 'active' : '' ?>" href="admin.php?tab=emails">Emails</a>
     <a class="admin-tab <?php echo $tab === 'novas' ? 'active' : '' ?>" href="admin.php?tab=novas">Novas (24h)</a>
+    <a class="admin-tab <?php echo $tab === 'agendadas' ? 'active' : '' ?>" href="admin.php?tab=agendadas" style="<?php echo $totalAgendadasCount > 0 ? 'color:#4338ca;font-weight:700;' : '' ?>">Agendadas<?php echo $totalAgendadasCount > 0 ? " ($totalAgendadasCount)" : '' ?></a>
     <a class="admin-tab <?php echo $tab === 'blog' ? 'active' : '' ?>" href="admin.php?tab=blog">Blog</a>
     <a class="admin-tab <?php echo $tab === 'categorias' ? 'active' : '' ?>" href="admin.php?tab=categorias">Categorias</a>
   </div>
@@ -814,11 +940,58 @@ try {
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Descrição (HTML)</label>
         <textarea name="descricao" class="admin-search-input" style="width:100%;min-height:200px;resize:vertical;font-family:monospace" placeholder="<p>Descrição da vaga em HTML...</p>"></textarea>
       </div>
-      <div>
-        <button type="submit" name="cadastrar_vaga" class="btn-search" style="font-size:15px;padding:12px 32px">Cadastrar Vaga</button>
-      </div>
-    </form>
-  </div>
+        <div style="background:#f8fafc;padding:16px;border-radius:8px;border:1px solid #cbd5e1;margin-top:8px">
+          <h3 style="font-size:14px;font-weight:700;color:#0f172a;margin:0 0 8px 0;display:flex;align-items:center;gap:6px">
+            <span>⏱️</span> Agendamento de Publicação (Relativo ao servidor)
+          </h3>
+          <p style="font-size:12px;color:#64748b;margin:0 0 12px 0">
+            Agende quando esta vaga deve entrar ou sair do ar. Calculado em relação ao relógio do servidor (sem conflito de fuso horário).
+          </p>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="background:#ffffff;padding:12px;border-radius:6px;border:1px solid #e2e8f0">
+              <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1e293b">🚀 Agendar Ativação</label>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_ativar', 30)">+30 min</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_ativar', 60)">+1h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_ativar', 120)">+2h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_ativar', 360)">+6h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_ativar', 720)">+12h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_ativar', 1440)">+1 dia</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_ativar', 2880)">+2 dias</button>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="datetime-local" id="input_cad_ativar_dt" name="agendado_ativar_em" class="admin-search-input" style="flex:1;font-size:13px;padding:6px 10px" onchange="syncDatetimeOffset('cad_ativar')">
+                <input type="hidden" id="input_cad_ativar_offset" name="agendado_ativar_offset" value="">
+              </div>
+              <span id="cad_ativar_preview_text" style="font-size:11px;color:#4338ca;font-weight:600;display:block;margin-top:4px"></span>
+            </div>
+
+            <div style="background:#ffffff;padding:12px;border-radius:6px;border:1px solid #e2e8f0">
+              <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1e293b">🛑 Agendar Desativação</label>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_desativar', 30)">+30 min</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_desativar', 60)">+1h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_desativar', 120)">+2h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_desativar', 360)">+6h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_desativar', 720)">+12h</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_desativar', 1440)">+1 dia</button>
+                <button type="button" class="btn-preset" onclick="setRelativeSchedule('cad_desativar', 2880)">+2 dias</button>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="datetime-local" id="input_cad_desativar_dt" name="agendado_desativar_em" class="admin-search-input" style="flex:1;font-size:13px;padding:6px 10px" onchange="syncDatetimeOffset('cad_desativar')">
+                <input type="hidden" id="input_cad_desativar_offset" name="agendado_desativar_offset" value="">
+              </div>
+              <span id="cad_desativar_preview_text" style="font-size:11px;color:#be123c;font-weight:600;display:block;margin-top:4px"></span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button type="submit" name="cadastrar_vaga" class="btn-search" style="font-size:15px;padding:12px 32px">Cadastrar Vaga</button>
+        </div>
+      </form>
+    </div>
 
   <?php elseif ($tab === 'editar' && $vagaEditar): ?>
 
@@ -909,12 +1082,137 @@ try {
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Descrição (HTML)</label>
         <textarea name="descricao" class="admin-search-input" style="width:100%;min-height:200px;resize:vertical;font-family:monospace"><?php echo htmlspecialchars($vagaEditar['descricao'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
       </div>
+      <div style="background:#f8fafc;padding:16px;border-radius:8px;border:1px solid #cbd5e1;margin-top:8px">
+        <h3 style="font-size:14px;font-weight:700;color:#0f172a;margin:0 0 8px 0;display:flex;align-items:center;gap:6px">
+          <span>⏱️</span> Agendamento de Publicação (Relativo ao servidor)
+        </h3>
+        <p style="font-size:12px;color:#64748b;margin:0 0 12px 0">
+          Agende quando esta vaga deve entrar ou sair do ar. Calculado em relação ao relógio do servidor (sem conflito de fuso horário).
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="background:#ffffff;padding:12px;border-radius:6px;border:1px solid #e2e8f0">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1e293b">🚀 Agendar Ativação</label>
+            <?php if (!empty($vagaEditar['agendado_ativar_em'])): ?>
+              <div style="font-size:12px;color:#4338ca;background:#eef2ff;padding:6px 10px;border-radius:4px;margin-bottom:8px;border:1px solid #c7d2fe">
+                Agendada para: <strong><?php echo date('d/m/Y H:i', strtotime($vagaEditar['agendado_ativar_em'])) ?></strong> (<?php echo agendarTempoRestante($vagaEditar['agendado_ativar_em']) ?>)
+                <label style="display:block;margin-top:4px;color:#dc2626;cursor:pointer;font-weight:600">
+                  <input type="checkbox" name="limpar_agendamento_ativar" value="1"> Cancelar agendamento
+                </label>
+              </div>
+            <?php endif; ?>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_ativar', 30)">+30 min</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_ativar', 60)">+1h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_ativar', 120)">+2h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_ativar', 360)">+6h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_ativar', 720)">+12h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_ativar', 1440)">+1 dia</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_ativar', 2880)">+2 dias</button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="datetime-local" id="input_edit_ativar_dt" name="agendado_ativar_em" class="admin-search-input" style="flex:1;font-size:13px;padding:6px 10px" onchange="syncDatetimeOffset('edit_ativar')">
+              <input type="hidden" id="input_edit_ativar_offset" name="agendado_ativar_offset" value="">
+            </div>
+            <span id="edit_ativar_preview_text" style="font-size:11px;color:#4338ca;font-weight:600;display:block;margin-top:4px"></span>
+          </div>
+
+          <div style="background:#ffffff;padding:12px;border-radius:6px;border:1px solid #e2e8f0">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1e293b">🛑 Agendar Desativação</label>
+            <?php if (!empty($vagaEditar['agendado_desativar_em'])): ?>
+              <div style="font-size:12px;color:#be123c;background:#fff1f2;padding:6px 10px;border-radius:4px;margin-bottom:8px;border:1px solid #fecdd3">
+                Agendada para: <strong><?php echo date('d/m/Y H:i', strtotime($vagaEditar['agendado_desativar_em'])) ?></strong> (<?php echo agendarTempoRestante($vagaEditar['agendado_desativar_em']) ?>)
+                <label style="display:block;margin-top:4px;color:#dc2626;cursor:pointer;font-weight:600">
+                  <input type="checkbox" name="limpar_agendamento_desativar" value="1"> Cancelar agendamento
+                </label>
+              </div>
+            <?php endif; ?>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_desativar', 30)">+30 min</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_desativar', 60)">+1h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_desativar', 120)">+2h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_desativar', 360)">+6h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_desativar', 720)">+12h</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_desativar', 1440)">+1 dia</button>
+              <button type="button" class="btn-preset" onclick="setRelativeSchedule('edit_desativar', 2880)">+2 dias</button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="datetime-local" id="input_edit_desativar_dt" name="agendado_desativar_em" class="admin-search-input" style="flex:1;font-size:13px;padding:6px 10px" onchange="syncDatetimeOffset('edit_desativar')">
+              <input type="hidden" id="input_edit_desativar_offset" name="agendado_desativar_offset" value="">
+            </div>
+            <span id="edit_desativar_preview_text" style="font-size:11px;color:#be123c;font-weight:600;display:block;margin-top:4px"></span>
+          </div>
+        </div>
+      </div>
+
       <div style="display:flex;gap:12px">
         <button type="submit" name="editar_vaga" class="btn-search" style="font-size:15px;padding:12px 32px">Salvar Alterações</button>
         <a href="admin.php<?php echo $origemParam . $statusParam . $qParam . $categoriasParam ?>" class="btn-clear" style="display:inline-flex;align-items:center">Cancelar</a>
       </div>
     </form>
   </div>
+
+  <?php elseif ($tab === 'agendadas'): ?>
+
+  <div class="admin-header">
+    <div>
+      <h1>Vagas Agendadas</h1>
+      <span>Vagas com ativação ou desativação programadas</span>
+    </div>
+  </div>
+
+  <?php if (empty($vagasAgendadas)): ?>
+    <div class="admin-empty">Nenhuma vaga agendada no momento.</div>
+  <?php else: ?>
+    <?php foreach ($vagasAgendadas as $ag): ?>
+      <div class="admin-card" style="margin-bottom:12px">
+        <div class="admin-card-header">
+          <div style="flex:1">
+            <div class="admin-card-title"><?php echo htmlspecialchars($ag['titulo'], ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="admin-card-company"><?php echo htmlspecialchars($ag['empresa'], ENT_QUOTES, 'UTF-8') ?><?php echo $ag['localizacao'] ? ' • ' . htmlspecialchars($ag['localizacao'], ENT_QUOTES, 'UTF-8') : '' ?></div>
+          </div>
+        </div>
+        <div class="admin-card-meta" style="margin-top:8px">
+          <span class="<?php echo $ag['origem'] === 'exterior' ? 'badge-origem exterior' : 'badge-origem' ?>"><?php echo $ag['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span>
+          <span class="badge-status <?php echo $ag['status'] ?>"><?php echo $ag['status'] === 'ativa' ? 'Ativa no site' : 'Inativa no site' ?></span>
+
+          <?php if ($ag['agendado_ativar_em']): ?>
+            <span class="badge-agendado-ativar">
+              🚀 <strong>Ativar em:</strong> <?php echo $ag['agendado_ativar_fmt'] ?> (<?php echo agendarTempoRestante($ag['agendado_ativar_em']) ?>)
+            </span>
+          <?php endif; ?>
+
+          <?php if ($ag['agendado_desativar_em']): ?>
+            <span class="badge-agendado-desativar">
+              🛑 <strong>Desativar em:</strong> <?php echo $ag['agendado_desativar_fmt'] ?> (<?php echo agendarTempoRestante($ag['agendado_desativar_em']) ?>)
+            </span>
+          <?php endif; ?>
+
+          <?php if (!empty($ag['tags_str'])): ?>
+            <span style="font-size:12px;color:#4b41e1;font-weight:600"><?php echo htmlspecialchars($ag['tags_str'], ENT_QUOTES, 'UTF-8') ?></span>
+          <?php endif; ?>
+        </div>
+
+        <?php if ($ag['resumo']): ?>
+          <p style="font-size:14px;line-height:20px;color:#45464d;margin-top:12px"><?php echo htmlspecialchars(mb_substr($ag['resumo'], 0, 200), ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endif; ?>
+
+        <div class="admin-card-actions" style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <form method="post" style="margin:0">
+            <input type="hidden" name="executar_agendamento_id" value="<?php echo (int)$ag['id'] ?>">
+            <button type="submit" class="btn-search" style="font-size:13px;padding:8px 16px;background:#16a34a;border-color:#16a34a">⚡ Executar Agora</button>
+          </form>
+
+          <a href="admin.php?tab=editar&id=<?php echo (int)$ag['id'] ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">✏️ Editar Agendamento</a>
+
+          <form method="post" style="margin:0" onsubmit="return confirm('Tem certeza que deseja cancelar este agendamento?')">
+            <input type="hidden" name="cancelar_agendamento_id" value="<?php echo (int)$ag['id'] ?>">
+            <button type="submit" class="btn-clear" style="font-size:13px;padding:8px 16px;color:#dc2626;border-color:#fca5a5">❌ Cancelar Agendamento</button>
+          </form>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  <?php endif; ?>
 
   <?php elseif ($tab === 'emails'): ?>
 
@@ -1572,6 +1870,12 @@ try {
             <span class="badge badge-<?php echo htmlspecialchars(strtolower($v['modelo_trabalho']), ENT_QUOTES, 'UTF-8') === 'remote' ? 'remote' : (strtolower($v['modelo_trabalho']) === 'hybrid' ? 'hybrid' : 'onsite') ?>"><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
           <?php endif; ?>
           <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
+          <?php if (!empty($v['agendado_ativar_em'])): ?>
+            <span class="badge-agendado-ativar">🚀 Ativar <?php echo agendarTempoRestante($v['agendado_ativar_em']) ?></span>
+          <?php endif; ?>
+          <?php if (!empty($v['agendado_desativar_em'])): ?>
+            <span class="badge-agendado-desativar">🛑 Desativar <?php echo agendarTempoRestante($v['agendado_desativar_em']) ?></span>
+          <?php endif; ?>
           <?php if (!empty($v['tags_str'])): ?>
             <span style="font-size:12px;color:#4b41e1;font-weight:600"><?php echo htmlspecialchars($v['tags_str'], ENT_QUOTES, 'UTF-8') ?></span>
           <?php endif; ?>
@@ -1592,6 +1896,12 @@ try {
             <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
             <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
           </form>
+          <?php if (!empty($v['agendado_ativar_em']) || !empty($v['agendado_desativar_em'])): ?>
+            <form method="post" style="margin:0">
+              <input type="hidden" name="executar_agendamento_id" value="<?php echo (int)$v['id'] ?>">
+              <button type="submit" class="btn-toggle ativar" style="font-size:12px;padding:6px 12px">⚡ Executar Agendamento</button>
+            </form>
+          <?php endif; ?>
           <?php if ($v['vaga_id_externo']): ?>
             <a href="/#<?php echo urlencode($v['vaga_id_externo']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver no site</a>
           <?php endif; ?>
@@ -1631,21 +1941,37 @@ try {
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
     <button type="button" class="btn-toggle ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('remover')">Remover Selecionadas</button>
-    <span style="border-left:1px solid #ccc;height:24px;margin:0 8px"></span>
-    <select id="batch-cat-select" multiple style="max-width:220px;font-size:12px;padding:4px;border:1px solid #ccc;border-radius:4px;min-height:28px">
+    <span style="border-left:1px solid #ccc;height:24px;margin:0 4px"></span>
+    <select id="batch-schedule-select" style="font-size:12px;padding:4px 8px;border:1px solid #ccc;border-radius:4px">
+      <option value="">⏱️ Agendar em lote...</option>
+      <option value="30">Daqui a 30 minutos</option>
+      <option value="60">Daqui a 1 hora</option>
+      <option value="120">Daqui a 2 horas</option>
+      <option value="360">Daqui a 6 horas</option>
+      <option value="720">Daqui a 12 horas</option>
+      <option value="1440">Daqui a 24h (1 dia)</option>
+      <option value="2880">Daqui a 2 dias</option>
+      <option value="10080">Daqui a 7 dias</option>
+    </select>
+    <button type="button" class="btn-toggle ativar" onclick="batchSchedule('agendar_ativar')" style="padding:6px 12px;font-size:12px">🚀 Agendar Ativação</button>
+    <button type="button" class="btn-toggle inativar" onclick="batchSchedule('agendar_desativar')" style="padding:6px 12px;font-size:12px">🛑 Agendar Desativação</button>
+    <button type="button" class="btn-toggle inativar" onclick="batchToggle('cancelar_agendamento')" style="padding:6px 12px;font-size:12px;color:#dc2626;border-color:#fca5a5">❌ Cancelar Agendamento</button>
+    <span style="border-left:1px solid #ccc;height:24px;margin:0 4px"></span>
+    <select id="batch-cat-select" multiple style="max-width:180px;font-size:12px;padding:4px;border:1px solid #ccc;border-radius:4px;min-height:28px">
       <?php foreach ($todasCategorias as $cat): ?>
         <?php if ($cat['slug'] !== 'sem-categoria'): ?>
           <option value="<?php echo $cat['slug'] ?>"><?php echo htmlspecialchars($cat['nome_pt'], ENT_QUOTES, 'UTF-8') ?></option>
         <?php endif; ?>
       <?php endforeach; ?>
     </select>
-    <button type="button" class="btn-toggle ativar" onclick="batchCategorize()" style="padding:7px 14px;font-size:12px">Categorizar</button>
-    <button type="button" class="btn-toggle inativar" onclick="batchRemoveCats()" style="padding:7px 14px;font-size:12px">Remover Categorias</button>
+    <button type="button" class="btn-toggle ativar" onclick="batchCategorize()" style="padding:6px 12px;font-size:12px">Categorizar</button>
+    <button type="button" class="btn-toggle inativar" onclick="batchRemoveCats()" style="padding:6px 12px;font-size:12px">Remover Categorias</button>
   </template>
 
   <form id="batch-form" method="post" style="display:none">
     <input type="hidden" name="batch_ids" id="batch-ids">
     <input type="hidden" name="batch_action" id="batch-action">
+    <input type="hidden" name="batch_offset_minutes" id="batch-offset-minutes">
     <input type="hidden" name="batch_categorize" id="batch-cats">
     <input type="hidden" name="batch_remove_cats" id="batch-remove-cats">
   </form>
@@ -1653,6 +1979,51 @@ try {
 
 <script>
 (function() {
+  window.setRelativeSchedule = function(type, minutes) {
+    var hiddenInput = document.getElementById('input_' + type + '_offset');
+    var previewText = document.getElementById(type + '_preview_text');
+    var dtInput = document.getElementById('input_' + type + '_dt');
+
+    if (hiddenInput) hiddenInput.value = minutes;
+
+    if (dtInput) {
+      var targetDate = new Date(Date.now() + minutes * 60000);
+      var isoStr = new Date(targetDate.getTime() - (targetDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+      dtInput.value = isoStr;
+    }
+
+    var desc = minutes < 60 ? minutes + ' min' : (minutes < 1440 ? (minutes / 60) + 'h' : (minutes / 1440) + 'd');
+    if (previewText) previewText.innerText = '⚡ Agendado para daqui a ' + desc + ' (relativo ao relógio do servidor).';
+  };
+
+  window.syncDatetimeOffset = function(type) {
+    var dtInput = document.getElementById('input_' + type + '_dt');
+    var hiddenInput = document.getElementById('input_' + type + '_offset');
+    var previewText = document.getElementById(type + '_preview_text');
+
+    if (!dtInput || !dtInput.value) {
+      if (hiddenInput) hiddenInput.value = '';
+      if (previewText) previewText.innerText = '';
+      return;
+    }
+
+    var selectedTime = new Date(dtInput.value).getTime();
+    var nowTime = new Date().getTime();
+    var diffMinutes = Math.round((selectedTime - nowTime) / 60000);
+
+    if (diffMinutes <= 0) {
+      alert('Por favor, selecione uma data e hora no futuro.');
+      dtInput.value = '';
+      if (hiddenInput) hiddenInput.value = '';
+      if (previewText) previewText.innerText = '';
+      return;
+    }
+
+    if (hiddenInput) hiddenInput.value = diffMinutes;
+    var desc = diffMinutes < 60 ? diffMinutes + ' min' : (diffMinutes < 1440 ? Math.round(diffMinutes / 60) + 'h' : Math.round(diffMinutes / 1440) + 'd');
+    if (previewText) previewText.innerText = '⚡ Ajustado para daqui a ~' + desc + ' em relação ao relógio do servidor.';
+  };
+
   var manterData = document.getElementById('manter_data');
   var campoData = document.getElementById('campo_data');
   if (manterData && campoData) {
@@ -1695,12 +2066,32 @@ try {
     document.querySelectorAll('.batch-check:checked').forEach(function(cb) {
       ids.push(cb.value);
     });
-    if (!ids.length) return;
-    var msgs = { inativar: 'Inativar', ativar: 'Ativar', remover: 'Remover da lista de novas' };
+    if (!ids.length) return alert('Selecione ao menos uma vaga.');
+    var msgs = { inativar: 'Inativar', ativar: 'Ativar', remover: 'Remover da lista de novas', cancelar_agendamento: 'Cancelar agendamentos de' };
     var msg = msgs[action] || action;
     if (!confirm(msg + ' ' + ids.length + ' vaga(s)?')) return;
     document.getElementById('batch-ids').value = ids.join(',');
     document.getElementById('batch-action').value = action;
+    document.getElementById('batch-cats').value = '';
+    document.getElementById('batch-remove-cats').value = '';
+    document.getElementById('batch-form').submit();
+  };
+
+  window.batchSchedule = function(action) {
+    var ids = [];
+    document.querySelectorAll('.batch-check:checked').forEach(function(cb) {
+      ids.push(cb.value);
+    });
+    if (!ids.length) return alert('Selecione ao menos uma vaga.');
+    var sels = document.querySelectorAll('#batch-schedule-select');
+    var mins = '';
+    sels.forEach(function(s) { if (s.value) mins = s.value; });
+    if (!mins) return alert('Selecione o tempo de agendamento no menu.');
+    var actionTitle = action === 'agendar_ativar' ? 'ativar' : 'desativar';
+    if (!confirm('Agendar para ' + actionTitle + ' ' + ids.length + ' vaga(s) daqui a ' + mins + ' minutos (tempo do servidor)?')) return;
+    document.getElementById('batch-ids').value = ids.join(',');
+    document.getElementById('batch-action').value = action;
+    document.getElementById('batch-offset-minutes').value = mins;
     document.getElementById('batch-cats').value = '';
     document.getElementById('batch-remove-cats').value = '';
     document.getElementById('batch-form').submit();

@@ -60,6 +60,12 @@ function setupSchema(PDO $pdo): void
     if (!in_array('descricao_reescrita', $nomesColunas)) {
         $pdo->exec("ALTER TABLE vagas ADD COLUMN descricao_reescrita TEXT DEFAULT NULL AFTER resumo");
     }
+    if (!in_array('agendado_ativar_em', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN agendado_ativar_em DATETIME DEFAULT NULL AFTER revisada_em");
+    }
+    if (!in_array('agendado_desativar_em', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN agendado_desativar_em DATETIME DEFAULT NULL AFTER agendado_ativar_em");
+    }
 
     $indexExists = $pdo->query("SHOW INDEX FROM vagas WHERE Key_name = 'idx_busca'")->fetchAll();
     if (empty($indexExists)) {
@@ -554,4 +560,36 @@ function setupSchema(PDO $pdo): void
             SELECT c.id, :titulo_pt, :titulo_en, :conteudo_pt, :conteudo_en FROM categorias c WHERE c.slug = :slug");
         $stmt->execute([':slug' => $nc[0], ':titulo_pt' => $nc[1], ':titulo_en' => $nc[2], ':conteudo_pt' => $nc[3], ':conteudo_en' => $nc[4]]);
     }
+
+    processarAgendamentosVagas($pdo);
 }
+
+function processarAgendamentosVagas(PDO $pdo): int
+{
+    $total = 0;
+    try {
+        // Ativar vagas inativas agendadas cuja data/hora no servidor ja passou
+        $stmtAtivar = $pdo->prepare("
+            UPDATE vagas 
+            SET status = 'ativa', agendado_ativar_em = NULL 
+            WHERE status = 'inativa' 
+              AND agendado_ativar_em IS NOT NULL 
+              AND agendado_ativar_em <= NOW()
+        ");
+        $stmtAtivar->execute();
+        $total += $stmtAtivar->rowCount();
+
+        // Desativar vagas ativas agendadas cuja data/hora no servidor ja passou
+        $stmtDesativar = $pdo->prepare("
+            UPDATE vagas 
+            SET status = 'inativa', agendado_desativar_em = NULL 
+            WHERE status = 'ativa' 
+              AND agendado_desativar_em IS NOT NULL 
+              AND agendado_desativar_em <= NOW()
+        ");
+        $stmtDesativar->execute();
+        $total += $stmtDesativar->rowCount();
+    } catch (Exception $e) {}
+    return $total;
+}
+
