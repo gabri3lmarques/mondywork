@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/App/Autoloader.php';
 $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
 $config = require $configFile;
 
