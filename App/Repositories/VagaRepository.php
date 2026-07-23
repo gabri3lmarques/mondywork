@@ -63,27 +63,31 @@ class VagaRepository
     public function upsert(VagaDTO $vaga): int
     {
         $stmt = $this->pdo->prepare("
-            INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem)
-            VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, :status, :origem)
+            INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem, agendado_ativar_em, agendado_desativar_em)
+            VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, :status, :origem, :agendado_ativar, :agendado_desativar)
             ON DUPLICATE KEY UPDATE 
                 data_coleta = CURRENT_TIMESTAMP, 
                 modelo_trabalho = VALUES(modelo_trabalho), 
                 publicado_em = VALUES(publicado_em), 
-                origem = VALUES(origem)
+                origem = VALUES(origem),
+                agendado_ativar_em = VALUES(agendado_ativar_em),
+                agendado_desativar_em = VALUES(agendado_desativar_em)
         ");
 
         $stmt->execute([
-            ':id'        => $vaga->vagaIdExterno,
-            ':titulo'    => $vaga->titulo,
-            ':empresa'   => $vaga->empresa,
-            ':local'     => $vaga->localizacao,
-            ':modelo'    => $vaga->modeloTrabalho,
-            ':url'       => $vaga->urlVaga,
-            ':desc'      => $vaga->descricao,
-            ':resumo'    => $vaga->resumo,
-            ':publicado' => $vaga->publicadoEm,
-            ':status'    => $vaga->status,
-            ':origem'    => $vaga->origem,
+            ':id'               => $vaga->vagaIdExterno,
+            ':titulo'           => $vaga->titulo,
+            ':empresa'          => $vaga->empresa,
+            ':local'            => $vaga->localizacao,
+            ':modelo'           => $vaga->modeloTrabalho,
+            ':url'              => $vaga->urlVaga,
+            ':desc'             => $vaga->descricao,
+            ':resumo'           => $vaga->resumo,
+            ':publicado'        => $vaga->publicadoEm,
+            ':status'           => $vaga->status,
+            ':origem'           => $vaga->origem,
+            ':agendado_ativar'   => $vaga->agendadoAtivarEm,
+            ':agendado_desativar' => $vaga->agendadoDesativarEm,
         ]);
 
         $vagaId = (int)$this->pdo->lastInsertId();
@@ -98,13 +102,42 @@ class VagaRepository
 
     public function toggleStatus(int $id): bool
     {
-        $stmt = $this->pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
+        $stmt = $this->pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa'), agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
         return $stmt->execute([':id' => $id]);
     }
 
     public function updateStatus(int $id, string $status): bool
     {
-        $stmt = $this->pdo->prepare("UPDATE vagas SET status = :status WHERE id = :id");
+        $stmt = $this->pdo->prepare("UPDATE vagas SET status = :status, agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
         return $stmt->execute([':status' => $status, ':id' => $id]);
+    }
+
+    public function countAgendadas(): int
+    {
+        $stmt = $this->pdo->query("SELECT COUNT(*) FROM vagas WHERE agendado_ativar_em IS NOT NULL OR agendado_desativar_em IS NOT NULL");
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function findAgendadas(): array
+    {
+        $stmt = $this->pdo->query("
+            SELECT vagas.*,
+                   DATE_FORMAT(vagas.agendado_ativar_em, '%d/%m/%Y %H:%i') as agendado_ativar_fmt,
+                   DATE_FORMAT(vagas.agendado_desativar_em, '%d/%m/%Y %H:%i') as agendado_desativar_fmt
+            FROM vagas
+            WHERE vagas.agendado_ativar_em IS NOT NULL OR vagas.agendado_desativar_em IS NOT NULL
+            ORDER BY COALESCE(vagas.agendado_ativar_em, vagas.agendado_desativar_em) ASC
+        ");
+        
+        $results = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $results[] = VagaDTO::fromArray($row);
+        }
+        return $results;
+    }
+
+    public function processarAgendamentos(): int
+    {
+        return processarAgendamentosVagas($this->pdo);
     }
 }

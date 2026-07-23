@@ -16,41 +16,47 @@ class VagaDTO
         public ?string $publicadoEm = null,
         public string $status = 'inativa',
         public string $origem = 'nacional',
-        public ?int $id = null
+        public ?int $id = null,
+        public ?string $agendadoAtivarEm = null,
+        public ?string $agendadoDesativarEm = null
     ) {}
 
     public static function fromArray(array $data): self
     {
         return new self(
-            vagaIdExterno: $data['vaga_id_externo'] ?? $data['vagaIdExterno'] ?? '',
-            titulo:        $data['titulo'] ?? '',
-            empresa:       $data['empresa'] ?? '',
-            localizacao:   $data['localizacao'] ?? null,
-            modeloTrabalho:$data['modelo_trabalho'] ?? $data['modeloTrabalho'] ?? null,
-            urlVaga:       $data['url_vaga'] ?? $data['urlVaga'] ?? null,
-            descricao:     $data['descricao'] ?? '',
-            resumo:        $data['resumo'] ?? '',
-            publicadoEm:   $data['publicado_em'] ?? $data['publicadoEm'] ?? null,
-            status:        $data['status'] ?? 'inativa',
-            origem:        $data['origem'] ?? 'nacional',
-            id:            isset($data['id']) ? (int)$data['id'] : null
+            vagaIdExterno:     $data['vaga_id_externo'] ?? $data['vagaIdExterno'] ?? '',
+            titulo:            $data['titulo'] ?? '',
+            empresa:           $data['empresa'] ?? '',
+            localizacao:       $data['localizacao'] ?? null,
+            modeloTrabalho:    $data['modelo_trabalho'] ?? $data['modeloTrabalho'] ?? null,
+            urlVaga:           $data['url_vaga'] ?? $data['urlVaga'] ?? null,
+            descricao:         $data['descricao'] ?? '',
+            resumo:            $data['resumo'] ?? '',
+            publicadoEm:       $data['publicado_em'] ?? $data['publicadoEm'] ?? null,
+            status:            $data['status'] ?? 'inativa',
+            origem:            $data['origem'] ?? 'nacional',
+            id:                isset($data['id']) ? (int)$data['id'] : null,
+            agendadoAtivarEm:   $data['agendado_ativar_em'] ?? $data['agendadoAtivarEm'] ?? null,
+            agendadoDesativarEm:$data['agendado_desativar_em'] ?? $data['agendadoDesativarEm'] ?? null
         );
     }
 
     public function toArray(): array
     {
         return [
-            'vaga_id_externo' => $this->vagaIdExterno,
-            'titulo'          => $this->titulo,
-            'empresa'         => $this->empresa,
-            'localizacao'     => $this->localizacao,
-            'modelo_trabalho' => $this->modeloTrabalho,
-            'url_vaga'        => $this->urlVaga,
-            'descricao'       => $this->descricao,
-            'resumo'          => $this->resumo,
-            'publicado_em'    => $this->publicadoEm,
-            'status'          => $this->status,
-            'origem'          => $this->origem,
+            'vaga_id_externo'      => $this->vagaIdExterno,
+            'titulo'               => $this->titulo,
+            'empresa'              => $this->empresa,
+            'localizacao'          => $this->localizacao,
+            'modelo_trabalho'      => $this->modeloTrabalho,
+            'url_vaga'             => $this->urlVaga,
+            'descricao'            => $this->descricao,
+            'resumo'               => $this->resumo,
+            'publicado_em'         => $this->publicadoEm,
+            'status'               => $this->status,
+            'origem'               => $this->origem,
+            'agendado_ativar_em'   => $this->agendadoAtivarEm,
+            'agendado_desativar_em' => $this->agendadoDesativarEm,
         ];
     }
 }

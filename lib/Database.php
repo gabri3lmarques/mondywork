@@ -568,16 +568,26 @@ function processarAgendamentosVagas(PDO $pdo): int
 {
     $total = 0;
     try {
-        // Ativar vagas inativas agendadas cuja data/hora no servidor ja passou
+        // Ativar vagas inativas agendadas cuja data/hora no servidor ja passou (e atualizar data de publicacao)
         $stmtAtivar = $pdo->prepare("
             UPDATE vagas 
-            SET status = 'ativa', agendado_ativar_em = NULL 
+            SET status = 'ativa', publicado_em = NOW(), agendado_ativar_em = NULL 
             WHERE status = 'inativa' 
               AND agendado_ativar_em IS NOT NULL 
               AND agendado_ativar_em <= NOW()
         ");
         $stmtAtivar->execute();
         $total += $stmtAtivar->rowCount();
+
+        // Limpar agendamentos de ativacao expirados para vagas que ja foram ativadas manualmente
+        $stmtLimparAtivarOrfao = $pdo->prepare("
+            UPDATE vagas 
+            SET agendado_ativar_em = NULL 
+            WHERE status = 'ativa' 
+              AND agendado_ativar_em IS NOT NULL 
+              AND agendado_ativar_em <= NOW()
+        ");
+        $stmtLimparAtivarOrfao->execute();
 
         // Desativar vagas ativas agendadas cuja data/hora no servidor ja passou
         $stmtDesativar = $pdo->prepare("
@@ -589,6 +599,16 @@ function processarAgendamentosVagas(PDO $pdo): int
         ");
         $stmtDesativar->execute();
         $total += $stmtDesativar->rowCount();
+
+        // Limpar agendamentos de desativacao expirados para vagas que ja foram desativadas manualmente
+        $stmtLimparDesativarOrfao = $pdo->prepare("
+            UPDATE vagas 
+            SET agendado_desativar_em = NULL 
+            WHERE status = 'inativa' 
+              AND agendado_desativar_em IS NOT NULL 
+              AND agendado_desativar_em <= NOW()
+        ");
+        $stmtLimparDesativarOrfao->execute();
     } catch (Exception $e) {}
     return $total;
 }

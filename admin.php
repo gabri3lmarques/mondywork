@@ -77,18 +77,36 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             } elseif ($_POST['batch_action'] === 'cancelar_agendamento') {
                 $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id IN ($placeholders)");
                 $stmt->execute($ids);
-            } elseif ($_POST['batch_action'] === 'agendar_ativar' && !empty($_POST['batch_offset_minutes'])) {
-                $mins = max(1, (int)$_POST['batch_offset_minutes']);
-                $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
-                $stmt->execute(array_merge([$mins], $ids));
-            } elseif ($_POST['batch_action'] === 'agendar_desativar' && !empty($_POST['batch_offset_minutes'])) {
-                $mins = max(1, (int)$_POST['batch_offset_minutes']);
-                $stmt = $pdo->prepare("UPDATE vagas SET agendado_desativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
-                $stmt->execute(array_merge([$mins], $ids));
+            } elseif ($_POST['batch_action'] === 'agendar_ativar' && (!empty($_POST['batch_schedule_datetime']) || !empty($_POST['batch_offset_minutes']))) {
+                if (!empty($_POST['batch_schedule_datetime'])) {
+                    $ts = strtotime($_POST['batch_schedule_datetime']);
+                    if ($ts) {
+                        $dtStr = date('Y-m-d H:i:s', $ts);
+                        $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = ? WHERE id IN ($placeholders)");
+                        $stmt->execute(array_merge([$dtStr], $ids));
+                    }
+                } else {
+                    $mins = max(1, (int)$_POST['batch_offset_minutes']);
+                    $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
+                    $stmt->execute(array_merge([$mins], $ids));
+                }
+            } elseif ($_POST['batch_action'] === 'agendar_desativar' && (!empty($_POST['batch_schedule_datetime']) || !empty($_POST['batch_offset_minutes']))) {
+                if (!empty($_POST['batch_schedule_datetime'])) {
+                    $ts = strtotime($_POST['batch_schedule_datetime']);
+                    if ($ts) {
+                        $dtStr = date('Y-m-d H:i:s', $ts);
+                        $stmt = $pdo->prepare("UPDATE vagas SET agendado_desativar_em = ? WHERE id IN ($placeholders)");
+                        $stmt->execute(array_merge([$dtStr], $ids));
+                    }
+                } else {
+                    $mins = max(1, (int)$_POST['batch_offset_minutes']);
+                    $stmt = $pdo->prepare("UPDATE vagas SET agendado_desativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
+                    $stmt->execute(array_merge([$mins], $ids));
+                }
             } else {
                 $targetStatus = $_POST['batch_action'] === 'ativar' ? 'ativa' : 'inativa';
-                $stmt = $pdo->prepare("UPDATE vagas SET status = ? WHERE id IN ($placeholders)");
-                $stmt->execute(array_merge([$targetStatus], $ids));
+                $stmt = $pdo->prepare("UPDATE vagas SET status = ?, publicado_em = IF(? = 'ativa', NOW(), publicado_em), agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id IN ($placeholders)");
+                $stmt->execute(array_merge([$targetStatus, $targetStatus], $ids));
             }
         }
     } catch (Exception $e) {}
@@ -153,7 +171,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
             $config['pass'],
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
-        $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa') WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa'), publicado_em = IF(status = 'inativa', NOW(), publicado_em), agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
     } catch (Exception $e) {}
     header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
@@ -169,7 +187,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['execut
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
         $vId = (int)$_POST['executar_agendamento_id'];
-        $stmt = $pdo->prepare("UPDATE vagas SET status = CASE WHEN agendado_ativar_em IS NOT NULL THEN 'ativa' WHEN agendado_desativar_em IS NOT NULL THEN 'inativa' ELSE status END, agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE vagas SET publicado_em = IF(agendado_ativar_em IS NOT NULL, NOW(), publicado_em), status = CASE WHEN agendado_ativar_em IS NOT NULL THEN 'ativa' WHEN agendado_desativar_em IS NOT NULL THEN 'inativa' ELSE status END, agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
         $stmt->execute([':id' => $vId]);
     } catch (Exception $e) {}
     header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
@@ -1945,17 +1963,7 @@ try {
     <button type="button" class="btn-toggle ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('remover')">Remover Selecionadas</button>
     <span style="border-left:1px solid #ccc;height:24px;margin:0 4px"></span>
-    <select id="batch-schedule-select" style="font-size:12px;padding:4px 8px;border:1px solid #ccc;border-radius:4px">
-      <option value="">⏱️ Agendar em lote...</option>
-      <option value="30">Daqui a 30 minutos</option>
-      <option value="60">Daqui a 1 hora</option>
-      <option value="120">Daqui a 2 horas</option>
-      <option value="360">Daqui a 6 horas</option>
-      <option value="720">Daqui a 12 horas</option>
-      <option value="1440">Daqui a 24h (1 dia)</option>
-      <option value="2880">Daqui a 2 dias</option>
-      <option value="10080">Daqui a 7 dias</option>
-    </select>
+    <input type="datetime-local" class="batch-schedule-dt" style="font-size:12px;padding:4px 8px;border:1px solid #ccc;border-radius:4px;color:#0b1c30;background:#fff" title="Escolha a data e a hora do agendamento">
     <button type="button" class="btn-toggle ativar" onclick="batchSchedule('agendar_ativar')" style="padding:6px 12px;font-size:12px">🚀 Agendar Ativação</button>
     <button type="button" class="btn-toggle inativar" onclick="batchSchedule('agendar_desativar')" style="padding:6px 12px;font-size:12px">🛑 Agendar Desativação</button>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('cancelar_agendamento')" style="padding:6px 12px;font-size:12px;color:#dc2626;border-color:#fca5a5">❌ Cancelar Agendamento</button>
@@ -1975,6 +1983,7 @@ try {
     <input type="hidden" name="batch_ids" id="batch-ids">
     <input type="hidden" name="batch_action" id="batch-action">
     <input type="hidden" name="batch_offset_minutes" id="batch-offset-minutes">
+    <input type="hidden" name="batch_schedule_datetime" id="batch-schedule-datetime">
     <input type="hidden" name="batch_categorize" id="batch-cats">
     <input type="hidden" name="batch_remove_cats" id="batch-remove-cats">
   </form>
@@ -2086,15 +2095,17 @@ try {
       ids.push(cb.value);
     });
     if (!ids.length) return alert('Selecione ao menos uma vaga.');
-    var sels = document.querySelectorAll('#batch-schedule-select');
-    var mins = '';
-    sels.forEach(function(s) { if (s.value) mins = s.value; });
-    if (!mins) return alert('Selecione o tempo de agendamento no menu.');
+    var dtInputs = document.querySelectorAll('.batch-schedule-dt');
+    var dtVal = '';
+    dtInputs.forEach(function(input) { if (input.value) dtVal = input.value; });
+    if (!dtVal) return alert('Por favor, selecione a data e a hora para o agendamento.');
+    var formattedDate = new Date(dtVal).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
     var actionTitle = action === 'agendar_ativar' ? 'ativar' : 'desativar';
-    if (!confirm('Agendar para ' + actionTitle + ' ' + ids.length + ' vaga(s) daqui a ' + mins + ' minutos (tempo do servidor)?')) return;
+    if (!confirm('Agendar para ' + actionTitle + ' ' + ids.length + ' vaga(s) em ' + formattedDate + '?')) return;
     document.getElementById('batch-ids').value = ids.join(',');
     document.getElementById('batch-action').value = action;
-    document.getElementById('batch-offset-minutes').value = mins;
+    document.getElementById('batch-schedule-datetime').value = dtVal;
+    document.getElementById('batch-offset-minutes').value = '';
     document.getElementById('batch-cats').value = '';
     document.getElementById('batch-remove-cats').value = '';
     document.getElementById('batch-form').submit();
