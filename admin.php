@@ -50,6 +50,15 @@ $redirectTab = isset($_GET['tab']) && $_GET['tab'] !== 'lista' ? '&tab=' . urlen
 $redirectNs = isset($_GET['ns']) && in_array($_GET['ns'], ['ativa', 'inativa']) ? '&ns=' . urlencode($_GET['ns']) : '';
 $redirectMostrar = isset($_GET['mostrar']) && $_GET['mostrar'] === 'todas' ? '&mostrar=todas' : '';
 
+$origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
+$statusFilter = isset($_GET['status']) && in_array($_GET['status'], ['ativa', 'inativa']) ? $_GET['status'] : '';
+$searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
+
+$qParam = $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '';
+$origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : '';
+$statusParam = $statusFilter !== '' ? '&status=' . urlencode($statusFilter) : '';
+
+
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && !empty($_POST['batch_action'])) {
     try {
         $pdo = new PDO(
@@ -490,18 +499,11 @@ if ($isLoggedIn && $tab === 'categorias') {
     }
 }
 
-$origemFilter = isset($_GET['origem']) && in_array($_GET['origem'], ['nacional', 'exterior']) ? $_GET['origem'] : '';
-$statusFilter = isset($_GET['status']) && in_array($_GET['status'], ['ativa', 'inativa']) ? $_GET['status'] : '';
-$searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
-
 $catFilter = isset($_GET['categorias']) && is_array($_GET['categorias']) ? $_GET['categorias'] : [];
 $semCategoria = in_array('sem-categoria', $catFilter);
 $catSlugs = array_values(array_filter($catFilter, fn($s) => $s !== 'sem-categoria'));
 
 $tabParam = $tab !== 'lista' ? '&tab=' . $tab : '';
-$qParam = $searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '';
-$origemParam = $origemFilter !== '' ? '&origem=' . urlencode($origemFilter) : '';
-$statusParam = $statusFilter !== '' ? '&status=' . urlencode($statusFilter) : '';
 $categoriasParam = '';
 foreach ($catFilter as $slug) {
     $categoriasParam .= '&categorias[]=' . urlencode($slug);
