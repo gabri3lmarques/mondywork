@@ -1020,6 +1020,15 @@ try {
     <div>
       <h1>Editar Vaga</h1>
       <span>ID: <?php echo (int)$vagaEditar['id'] ?> — <?php echo htmlspecialchars($vagaEditar['vaga_id_externo'], ENT_QUOTES, 'UTF-8') ?></span>
+      <?php if (!empty($vagaEditar['vaga_id_externo'])): 
+        $linkVagaPath = ($vagaEditar['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($vagaEditar['vaga_id_externo']);
+      ?>
+        <div style="margin-top:6px;font-size:13px;color:#475569;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span><strong>Link da vaga:</strong> <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a"><?php echo htmlspecialchars($linkVagaPath, ENT_QUOTES, 'UTF-8') ?></code></span>
+          <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkVagaPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:3px 10px;background:#ffffff;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;color:#334155">📋 Copiar Link</button>
+          <a href="<?php echo $linkVagaPath ?>" target="_blank" style="font-size:12px;color:#4b41e1;font-weight:600;text-decoration:none">👁️ Abrir / Pré-visualizar</a>
+        </div>
+      <?php endif; ?>
     </div>
     <a href="admin.php<?php echo $origemParam . $statusParam . $qParam ?>" class="btn-clear" style="font-size:13px">&larr; Voltar</a>
   </div>
@@ -1218,6 +1227,21 @@ try {
           <p style="font-size:14px;line-height:20px;color:#45464d;margin-top:12px"><?php echo htmlspecialchars(mb_substr($ag['resumo'], 0, 200), ENT_QUOTES, 'UTF-8') ?></p>
         <?php endif; ?>
 
+        <?php if (!empty($ag['vaga_id_externo'])): 
+          $futuroUrlPath = ($ag['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($ag['vaga_id_externo']);
+        ?>
+          <div style="margin-top:14px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div style="font-size:13px;color:#475569;word-break:break-all">
+              <strong style="color:#1e293b">🔗 Link Futuro da Vaga:</strong>
+              <code style="background:#e2e8f0;padding:3px 8px;border-radius:4px;font-size:12px;color:#0f172a;margin-left:4px"><?php echo htmlspecialchars($futuroUrlPath, ENT_QUOTES, 'UTF-8') ?></code>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $futuroUrlPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link Futuro', 2000)" style="font-size:12px;font-weight:600;padding:6px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;color:#334155">📋 Copiar Link Futuro</button>
+              <a href="<?php echo $futuroUrlPath ?>" target="_blank" style="font-size:12px;font-weight:600;padding:6px 12px;background:#4b41e1;color:#fff;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center">👁️ Pré-visualizar (Admin)</a>
+            </div>
+          </div>
+        <?php endif; ?>
+
         <div class="admin-card-actions" style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <form method="post" style="margin:0">
             <input type="hidden" name="executar_agendamento_id" value="<?php echo (int)$ag['id'] ?>">
@@ -1381,8 +1405,13 @@ try {
             <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
             <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
           </form>
-          <?php if ($v['vaga_id_externo']): ?>
-            <a href="/#<?php echo urlencode($v['vaga_id_externo']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver no site</a>
+          <?php if (!empty($v['vaga_id_externo'])): 
+            $linkNovasPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
+          ?>
+            <a href="<?php echo $linkNovasPath ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">
+              <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar Link' ?>
+            </a>
+            <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkNovasPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:7px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:0.5rem;cursor:pointer;color:#334155">📋 Copiar Link</button>
           <?php endif; ?>
           <form method="post" style="margin:0" onsubmit="return confirm('Remover esta vaga da lista de novas?')">
             <input type="hidden" name="remover_vaga_id" value="<?php echo (int)$v['id'] ?>">
@@ -1691,8 +1720,13 @@ try {
               <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
               <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
             </form>
-            <?php if ($v['vaga_id_externo']): ?>
-              <a href="/#<?php echo urlencode($v['vaga_id_externo']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver no site</a>
+            <?php if (!empty($v['vaga_id_externo'])): 
+              $linkCatPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
+            ?>
+              <a href="<?php echo $linkCatPath ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">
+                <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar Link' ?>
+              </a>
+              <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkCatPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:7px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:0.5rem;cursor:pointer;color:#334155">📋 Copiar Link</button>
             <?php endif; ?>
           </div>
         </div>
@@ -1923,8 +1957,13 @@ try {
               <button type="submit" class="btn-toggle ativar" style="font-size:12px;padding:6px 12px">⚡ Executar Agendamento</button>
             </form>
           <?php endif; ?>
-          <?php if ($v['vaga_id_externo']): ?>
-            <a href="/#<?php echo urlencode($v['vaga_id_externo']) ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">Ver no site</a>
+          <?php if (!empty($v['vaga_id_externo'])): 
+            $linkListPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
+          ?>
+            <a href="<?php echo $linkListPath ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">
+              <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar Link' ?>
+            </a>
+            <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkListPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:7px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:0.5rem;cursor:pointer;color:#334155">📋 Copiar Link</button>
           <?php endif; ?>
         </div>
       </div>

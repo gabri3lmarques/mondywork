@@ -1,4 +1,9 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$isAdmin = !empty($_SESSION['admin_logged_in']);
+
 $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
 $config = require $configFile;
 
@@ -18,7 +23,11 @@ try {
     require_once __DIR__ . '/lib/Database.php';
     setupSchema($pdo);
 
-    $stmt = $pdo->prepare("SELECT * FROM vagas WHERE vaga_id_externo = :id AND status = 'ativa' LIMIT 1");
+    if ($isAdmin) {
+        $stmt = $pdo->prepare("SELECT * FROM vagas WHERE vaga_id_externo = :id LIMIT 1");
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM vagas WHERE vaga_id_externo = :id AND status = 'ativa' LIMIT 1");
+    }
     $stmt->execute([':id' => $id]);
     $vaga = $stmt->fetch(PDO::FETCH_ASSOC);
     $isExterior = ($vaga ? $vaga['origem'] : 'nacional') === 'exterior';
@@ -215,6 +224,15 @@ gtag('config', 'G-RPQ9FFFNP1');
 </script>
 </head>
 <body>
+
+<?php if ($vaga && $vaga['status'] !== 'ativa' && $isAdmin): ?>
+<div style="background:#fff7ed;color:#9a3412;border-bottom:1px solid #ffedd5;padding:12px 20px;text-align:center;font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:relative;z-index:9999">
+  <span>⚠️ <strong>Modo Pré-visualização Admin:</strong> Esta vaga atualmente está <strong><?= htmlspecialchars($vaga['status'], ENT_QUOTES, 'UTF-8') ?></strong> (oculta do site público).</span>
+  <?php if (!empty($vaga['agendado_ativar_em'])): ?>
+    <span style="background:#ea580c;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600">🚀 Ativação agendada para: <?= date('d/m/Y H:i', strtotime($vaga['agendado_ativar_em'])) ?></span>
+  <?php endif; ?>
+</div>
+<?php endif; ?>
 
 <nav class="nav">
   <div class="nav-inner">
