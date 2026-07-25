@@ -62,12 +62,7 @@ $statusParam = $statusFilter !== '' ? '&status=' . urlencode($statusFilter) : ''
 
 if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_ids']) && !empty($_POST['batch_action'])) {
     try {
-        $pdo = new PDO(
-            "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
-            $config['user'],
-            $config['pass'],
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
+        $pdo = conectarBanco($config);
         $ids = array_map('intval', explode(',', $_POST['batch_ids']));
         if (!empty($ids)) {
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -82,12 +77,12 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
                     $ts = strtotime($_POST['batch_schedule_datetime']);
                     if ($ts) {
                         $dtStr = date('Y-m-d H:i:s', $ts);
-                        $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = ? WHERE id IN ($placeholders)");
+                        $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa', agendado_ativar_em = ? WHERE id IN ($placeholders)");
                         $stmt->execute(array_merge([$dtStr], $ids));
                     }
                 } else {
                     $mins = max(1, (int)$_POST['batch_offset_minutes']);
-                    $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
+                    $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa', agendado_ativar_em = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id IN ($placeholders)");
                     $stmt->execute(array_merge([$mins], $ids));
                 }
             } elseif ($_POST['batch_action'] === 'agendar_desativar' && (!empty($_POST['batch_schedule_datetime']) || !empty($_POST['batch_offset_minutes']))) {
@@ -361,10 +356,12 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
             $ativarOffset = isset($_POST['agendado_ativar_offset']) && $_POST['agendado_ativar_offset'] !== '' ? (int)$_POST['agendado_ativar_offset'] : null;
             if ($ativarOffset !== null && $ativarOffset > 0) {
                 $setParts[] = "agendado_ativar_em = DATE_ADD(NOW(), INTERVAL {$ativarOffset} MINUTE)";
+                $params[':status'] = 'inativa';
             } elseif (!empty($_POST['agendado_ativar_em'])) {
                 $ts = strtotime($_POST['agendado_ativar_em']);
                 if ($ts) {
                     $setParts[] = 'agendado_ativar_em = ' . $pdo->quote(date('Y-m-d H:i:s', $ts));
+                    $params[':status'] = 'inativa';
                 }
             }
         }
@@ -685,14 +682,10 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 <?php else:
 
 try {
-    $pdo = new PDO(
-        "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
-        $config['user'],
-        $config['pass'],
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    $pdo = conectarBanco($config);
 
     setupSchema($pdo);
+    processarAgendamentosVagas($pdo);
 
     $whereClauses = [];
     if ($origemFilter !== '') $whereClauses[] = "origem = " . $pdo->quote($origemFilter);

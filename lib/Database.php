@@ -1,7 +1,10 @@
 <?php
 
+date_default_timezone_set('America/Sao_Paulo');
+
 function conectarBanco(array $dbConfig): PDO
 {
+    date_default_timezone_set('America/Sao_Paulo');
     $pdo = new PDO(
         "mysql:host={$dbConfig['host']};dbname={$dbConfig['db']};charset=utf8mb4",
         $dbConfig['user'],
@@ -9,6 +12,9 @@ function conectarBanco(array $dbConfig): PDO
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
     $pdo->exec("SET SESSION wait_timeout = 28800, interactive_timeout = 28800");
+    try {
+        $pdo->exec("SET time_zone = '-03:00'");
+    } catch (Exception $e) {}
     return $pdo;
 }
 

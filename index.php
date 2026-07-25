@@ -4,14 +4,10 @@ $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.lo
 $config = require $configFile;
 
 try {
-    $pdo = new PDO(
-        "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
-        $config['user'],
-        $config['pass'],
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
     require_once __DIR__ . '/lib/Database.php';
+    $pdo = conectarBanco($config);
     setupSchema($pdo);
+    processarAgendamentosVagas($pdo);
 
     $categoriaFiltro = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
     $page = max(1, (int)($_GET['page'] ?? 1));
