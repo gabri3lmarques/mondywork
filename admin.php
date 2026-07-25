@@ -693,7 +693,12 @@ try {
     if ($searchQuery !== '') {
         $escaped = str_replace(['%', '_'], ['\%', '\_'], $searchQuery);
         $like = $pdo->quote('%' . $escaped . '%');
-        $whereClauses[] = "(titulo LIKE $like OR empresa LIKE $like OR localizacao LIKE $like)";
+        if (is_numeric($searchQuery)) {
+            $idVal = (int)$searchQuery;
+            $whereClauses[] = "(vagas.id = $idVal OR vagas.vaga_id_externo LIKE $like OR vagas.titulo LIKE $like OR vagas.empresa LIKE $like OR vagas.localizacao LIKE $like)";
+        } else {
+            $whereClauses[] = "(vagas.id LIKE $like OR vagas.vaga_id_externo LIKE $like OR vagas.titulo LIKE $like OR vagas.empresa LIKE $like OR vagas.localizacao LIKE $like)";
+        }
     }
     if (!empty($catSlugs)) {
         $quoted = array_map(fn($s) => $pdo->quote($s), $catSlugs);
@@ -827,7 +832,12 @@ try {
             if ($searchQuery !== '') {
                 $escaped = str_replace(['%', '_'], ['\%', '\_'], $searchQuery);
                 $like = $pdo->quote('%' . $escaped . '%');
-                $whereClausesCat[] = "(vagas.titulo LIKE $like OR vagas.empresa LIKE $like OR vagas.localizacao LIKE $like)";
+                if (is_numeric($searchQuery)) {
+                    $idVal = (int)$searchQuery;
+                    $whereClausesCat[] = "(vagas.id = $idVal OR vagas.vaga_id_externo LIKE $like OR vagas.titulo LIKE $like OR vagas.empresa LIKE $like OR vagas.localizacao LIKE $like)";
+                } else {
+                    $whereClausesCat[] = "(vagas.id LIKE $like OR vagas.vaga_id_externo LIKE $like OR vagas.titulo LIKE $like OR vagas.empresa LIKE $like OR vagas.localizacao LIKE $like)";
+                }
             }
 
             $whereCatSql = " WHERE " . implode(" AND ", $whereClausesCat);
@@ -1196,6 +1206,7 @@ try {
           </div>
         </div>
         <div class="admin-card-meta" style="margin-top:8px">
+          <span style="background:#e2e8f0;color:#0f172a;font-weight:700;padding:2px 8px;border-radius:4px;font-size:12px;font-family:monospace">ID: #<?php echo (int)$ag['id'] ?></span>
           <span class="<?php echo $ag['origem'] === 'exterior' ? 'badge-origem exterior' : 'badge-origem' ?>"><?php echo $ag['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span>
           <span class="badge-status <?php echo $ag['status'] ?>"><?php echo $ag['status'] === 'ativa' ? 'Ativa no site' : 'Inativa no site' ?></span>
 
@@ -1378,6 +1389,7 @@ try {
           </div>
         </div>
         <div class="admin-card-meta">
+          <span style="background:#e2e8f0;color:#0f172a;font-weight:700;padding:2px 8px;border-radius:4px;font-size:12px;font-family:monospace">ID: #<?php echo (int)$v['id'] ?></span>
           <span class="<?php echo $v['origem'] === 'exterior' ? 'badge-origem exterior' : 'badge-origem' ?>"><?php echo $v['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span>
           <?php if ($v['modelo_trabalho']): ?>
             <span><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
@@ -1664,7 +1676,7 @@ try {
     <form class="admin-search" method="get">
       <input type="hidden" name="tab" value="por-categorias">
       <input type="hidden" name="cat" value="<?php echo htmlspecialchars($catSelected, ENT_QUOTES, 'UTF-8') ?>">
-      <input type="search" name="q" class="admin-search-input" placeholder="Filtrar por título, empresa ou localização nesta categoria..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>">
+      <input type="search" name="q" class="admin-search-input" placeholder="Filtrar por ID, título, empresa ou localização nesta categoria..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>">
       <button type="submit" class="btn-search">Buscar</button>
       <?php if ($searchQuery !== ''): ?>
         <a href="admin.php?tab=por-categorias&cat=<?php echo urlencode($catSelected) ?>" class="btn-clear">Limpar busca</a>
@@ -1688,6 +1700,7 @@ try {
             </div>
           </div>
           <div class="admin-card-meta">
+            <span style="background:#e2e8f0;color:#0f172a;font-weight:700;padding:2px 8px;border-radius:4px;font-size:12px;font-family:monospace">ID: #<?php echo (int)$v['id'] ?></span>
             <span class="<?php echo $v['origem'] === 'exterior' ? 'badge-origem exterior' : 'badge-origem' ?>"><?php echo $v['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span>
             <?php if ($v['modelo_trabalho']): ?>
               <span class="badge badge-<?php echo htmlspecialchars(strtolower($v['modelo_trabalho']), ENT_QUOTES, 'UTF-8') === 'remote' ? 'remote' : (strtolower($v['modelo_trabalho']) === 'hybrid' ? 'hybrid' : 'onsite') ?>"><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
@@ -1880,7 +1893,7 @@ try {
   </details>
 
   <form class="admin-search" method="get">
-    <input type="search" name="q" class="admin-search-input" placeholder="Buscar por título, empresa ou local..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" autofocus>
+    <input type="search" name="q" class="admin-search-input" placeholder="Buscar por ID, título, empresa ou local..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" autofocus>
     <?php if ($origemFilter !== ''): ?>
       <input type="hidden" name="origem" value="<?php echo htmlspecialchars($origemFilter, ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
@@ -1913,6 +1926,7 @@ try {
           </div>
         </div>
         <div class="admin-card-meta">
+          <span style="background:#e2e8f0;color:#0f172a;font-weight:700;padding:2px 8px;border-radius:4px;font-size:12px;font-family:monospace">ID: #<?php echo (int)$v['id'] ?></span>
           <span class="<?php echo $v['origem'] === 'exterior' ? 'badge-origem exterior' : 'badge-origem' ?>"><?php echo $v['origem'] === 'exterior' ? 'Exterior' : 'Brasil' ?></span>
           <?php if ($v['modelo_trabalho']): ?>
             <span class="badge badge-<?php echo htmlspecialchars(strtolower($v['modelo_trabalho']), ENT_QUOTES, 'UTF-8') === 'remote' ? 'remote' : (strtolower($v['modelo_trabalho']) === 'hybrid' ? 'hybrid' : 'onsite') ?>"><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
