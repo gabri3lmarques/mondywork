@@ -74,17 +74,17 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
                 </div>
             </div>
 
-                    <label for="area">Área da Vaga</label>
-                    <select id="area" name="area">
-                        <option value="desenvolvimento">Desenvolvimento / Engenharia</option>
-                        <option value="dados">Dados & IA</option>
-                        <option value="design">Design & UX</option>
-                        <option value="produto">Produto & Projeto</option>
-                        <option value="marketing">Marketing & Conteúdo</option>
-                        <option value="financas">Finanças & Administração</option>
-                        <option value="geral">Outra Área</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="area">Área da Vaga</label>
+                <select id="area" name="area">
+                    <option value="desenvolvimento">Desenvolvimento / Engenharia</option>
+                    <option value="dados">Dados & IA</option>
+                    <option value="design">Design & UX</option>
+                    <option value="produto">Produto & Projeto</option>
+                    <option value="marketing">Marketing & Conteúdo</option>
+                    <option value="financas">Finanças & Administração</option>
+                    <option value="geral">Outra Área</option>
+                </select>
             </div>
 
             <div class="form-grid-2">
@@ -246,6 +246,7 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
                 // Exibe modal de Pix
                 stepPayment.style.display = 'block';
                 stepSuccess.style.display = 'none';
+                pixModal.classList.remove('hidden');
                 pixModal.style.display = 'flex';
 
                 startTimer(30 * 60);
@@ -278,6 +279,7 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
 
         // Fechar modal
         closePixModal.addEventListener('click', function() {
+            pixModal.classList.add('hidden');
             pixModal.style.display = 'none';
             stopPolling();
         });
