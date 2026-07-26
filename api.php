@@ -144,10 +144,11 @@ try {
             try {
                 $resultado = $vagaPremiumService->criarVagaEGerarPix($input);
                 echo json_encode(array_merge(['success' => true], $resultado));
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'error' => $e->getMessage()]);
             }
+
             return;
         }
 
