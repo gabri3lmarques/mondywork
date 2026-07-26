@@ -221,11 +221,19 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
+
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Resposta do servidor: ' + text.substring(0, 150));
+                }
 
                 if (!data.success) {
                     throw new Error(data.error || 'Erro ao gerar Pix');
                 }
+
 
                 currentVagaId = data.vaga_id;
                 currentOrderId = data.order_id;

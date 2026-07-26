@@ -42,14 +42,32 @@ class PagBankService
         $expirationDate = date('Y-m-d\TH:i:sP', strtotime("+{$this->validadePixMinutos} minutes"));
         $amountCents = (int)round($this->precoVaga * 100);
 
-        $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
-        $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-        $notificationUrl = "{$scheme}://{$serverName}/api.php?action=pagbank_webhook";
-
         $cpfCnpjClean = preg_replace('/\D/', '', $cpfCnpj);
+        if (strlen($cpfCnpjClean) !== 11 && strlen($cpfCnpjClean) !== 14) {
+            throw new Exception("O CPF (11 dígitos) ou CNPJ (14 dígitos) é obrigatório para emissão do Pix pelo PagBank.");
+        }
+
+        $customerName = trim($empresa);
+        if (strpos($customerName, ' ') === false) {
+            $customerName .= ' Recrutamento';
+        }
+        $customerName = mb_substr($customerName, 0, 30);
+
+        $host = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
+        if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) {
+            $notificationUrl = "https://mondywork.com.br/api.php?action=pagbank_webhook";
+        } else {
+            $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+            $notificationUrl = "{$scheme}://{$host}/api.php?action=pagbank_webhook";
+        }
 
         $payload = [
             'reference_id' => $referenceId,
+            'customer'     => [
+                'name'   => $customerName,
+                'email'  => trim($emailRecrutador),
+                'tax_id' => $cpfCnpjClean
+            ],
             'items' => [
                 [
                     'name'        => mb_substr("Anúncio Vaga Premium: {$tituloVaga}", 0, 100),
@@ -70,14 +88,6 @@ class PagBankService
             ]
         ];
 
-        // PagBank exige tax_id (CPF/CNPJ) se o objeto customer for enviado
-        if (!empty($cpfCnpjClean)) {
-            $payload['customer'] = [
-                'name'   => mb_substr($empresa, 0, 30),
-                'email'  => $emailRecrutador,
-                'tax_id' => $cpfCnpjClean
-            ];
-        }
 
         $response = $this->request('POST', '/orders', $payload);
 
