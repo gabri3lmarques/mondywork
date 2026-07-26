@@ -9,12 +9,14 @@ class Config
     public static function get(?string $key = null, mixed $default = null): mixed
     {
         if (self::$config === null) {
-            $rootDir = dirname(__DIR__, 2);
-            $localFile = $rootDir . '/config.local.php';
-            $prodFile  = $rootDir . '/config.php';
+            $rootDir    = dirname(__DIR__, 2);
+            $prodFile   = $rootDir . '/config.php';
+            $localFile  = $rootDir . '/config.local.php';
+            $prodConfig = file_exists($prodFile) ? (require $prodFile) : [];
+            $localConfig = file_exists($localFile) ? (require $localFile) : [];
+            self::$config = array_replace_recursive($prodConfig, $localConfig);
 
-            $file = file_exists($localFile) ? $localFile : $prodFile;
-            self::$config = file_exists($file) ? require $file : [];
+
         }
 
         if ($key === null) {

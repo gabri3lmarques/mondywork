@@ -644,7 +644,8 @@ function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                 $modeloTrabalho = $mapa[$modelos[0]] ?? $modelos[0];
             }
 
-            $urlVaga = "https://portaldetalentos.senior.com.br/vacancy/" . $vaga['vacancy']['id'];
+            $subdomain = !empty($vaga['company']['tenant']) ? strtolower($vaga['company']['tenant']) : strtolower($tenant);
+            $urlVaga = "https://{$subdomain}.portaldetalentos.senior.com.br/vacancy/" . $vaga['vacancy']['id'];
 
             upsertVaga($pdo, [
                 'vaga_id_externo' => $vagaId,

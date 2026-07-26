@@ -2,8 +2,10 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/App/Autoloader.php';
 
-$configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
-$config = require $configFile;
+$prodConfig  = file_exists(__DIR__ . '/config.php') ? (require __DIR__ . '/config.php') : [];
+$localConfig = file_exists(__DIR__ . '/config.local.php') ? (require __DIR__ . '/config.local.php') : [];
+$config      = array_replace_recursive($prodConfig, $localConfig);
+
 
 $page  = isset($_GET['page'])  ? max(1, (int)$_GET['page'])  : 1;
 $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 10;
@@ -132,7 +134,62 @@ try {
     require_once __DIR__ . '/lib/Database.php';
     setupSchema($pdo);
 
-    $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, descricao, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em, area";
+    $action = $_REQUEST['action'] ?? '';
+
+    if ($action !== '') {
+        $vagaPremiumService = new \App\Services\VagaPremiumService($pdo);
+
+        if ($action === 'criar_vaga_premium') {
+            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            try {
+                $resultado = $vagaPremiumService->criarVagaEGerarPix($input);
+                echo json_encode(array_merge(['success' => true], $resultado));
+            } catch (Exception $e) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            }
+            return;
+        }
+
+        if ($action === 'verificar_pagamento') {
+            $vagaId = (int)($_GET['vaga_id'] ?? 0);
+            if ($vagaId <= 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'vaga_id inválido']);
+                return;
+            }
+            $statusData = $vagaPremiumService->verificarStatusPagamento($vagaId);
+            echo json_encode($statusData);
+            return;
+        }
+
+        if ($action === 'pagbank_webhook') {
+            $rawInput = file_get_contents('php://input');
+            $data = json_decode($rawInput, true) ?? [];
+            $orderId = $data['id'] ?? ($data['reference_id'] ?? '');
+            $chargesStatus = $data['charges'][0]['status'] ?? ($data['status'] ?? '');
+
+            if ($orderId && ($chargesStatus === 'PAID' || $chargesStatus === 'COMPLETED')) {
+                $vagaPremiumService->ativarVagaPagamentoConfirmado(0, $orderId);
+            }
+            echo json_encode(['status' => 'ok']);
+            return;
+        }
+
+        if ($action === 'simular_pagamento_pix') {
+            $vagaId = (int)($_REQUEST['vaga_id'] ?? 0);
+            if ($vagaId > 0) {
+                $vagaPremiumService->ativarVagaPagamentoConfirmado($vagaId, '');
+                echo json_encode(['success' => true, 'message' => 'Pagamento simulado com sucesso! Vaga ativada.']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'vaga_id inválido']);
+            }
+            return;
+        }
+    }
+
+    $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, descricao, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em, area, is_premium, status_pagamento";
+
 
     // --- Vaga individual (sem cache) ---
     if ($vagaId !== '') {
@@ -271,8 +328,9 @@ try {
         $total = (int)$totalStmt->fetchColumn();
 
         $sql = $useSubquery
-            ? "SELECT {$campos} FROM vagas WHERE vagas.id IN ({$idSubquery}) ORDER BY vagas.publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset"
-            : "SELECT {$campos} FROM vagas {$whereBase} ORDER BY vagas.publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset";
+            ? "SELECT {$campos} FROM vagas WHERE vagas.id IN ({$idSubquery}) ORDER BY vagas.is_premium DESC, vagas.publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset"
+            : "SELECT {$campos} FROM vagas {$whereBase} ORDER BY vagas.is_premium DESC, vagas.publicado_em DESC, data_coleta DESC LIMIT :limit OFFSET :offset";
+
     }
 
     $stmt = $pdo->prepare($sql);

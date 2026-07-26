@@ -129,6 +129,7 @@ return [
     "pottencial" => "pottencial",
     "poncetech" => "poncetech",
     "premiersoft" => "premiersoft",
+    "pxcenter" => "pxcenter",
     "qitech" => "qitech",
     "qualitycompliance" => "qualitycompliance",
     "queropassagem" => "queropassagem",

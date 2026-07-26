@@ -26,8 +26,9 @@ try {
     $stmtCount->execute();
     $total = (int)$stmtCount->fetchColumn();
 
-    $campos = "v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.url_vaga, v.resumo, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em";
-    $stmt = $pdo->prepare("SELECT {$campos} FROM vagas v {$where} ORDER BY v.publicado_em DESC, v.data_coleta DESC LIMIT 20");
+    $campos = "v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.url_vaga, v.resumo, v.is_premium, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em";
+    $stmt = $pdo->prepare("SELECT {$campos} FROM vagas v {$where} ORDER BY v.is_premium DESC, v.publicado_em DESC, v.data_coleta DESC LIMIT 20");
+
     foreach ($params as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
     $stmt->execute();
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);

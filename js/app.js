@@ -228,9 +228,13 @@
 
         vagasCache[v.vaga_id_externo] = v;
 
-        var card = document.createElement('article');
-        card.className = 'job-card';
+        var isPremium = (v.is_premium == 1 || v.is_premium === true || v.is_premium === '1');
+        card.className = 'job-card' + (isPremium ? ' job-card-premium' : '');
         card.setAttribute('data-vaga-id', v.vaga_id_externo);
+
+        var destaqueBadge = isPremium
+            ? '<span class="badge-destaque">Destaque 🚀</span>'
+            : '';
 
         var modeloHtml = modelo
             ? '<span class="' + getBadgeClass(modelo) + '">' + escapeHtml(modelo) + '</span>'
@@ -245,7 +249,10 @@
 
         card.innerHTML =
             '<div>' +
-                '<h3 class="job-card-title"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-link">' + escapeHtml(v.titulo) + '</a></h3>' +
+                '<div style="display:flex; justify-between; align-items:center; gap:8px;">' +
+                    '<h3 class="job-card-title"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-link">' + escapeHtml(v.titulo) + '</a></h3>' +
+                    destaqueBadge +
+                '</div>' +
                 '<p class="job-card-company">' + escapeHtml(v.empresa) + '</p>' +
             '</div>' +
             '<div class="job-card-info">' +
@@ -255,6 +262,7 @@
             '</div>' +
             '<p class="job-card-resumo line-clamp-2">' + escapeHtml(resumo) + '</p>' +
             '<div class="job-card-footer"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">Ver Detalhes</a></div>';
+
 
         container.appendChild(card);
         cardsRendered++;

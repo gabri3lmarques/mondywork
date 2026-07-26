@@ -257,8 +257,14 @@ gtag('config', 'G-RPQ9FFFNP1');
     <article class="vaga-page">
    
       <header class="vaga-page-header">
-        <h1 class="vaga-page-title"><?= esc($vaga['titulo']) ?></h1>
-        <p class="vaga-page-company"><?= esc($vaga['empresa']) ?></p>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <h1 class="vaga-page-title" style="margin: 0;"><?= esc($vaga['titulo']) ?></h1>
+          <?php if (!empty($vaga['is_premium'])): ?>
+            <span class="badge-destaque">Destaque 🚀</span>
+          <?php endif; ?>
+        </div>
+        <p class="vaga-page-company" style="margin-top: 8px;"><?= esc($vaga['empresa']) ?></p>
+
         <div class="job-card-info" style="margin-top: 12px;">
 <?php if ($modeloLabel): ?>
           <span class="<?= badgeClass($vaga['modelo_trabalho']) ?>"><?= esc($modeloLabel) ?></span>

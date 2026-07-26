@@ -344,6 +344,12 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
             ':status'  => $status,
         ];
 
+        if (isset($_POST['is_premium'])) {
+            $setParts[] = 'is_premium = :is_premium';
+            $params[':is_premium'] = (int)$_POST['is_premium'];
+        }
+
+
         if (!isset($_POST['manter_data'])) {
             $publicadoEm = trim($_POST['publicado_em'] ?? '') ?: date('Y-m-d H:i:s');
             $setParts[] = 'publicado_em = :publicado';
@@ -726,7 +732,8 @@ try {
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em, vagas.is_premium, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
+
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -1098,7 +1105,7 @@ try {
           </div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
         <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Status</label>
           <select name="status" class="admin-search-input" style="width:100%">
@@ -1107,10 +1114,18 @@ try {
           </select>
         </div>
         <div>
+          <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Destaque Premium 🚀</label>
+          <select name="is_premium" class="admin-search-input" style="width:100%">
+            <option value="0" <?php echo empty($vagaEditar['is_premium']) ? 'selected' : '' ?>>Não (Vaga Comum)</option>
+            <option value="1" <?php echo !empty($vagaEditar['is_premium']) ? 'selected' : '' ?>>Sim (Vaga Premium / Destaque)</option>
+          </select>
+        </div>
+        <div>
           <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Resumo</label>
           <textarea name="resumo" class="admin-search-input" style="width:100%;min-height:60px;resize:vertical" placeholder="Breve resumo da vaga..."><?php echo htmlspecialchars($vagaEditar['resumo'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
         </div>
       </div>
+
       <div>
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Descrição (HTML)</label>
         <textarea name="descricao" class="admin-search-input" style="width:100%;min-height:200px;resize:vertical;font-family:monospace"><?php echo htmlspecialchars($vagaEditar['descricao'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
@@ -1395,6 +1410,10 @@ try {
             <span><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
           <?php endif; ?>
           <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
+          <?php if (!empty($v['is_premium'])): ?>
+            <span style="background:linear-gradient(135deg,#7e22ce,#a855f7);color:#fff;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">Premium 🚀</span>
+          <?php endif; ?>
+
           <span style="font-size:12px;color:#45464d">Inserida: <?php echo htmlspecialchars($v['created_at_fmt'], ENT_QUOTES, 'UTF-8') ?></span>
         </div>
         <?php if (!empty($v['tags_str'])): ?>

@@ -53,7 +53,7 @@ function upsertVaga(PDO $pdo, array $dados): void
         $stmt = $pdo->prepare("
             INSERT INTO vagas (vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, descricao, resumo, publicado_em, status, origem)
             VALUES (:id, :titulo, :empresa, :local, :modelo, :url, :desc, :resumo, :publicado, 'inativa', :origem)
-            ON DUPLICATE KEY UPDATE data_coleta = CURRENT_TIMESTAMP, modelo_trabalho = VALUES(modelo_trabalho), publicado_em = VALUES(publicado_em), origem = VALUES(origem)
+            ON DUPLICATE KEY UPDATE data_coleta = CURRENT_TIMESTAMP, modelo_trabalho = VALUES(modelo_trabalho), publicado_em = VALUES(publicado_em), origem = VALUES(origem), url_vaga = VALUES(url_vaga)
         ");
     }
 

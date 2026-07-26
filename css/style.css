@@ -2573,5 +2573,210 @@ input { font-family: inherit; }
   color: #4b41e1;
 }
 
+/* ===== VAGAS PREMIUM & DESTAQUE ===== */
+.job-card-premium {
+  background: #f8f3ff !important;
+  border: 1.5px solid #d8b4fe !important;
+  box-shadow: 0 4px 15px rgba(147, 51, 234, 0.08) !important;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.job-card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.15) !important;
+}
+
+.badge-destaque {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%);
+  color: #ffffff !important;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(126, 34, 206, 0.25);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ===== POST A JOB / CHECKOUT PIX MODAL ===== */
+.post-job-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.post-job-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.post-job-header h1 {
+  font-size: 28px;
+  color: #1f2937;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.post-job-header p {
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #1f2937;
+  background: #f9fafb;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+  border-color: #7e22ce;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.15);
+  background: #fff;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .form-grid-2 { grid-template-columns: 1fr; }
+}
+
+.plan-card-selected {
+  background: #f3e8ff;
+  border: 2px solid #7e22ce;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.plan-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #581c87;
+}
+
+.plan-price {
+  font-size: 22px;
+  font-weight: 800;
+  color: #7e22ce;
+}
+
+.btn-primary-glow {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #7e22ce 0%, #6b21a8 100%);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(126, 34, 206, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary-glow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(126, 34, 206, 0.45);
+}
+
+.pix-modal-content {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.pix-qrcode-img {
+  width: 220px;
+  height: 220px;
+  margin: 16px auto;
+  border-radius: 12px;
+  border: 2px solid #f3e8ff;
+  padding: 8px;
+  background: #fff;
+}
+
+.pix-copia-cola-box {
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  word-break: break-all;
+  max-height: 80px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  color: #4b5563;
+}
+
+.btn-copy-pix {
+  background: #7e22ce;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.btn-copy-pix:hover {
+  background: #6b21a8;
+}
+
+.timer-box {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+
 
 

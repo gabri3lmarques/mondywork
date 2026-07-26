@@ -72,6 +72,41 @@ function setupSchema(PDO $pdo): void
     if (!in_array('agendado_desativar_em', $nomesColunas)) {
         $pdo->exec("ALTER TABLE vagas ADD COLUMN agendado_desativar_em DATETIME DEFAULT NULL AFTER agendado_ativar_em");
     }
+    if (!in_array('is_premium', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN is_premium TINYINT(1) DEFAULT 0 AFTER status");
+    }
+    if (!in_array('destaque_ate', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN destaque_ate DATETIME DEFAULT NULL AFTER is_premium");
+    }
+    if (!in_array('email_recrutador', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN email_recrutador VARCHAR(255) DEFAULT NULL AFTER destaque_ate");
+    }
+    if (!in_array('magic_token', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN magic_token VARCHAR(64) DEFAULT NULL AFTER email_recrutador");
+    }
+    if (!in_array('pagbank_order_id', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN pagbank_order_id VARCHAR(100) DEFAULT NULL AFTER magic_token");
+    }
+    if (!in_array('status_pagamento', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN status_pagamento VARCHAR(20) DEFAULT 'gratuito' AFTER pagbank_order_id");
+    }
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS pedidos_pix (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        vaga_id INT NOT NULL,
+        pagbank_order_id VARCHAR(100) NOT NULL UNIQUE,
+        reference_id VARCHAR(100) NOT NULL,
+        valor DECIMAL(10,2) NOT NULL,
+        qr_code_text TEXT,
+        qr_code_image TEXT,
+        email_recrutador VARCHAR(255),
+        status VARCHAR(30) DEFAULT 'PENDING',
+        expiration_date DATETIME,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (vaga_id) REFERENCES vagas(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 
     $indexExists = $pdo->query("SHOW INDEX FROM vagas WHERE Key_name = 'idx_busca'")->fetchAll();
     if (empty($indexExists)) {

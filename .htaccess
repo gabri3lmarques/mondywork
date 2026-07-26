@@ -1,6 +1,11 @@
 RewriteEngine On
 
+# Pagina de anuncio de vaga (post-a-job)
+RewriteRule ^post-a-job/?$ post-a-job.php [L,QSA]
+RewriteRule ^anunciar-vaga/?$ post-a-job.php [L,QSA]
+
 # Pagina individual de vaga
+
 RewriteRule ^vaga/(.+)$ vaga.php?id=$1 [L,QSA]
 
 # Pagina individual de vaga (exterior)
