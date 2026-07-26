@@ -79,10 +79,11 @@ class VagaPremiumService
             ':area'            => $area
         ]);
 
-        $vagaId = (int)$this->pdo->lastInsertId();
+        $cpfCnpj = trim($dados['cpf_cnpj'] ?? ($dados['tax_id'] ?? ''));
 
         // Generate Pix payment via PagBank API
-        $pixData = $this->pagBankService->criarCobrancaPix($vagaId, $titulo, $empresa, $emailRecrutador);
+        $pixData = $this->pagBankService->criarCobrancaPix($vagaId, $titulo, $empresa, $emailRecrutador, $cpfCnpj);
+
 
         // Update vaga with pagbank_order_id
         $upStmt = $this->pdo->prepare("UPDATE vagas SET pagbank_order_id = :order_id WHERE id = :id");

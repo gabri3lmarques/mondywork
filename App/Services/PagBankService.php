@@ -31,7 +31,7 @@ class PagBankService
     /**
      * Criar ordem de pagamento Pix no PagBank
      */
-    public function criarCobrancaPix(int $vagaId, string $tituloVaga, string $empresa, string $emailRecrutador): array
+    public function criarCobrancaPix(int $vagaId, string $tituloVaga, string $empresa, string $emailRecrutador, string $cpfCnpj = ''): array
     {
         if (empty($this->token) || $this->token === 'YOUR_PAGBANK_SANDBOX_TOKEN') {
             // Gera um payload simulado em ambiente local para testes visuais sem bloquear dev
@@ -46,12 +46,10 @@ class PagBankService
         $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
         $notificationUrl = "{$scheme}://{$serverName}/api.php?action=pagbank_webhook";
 
+        $cpfCnpjClean = preg_replace('/\D/', '', $cpfCnpj);
+
         $payload = [
             'reference_id' => $referenceId,
-            'customer' => [
-                'name'  => mb_substr($empresa, 0, 30),
-                'email' => $emailRecrutador,
-            ],
             'items' => [
                 [
                     'name'        => mb_substr("Anúncio Vaga Premium: {$tituloVaga}", 0, 100),
@@ -72,10 +70,28 @@ class PagBankService
             ]
         ];
 
+        // PagBank exige tax_id (CPF/CNPJ) se o objeto customer for enviado
+        if (!empty($cpfCnpjClean)) {
+            $payload['customer'] = [
+                'name'   => mb_substr($empresa, 0, 30),
+                'email'  => $emailRecrutador,
+                'tax_id' => $cpfCnpjClean
+            ];
+        }
+
         $response = $this->request('POST', '/orders', $payload);
 
         if (!isset($response['id']) || !isset($response['qr_codes'][0])) {
-            $errorMsg = $response['error_messages'][0]['description'] ?? 'Erro desconhecido ao gerar Pix no PagBank.';
+            $errorMsg = 'Erro desconhecido ao gerar Pix no PagBank.';
+            if (!empty($response['error_messages'])) {
+                $errs = [];
+                foreach ($response['error_messages'] as $err) {
+                    $param = $err['parameter_name'] ?? '';
+                    $desc = $err['description'] ?? '';
+                    $errs[] = $param ? "{$param}: {$desc}" : $desc;
+                }
+                $errorMsg = implode(' | ', $errs);
+            }
             throw new Exception("Falha ao comunicar com PagBank: " . $errorMsg);
         }
 
@@ -150,12 +166,21 @@ class PagBankService
         $decoded = json_decode($responseBody, true) ?? [];
 
         if ($httpCode >= 400) {
-            $msg = $decoded['error_messages'][0]['description'] ?? "HTTP Code {$httpCode}";
+            $errs = [];
+            if (!empty($decoded['error_messages'])) {
+                foreach ($decoded['error_messages'] as $err) {
+                    $param = $err['parameter_name'] ?? '';
+                    $desc = $err['description'] ?? '';
+                    $errs[] = $param ? "{$param}: {$desc}" : $desc;
+                }
+            }
+            $msg = !empty($errs) ? implode(' | ', $errs) : "HTTP Code {$httpCode}";
             throw new Exception("Erro PagBank API ({$httpCode}): {$msg}");
         }
 
         return $decoded;
     }
+
 
     /**
      * Gera dados de Pix simulados em ambiente local de teste

@@ -68,6 +68,12 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
                     <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">Enviaremos o Magic Link de edição para este e-mail.</span>
                 </div>
                 <div class="form-group">
+                    <label for="cpf_cnpj">CPF ou CNPJ (para o Pix) *</label>
+                    <input type="text" id="cpf_cnpj" name="cpf_cnpj" placeholder="000.000.000-00 ou 00.000.000/0001-00" required>
+                    <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">Exigência do PagBank / Banco Central para gerar o Pix.</span>
+                </div>
+            </div>
+
                     <label for="area">Área da Vaga</label>
                     <select id="area" name="area">
                         <option value="desenvolvimento">Desenvolvimento / Engenharia</option>
@@ -200,12 +206,14 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
                 titulo: document.getElementById('titulo').value.trim(),
                 empresa: document.getElementById('empresa').value.trim(),
                 email_recrutador: document.getElementById('email_recrutador').value.trim(),
+                cpf_cnpj: document.getElementById('cpf_cnpj').value.trim(),
                 area: document.getElementById('area').value,
                 modelo_trabalho: document.getElementById('modelo_trabalho').value,
                 localizacao: document.getElementById('localizacao').value.trim(),
                 url_vaga: document.getElementById('url_vaga').value.trim(),
                 descricao: document.getElementById('descricao').value.trim(),
             };
+
 
             try {
                 const res = await fetch('/api.php?action=criar_vaga_premium', {
