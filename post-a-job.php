@@ -142,12 +142,14 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
                     ⏳ Aguardando pagamento em tempo real... <span id="pix-countdown" style="font-weight: 800; color: #7e22ce;">30:00</span>
                 </div>
 
+                <?php if (($config['pagbank']['env'] ?? 'sandbox') !== 'production'): ?>
                 <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; justify-content: center; gap: 10px;">
                     <!-- Botão de simular teste em ambiente sandbox/dev -->
                     <button type="button" id="btn-simular-pago" style="background: #f3e8ff; color: #6b21a8; border: 1px dashed #c084fc; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
                         ⚡ Teste Sandbox: Simular Pagamento Confirmado
                     </button>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- TELA DE SUCESSO / MAGIC LINK -->
@@ -284,20 +286,24 @@ $precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
             stopPolling();
         });
 
-        // Simular pagamento no Sandbox
-        btnSimular.addEventListener('click', async function() {
-            if (!currentVagaId) return;
-            btnSimular.textContent = 'Simulando...';
-            try {
-                const res = await fetch('/api.php?action=simular_pagamento_pix&vaga_id=' + currentVagaId);
-                const data = await res.json();
-                if (data.success) {
-                    showSuccess();
+        // Simular pagamento no Sandbox (caso o botão esteja no DOM)
+        if (btnSimular) {
+            btnSimular.addEventListener('click', async function() {
+                if (!currentVagaId) return;
+                btnSimular.textContent = 'Simulando...';
+                try {
+                    const res = await fetch('/api.php?action=simular_pagamento_pix&vaga_id=' + currentVagaId);
+                    const data = await res.json();
+                    if (data.success) {
+                        showSuccess();
+                    } else {
+                        alert(data.error || 'Erro ao simular');
+                    }
+                } catch(e) {
+                    alert('Erro ao simular');
                 }
-            } catch(e) {
-                alert('Erro ao simular');
-            }
-        });
+            });
+        }
 
         function startTimer(durationSeconds) {
             let timer = durationSeconds;

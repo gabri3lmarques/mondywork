@@ -178,6 +178,13 @@ try {
         }
 
         if ($action === 'simular_pagamento_pix') {
+            $pagbankConfig = \App\Core\Config::get('pagbank', []);
+            if (($pagbankConfig['env'] ?? 'sandbox') === 'production') {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Simulação de pagamento desativada em ambiente de produção.']);
+                return;
+            }
+
             $vagaId = (int)($_REQUEST['vaga_id'] ?? 0);
             if ($vagaId > 0) {
                 $vagaPremiumService->ativarVagaPagamentoConfirmado($vagaId, '');

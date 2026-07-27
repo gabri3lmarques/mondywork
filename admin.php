@@ -69,6 +69,12 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             if ($_POST['batch_action'] === 'remover') {
                 $stmt = $pdo->prepare("UPDATE vagas SET revisada_em = NOW() WHERE id IN ($placeholders) AND revisada_em IS NULL");
                 $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'favoritar') {
+                $stmt = $pdo->prepare("UPDATE vagas SET is_favorita = 1 WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'desfavoritar') {
+                $stmt = $pdo->prepare("UPDATE vagas SET is_favorita = 0 WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
             } elseif ($_POST['batch_action'] === 'cancelar_agendamento') {
                 $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id IN ($placeholders)");
                 $stmt->execute($ids);
@@ -168,6 +174,16 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle
         );
         $stmt = $pdo->prepare("UPDATE vagas SET status = IF(status = 'ativa', 'inativa', 'ativa'), publicado_em = IF(status = 'inativa', NOW(), publicado_em), agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id = :id");
         $stmt->execute([':id' => (int)$_POST['toggle_id']]);
+    } catch (Exception $e) {}
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
+    exit;
+}
+
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_favorita_id'])) {
+    try {
+        $pdo = conectarBanco($config);
+        $stmt = $pdo->prepare("UPDATE vagas SET is_favorita = IF(is_favorita = 1, 0, 1) WHERE id = :id");
+        $stmt->execute([':id' => (int)$_POST['toggle_favorita_id']]);
     } catch (Exception $e) {}
     header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
     exit;
@@ -398,7 +414,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
     }
 }
 
-$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas', 'categorias', 'por-categorias', 'agendadas']) ? $_GET['tab'] : 'lista';
+$tab = isset($_GET['tab']) && in_array($_GET['tab'], ['cadastro', 'editar', 'emails', 'blog', 'novas', 'categorias', 'por-categorias', 'agendadas', 'favoritas']) ? $_GET['tab'] : 'lista';
 
 $blogMsg = '';
 if ($isLoggedIn && $tab === 'blog' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_blog'])) {
@@ -569,8 +585,8 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 <style>
 .admin-nav { background: #0b1c30; height: 64px; }
 .admin-nav .nav-inner { height: 64px; }
-.admin-nav .nav-logo { color: #fff; font-size: 1.25rem; }
-.admin-link { font-size: 14px; font-weight: 500; color: #c6c6cd; transition: color 0.2s; }
+.admin-nav .nav-logo { color: #fff; font-size: 1.25rem; font-weight: 700; }
+.admin-link { font-size: 14px; font-weight: 500; color: #c6c6cd; transition: color 0.2s; text-decoration: none; }
 .admin-link:hover { color: #fff; }
 .admin-link.active { color: #fff; }
 .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
@@ -582,66 +598,135 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
 .login-card button { width: 100%; background: #4b41e1; color: #fff; font-size: 14px; font-weight: 700; padding: 12px 24px; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 16px; transition: background 0.3s; }
 .login-card button:hover { background: #645efb; }
 .login-error { color: #ba1a1a; font-size: 14px; font-weight: 500; margin-bottom: 16px; }
-.admin-main { max-width: 1280px; margin: 96px auto 48px; padding: 0 16px; }
-@media (min-width: 768px) { .admin-main { padding: 0 48px; } }
-.admin-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
-.admin-header h1 { font-size: 1.5rem; font-weight: 700; }
-.admin-header span { color: #45464d; font-size: 14px; font-weight: 500; }
-.admin-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
-.stat { background: #fff; border: 1px solid #c6c6cd; border-radius: 0.5rem; padding: 12px 20px; font-size: 14px; font-weight: 500; }
-.stat strong { color: #4b41e1; }
-.admin-card { background: #fff; border-radius: 0.75rem; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #c6c6cd; transition: box-shadow 0.3s; }
-.admin-card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+.admin-main { max-width: 1320px; margin: 80px auto 48px; padding: 0 16px; }
+@media (min-width: 768px) { .admin-main { padding: 0 40px; } }
+.admin-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.admin-header h1 { font-size: 1.65rem; font-weight: 700; color: #0b1c30; letter-spacing: -0.02em; margin: 0; }
+.admin-header span { color: #64748b; font-size: 14px; font-weight: 500; }
+.admin-stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.stat { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.6rem; padding: 10px 18px; font-size: 13px; font-weight: 600; color: #475569; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.stat strong { color: #4b41e1; font-size: 15px; }
+
+/* Modern Top Header Navigation */
+.admin-nav-bar { margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; }
+.admin-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: -2px; }
+.admin-tab { 
+  display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; 
+  font-size: 14px; font-weight: 600; color: #475569; border: 1px solid transparent; 
+  border-bottom: 2px solid transparent; border-radius: 0.6rem 0.6rem 0 0; 
+  transition: all 0.2s ease; text-decoration: none; background: transparent; 
+}
+.admin-tab:hover { color: #4b41e1; background: #f8fafc; }
+.admin-tab.active { color: #4b41e1; background: #fff; border-color: #e2e8f0 #e2e8f0 #fff; border-bottom: 2px solid #fff; box-shadow: 0 -2px 6px rgba(0,0,0,0.03); }
+
+/* Badges inside navigation tabs */
+.nav-badge {
+  font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+  background: #e2e8f0; color: #334155; display: inline-flex; align-items: center; justify-content: center;
+}
+.admin-tab.active .nav-badge { background: #e0e7ff; color: #4338ca; }
+.nav-badge-favorita { background: #fef3c7; color: #b45309; }
+.nav-badge-novas { background: #fee2e2; color: #b91c1c; }
+.nav-badge-agendadas { background: #e0e7ff; color: #4338ca; }
+
+/* Sub-filter Secondary Bar (Status & Origem) */
+.admin-subfilter-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 12px 18px; margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.filter-label { font-size: 12px; font-weight: 700; color: #64748b; margin-right: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.filter-btn {
+  font-size: 13px; font-weight: 600; color: #475569; padding: 6px 14px; border-radius: 0.5rem;
+  border: 1px solid #e2e8f0; background: #f8fafc; text-decoration: none; transition: all 0.2s ease;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.filter-btn:hover { border-color: #cbd5e1; color: #0f172a; background: #fff; }
+.filter-btn.active { background: #4b41e1; color: #fff; border-color: #4b41e1; box-shadow: 0 2px 4px rgba(75, 65, 225, 0.25); }
+
+/* Favorite Button & Badges */
+.btn-favorite {
+  font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 0.5rem;
+  border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+}
+.btn-favorite:hover { border-color: #facc15; background: #fffbe6; color: #d97706; transform: translateY(-1px); }
+.btn-favorite.active { background: #fef3c7; border-color: #f59e0b; color: #b45309; font-weight: 700; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2); }
+.badge-favorita { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+
+/* Job Cards & Actions */
+.admin-card { background: #fff; border-radius: 0.75rem; padding: 22px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; transition: all 0.25s ease; }
+.admin-card:hover { box-shadow: 0 8px 16px -2px rgba(0,0,0,0.08); border-color: #cbd5e1; }
 .admin-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.admin-card-title { font-size: 18px; line-height: 24px; font-weight: 600; color: #0b1c30; word-break: break-word; }
-.admin-card-company { font-size: 13px; line-height: 18px; font-weight: 500; color: #45464d; margin-top: 2px; word-break: break-word; }
+.admin-card-title { font-size: 18px; line-height: 24px; font-weight: 700; color: #0b1c30; word-break: break-word; }
+.admin-card-company { font-size: 13px; line-height: 18px; font-weight: 500; color: #64748b; margin-top: 3px; word-break: break-word; }
 .admin-card-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
-.admin-card-meta span { font-size: 12px; line-height: 16px; font-weight: 600; color: #45464d; display: inline-flex; align-items: center; gap: 4px; }
-.badge-origem { background: #e5eeff; color: #0b1c30; border: 1px solid #c6c6cd; border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+.admin-card-meta span { font-size: 12px; line-height: 16px; font-weight: 600; color: #475569; display: inline-flex; align-items: center; gap: 4px; }
+.badge-origem { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
 .badge-origem.exterior { background: #fff3e5; color: #b55a00; border-color: #ffe0b3; }
 .badge-status { border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
-.badge-status.ativa { background: #e6f7e6; color: #1a7d1a; border: 1px solid #b3e6b3; }
-.badge-status.inativa { background: #fde8e8; color: #ba1a1a; border: 1px solid #f5baba; }
-.admin-card-actions { margin-top: 12px; display: flex; gap: 8px; }
-.btn-toggle { font-size: 13px; font-weight: 600; padding: 7px 18px; border-radius: 0.5rem; border: 1px solid; cursor: pointer; transition: background 0.3s; }
-.btn-toggle.inativar { color: #ba1a1a; border-color: #f5baba; background: transparent; }
-.btn-toggle.inativar:hover { background: #fde8e8; }
-.btn-toggle.ativar { color: #1a7d1a; border-color: #b3e6b3; background: transparent; }
-.btn-toggle.ativar:hover { background: #e6f7e6; }
+.badge-status.ativa { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-status.inativa { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+/* Enhanced Action Buttons Container */
+.admin-card-actions { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+.btn-toggle { font-size: 13px; font-weight: 600; padding: 7px 18px; border-radius: 0.5rem; border: 1px solid; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
+.btn-toggle.inativar { color: #b91c1c; border-color: #fca5a5; background: #fff; }
+.btn-toggle.inativar:hover { background: #fee2e2; }
+.btn-toggle.ativar { color: #15803d; border-color: #bbf7d0; background: #fff; }
+.btn-toggle.ativar:hover { background: #dcfce7; }
+
+.btn-action-edit {
+  font-size: 13px; font-weight: 600; padding: 7px 18px; border-radius: 0.5rem;
+  border: 1px solid #4b41e1; color: #4b41e1; background: #f8faff; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;
+}
+.btn-action-edit:hover { background: #4b41e1; color: #fff; }
+.btn-action-view {
+  font-size: 13px; font-weight: 500; color: #334155; padding: 7px 18px;
+  border: 1px solid #cbd5e1; border-radius: 0.5rem; background: #fff; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;
+}
+.btn-action-view:hover { border-color: #4b41e1; color: #4b41e1; background: #f8fafc; }
+.btn-action-copy {
+  font-size: 12px; font-weight: 500; padding: 7px 14px; background: #fff;
+  border: 1px solid #cbd5e1; border-radius: 0.5rem; cursor: pointer; color: #475569;
+  display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;
+}
+.btn-action-copy:hover { border-color: #94a3b8; color: #0f172a; background: #f8fafc; }
+
 .admin-pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 32px; flex-wrap: wrap; }
-.admin-pagination a, .admin-pagination span { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 12px; border: 1px solid #c6c6cd; border-radius: 0.5rem; font-size: 14px; font-weight: 500; color: #0b1c30; background: #fff; transition: all 0.2s; }
+.admin-pagination a, .admin-pagination span { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 14px; font-weight: 500; color: #0b1c30; background: #fff; transition: all 0.2s; text-decoration: none; }
 .admin-pagination a:hover { border-color: #4b41e1; color: #4b41e1; }
 .admin-pagination .current { background: #4b41e1; color: #fff; border-color: #4b41e1; }
-.admin-empty { text-align: center; padding: 64px 16px; color: #45464d; }
-.admin-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 24px; border-bottom: 1px solid #c6c6cd; padding-bottom: 0; }
-.admin-tab { padding: 10px 20px; font-size: 14px; font-weight: 600; color: #45464d; border: 1px solid transparent; border-bottom: none; border-radius: 0.5rem 0.5rem 0 0; transition: all 0.2s; margin-bottom: -1px; }
-.admin-tab:hover { color: #4b41e1; }
-.admin-tab.active { color: #4b41e1; background: #fff; border-color: #c6c6cd; }
-.badge-velha { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 9999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
-.batch-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 16px; background: #fff; border: 1px solid #c6c6cd; border-radius: 0.5rem; }
-.batch-select-all { font-size: 14px; font-weight: 500; color: #0b1c30; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.admin-empty { text-align: center; padding: 64px 16px; color: #64748b; font-size: 15px; }
+
+.batch-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.batch-select-all { font-size: 14px; font-weight: 600; color: #0b1c30; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 .batch-select-all input { width: 16px; height: 16px; cursor: pointer; }
-.batch-count { font-size: 13px; color: #45464d; margin-right: auto; }
+.batch-count { font-size: 13px; color: #64748b; margin-right: auto; }
 .admin-check-wrap { display: flex; align-items: center; padding: 4px 8px 0 0; }
 .admin-check-wrap input { width: 18px; height: 18px; cursor: pointer; }
 .admin-search { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.admin-search-input { flex: 1; min-width: 200px; background: #fff; border: 1px solid #c6c6cd; border-radius: 0.5rem; padding: 10px 16px; font-size: 14px; color: #0b1c30; outline: none; transition: border-color 0.2s; }
+.admin-search-input { flex: 1; min-width: 200px; background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 10px 16px; font-size: 14px; color: #0b1c30; outline: none; transition: border-color 0.2s; }
 .admin-search-input:focus { border-color: #4b41e1; box-shadow: 0 0 0 1px #4b41e1; }
 .btn-search { background: #4b41e1; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border: none; border-radius: 0.5rem; cursor: pointer; transition: background 0.3s; }
 .btn-search:hover { background: #645efb; }
-.btn-clear { display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; color: #45464d; padding: 10px 16px; border: 1px solid #c6c6cd; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s; }
-.btn-clear:hover { border-color: #ba1a1a; color: #ba1a1a; }
+.btn-clear { display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; color: #64748b; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s; }
+.btn-clear:hover { border-color: #b91c1c; color: #b91c1c; }
 .cat-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-.cat-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #c6c6cd; border-radius: 0.5rem; background: #fff; transition: all 0.2s; }
+.cat-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 0.5rem; background: #fff; transition: all 0.2s; }
 .cat-checkbox:hover { border-color: #4b41e1; }
 .cat-checkbox input { width: 16px; height: 16px; cursor: pointer; }
-.cat-filter { background: #fff; border: 1px solid #c6c6cd; border-radius: 0.5rem; margin-bottom: 16px; overflow: hidden; }
+.cat-filter { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.5rem; margin-bottom: 16px; overflow: hidden; }
 .cat-filter-summary { padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; color: #0b1c30; user-select: none; }
-.cat-filter-summary:hover { background: #f8f9fa; }
-.cat-filter-form { padding: 0 16px 16px; border-top: 1px solid #c6c6cd; padding-top: 12px; }
+.cat-filter-summary:hover { background: #f8fafc; }
+.cat-filter-form { padding: 0 16px 16px; border-top: 1px solid #e2e8f0; padding-top: 12px; }
 .cat-filter-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.cat-filter-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #c6c6cd; border-radius: 0.5rem; background: #f8f9fa; transition: all 0.2s; }
+.cat-filter-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #0b1c30; cursor: pointer; padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 0.5rem; background: #f8fafc; transition: all 0.2s; }
 .cat-filter-checkbox:hover { border-color: #4b41e1; }
+.cat-filter-checkbox input { width: 16px; height: 16px; cursor: pointer; }
 .cat-filter-checkbox input { width: 16px; height: 16px; cursor: pointer; }
 .cat-grid-wrapper { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-bottom: 24px; }
 .cat-tile { background: #fff; border: 1px solid #c6c6cd; border-radius: 0.75rem; padding: 14px 18px; text-decoration: none; color: #0b1c30; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease-in-out; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -694,8 +779,11 @@ try {
     processarAgendamentosVagas($pdo);
 
     $whereClauses = [];
-    if ($origemFilter !== '') $whereClauses[] = "origem = " . $pdo->quote($origemFilter);
-    if ($statusFilter !== '') $whereClauses[] = "status = " . $pdo->quote($statusFilter);
+    if ($tab === 'favoritas' || $statusFilter === 'favorita') {
+        $whereClauses[] = "vagas.is_favorita = 1";
+    }
+    if ($origemFilter !== '') $whereClauses[] = "vagas.origem = " . $pdo->quote($origemFilter);
+    if ($statusFilter !== '' && $statusFilter !== 'favorita') $whereClauses[] = "vagas.status = " . $pdo->quote($statusFilter);
     if ($searchQuery !== '') {
         $escaped = str_replace(['%', '_'], ['\%', '\_'], $searchQuery);
         $like = $pdo->quote('%' . $escaped . '%');
@@ -732,7 +820,7 @@ try {
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em, vagas.is_premium, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em, vagas.is_premium, vagas.is_favorita, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
 
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -740,6 +828,8 @@ try {
     $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $totalAgendadasCount = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE agendado_ativar_em IS NOT NULL OR agendado_desativar_em IS NOT NULL")->fetchColumn();
+    $totalFavoritasCount = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE is_favorita = 1")->fetchColumn();
+    $totalNovasCount = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE created_at >= NOW() - INTERVAL 24 HOUR AND revisada_em IS NULL")->fetchColumn();
     $vagasAgendadas = [];
     if ($tab === 'agendadas') {
         $stmtAg = $pdo->query("
@@ -883,22 +973,36 @@ try {
 ?>
 
 <main class="admin-main">
-  <div class="admin-tabs">
-    <a class="admin-tab <?php echo $tab === 'lista' ? 'active' : '' ?>" href="admin.php">Vagas</a>
-    <a class="admin-tab <?php echo $tab === 'cadastro' ? 'active' : '' ?>" href="admin.php?tab=cadastro">Cadastrar Vaga</a>
-    <a class="admin-tab <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional<?php echo $qParam . $statusParam ?>">Brasil</a>
-    <a class="admin-tab <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior<?php echo $qParam . $statusParam ?>">Exterior</a>
-    <span style="flex:1"></span>
-    <a class="admin-tab <?php echo $statusFilter === '' ? 'active' : '' ?>" href="admin.php?<?php echo $origemParam . $qParam ?>">Todas</a>
-    <a class="admin-tab <?php echo $statusFilter === 'ativa' ? 'active' : '' ?>" href="admin.php?status=ativa<?php echo $origemParam . $qParam ?>">Ativas</a>
-    <a class="admin-tab <?php echo $statusFilter === 'inativa' ? 'active' : '' ?>" href="admin.php?status=inativa<?php echo $origemParam . $qParam ?>">Inativas</a>
-    <span style="flex:1"></span>
-    <a class="admin-tab <?php echo $tab === 'por-categorias' ? 'active' : '' ?>" href="admin.php?tab=por-categorias">Pesquisar por Categorias</a>
-    <a class="admin-tab <?php echo $tab === 'emails' ? 'active' : '' ?>" href="admin.php?tab=emails">Emails</a>
-    <a class="admin-tab <?php echo $tab === 'novas' ? 'active' : '' ?>" href="admin.php?tab=novas">Novas (24h)</a>
-    <a class="admin-tab <?php echo $tab === 'agendadas' ? 'active' : '' ?>" href="admin.php?tab=agendadas" style="<?php echo $totalAgendadasCount > 0 ? 'color:#4338ca;font-weight:700;' : '' ?>">Agendadas<?php echo $totalAgendadasCount > 0 ? " ($totalAgendadasCount)" : '' ?></a>
-    <a class="admin-tab <?php echo $tab === 'blog' ? 'active' : '' ?>" href="admin.php?tab=blog">Blog</a>
-    <a class="admin-tab <?php echo $tab === 'categorias' ? 'active' : '' ?>" href="admin.php?tab=categorias">Categorias</a>
+  <div class="admin-nav-bar">
+    <div class="admin-tabs">
+      <a class="admin-tab <?php echo ($tab === 'lista' && $statusFilter !== 'favorita') ? 'active' : '' ?>" href="admin.php">
+        📋 Vagas
+      </a>
+      <a class="admin-tab <?php echo ($tab === 'favoritas' || $statusFilter === 'favorita') ? 'active' : '' ?>" href="admin.php?tab=favoritas">
+        ⭐ Favoritas <?php echo $totalFavoritasCount > 0 ? "<span class=\"nav-badge nav-badge-favorita\">$totalFavoritasCount</span>" : '' ?>
+      </a>
+      <a class="admin-tab <?php echo $tab === 'novas' ? 'active' : '' ?>" href="admin.php?tab=novas">
+        🔥 Novas (24h) <?php echo $totalNovasCount > 0 ? "<span class=\"nav-badge nav-badge-novas\">$totalNovasCount</span>" : '' ?>
+      </a>
+      <a class="admin-tab <?php echo $tab === 'agendadas' ? 'active' : '' ?>" href="admin.php?tab=agendadas">
+        ⏰ Agendadas <?php echo $totalAgendadasCount > 0 ? "<span class=\"nav-badge nav-badge-agendadas\">$totalAgendadasCount</span>" : '' ?>
+      </a>
+      <a class="admin-tab <?php echo $tab === 'cadastro' ? 'active' : '' ?>" href="admin.php?tab=cadastro">
+        ➕ Cadastrar Vaga
+      </a>
+      <a class="admin-tab <?php echo $tab === 'categorias' ? 'active' : '' ?>" href="admin.php?tab=categorias">
+        📁 Categorias
+      </a>
+      <a class="admin-tab <?php echo $tab === 'por-categorias' ? 'active' : '' ?>" href="admin.php?tab=por-categorias">
+        🔍 Busca por Categorias
+      </a>
+      <a class="admin-tab <?php echo $tab === 'blog' ? 'active' : '' ?>" href="admin.php?tab=blog">
+        📝 Blog
+      </a>
+      <a class="admin-tab <?php echo $tab === 'emails' ? 'active' : '' ?>" href="admin.php?tab=emails">
+        📧 Emails
+      </a>
+    </div>
   </div>
 
   <?php if ($tab === 'cadastro'): ?>
@@ -1347,7 +1451,7 @@ try {
       $novasWhere .= " AND status = " . $pdo->quote($novasStatusFilter);
   }
 
-  $stmtNovas = $pdo->query("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.publicado_em, vagas.created_at, DATE_FORMAT(vagas.created_at, '%d/%m/%Y %H:%i') as created_at_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id WHERE {$novasWhere} GROUP BY vagas.id ORDER BY vagas.created_at DESC");
+  $stmtNovas = $pdo->query("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.publicado_em, vagas.created_at, vagas.is_premium, vagas.is_favorita, DATE_FORMAT(vagas.created_at, '%d/%m/%Y %H:%i') as created_at_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id WHERE {$novasWhere} GROUP BY vagas.id ORDER BY vagas.created_at DESC");
   $novasVagas = $stmtNovas->fetchAll(PDO::FETCH_ASSOC);
 
   $totalNovas = count($novasVagas);
@@ -1402,6 +1506,12 @@ try {
             <div class="admin-card-title"><?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?></div>
             <div class="admin-card-company"><?php echo htmlspecialchars($v['empresa'], ENT_QUOTES, 'UTF-8') ?><?php echo $v['localizacao'] ? ' • ' . htmlspecialchars($v['localizacao'], ENT_QUOTES, 'UTF-8') : '' ?></div>
           </div>
+          <form method="post" style="margin:0">
+            <input type="hidden" name="toggle_favorita_id" value="<?php echo (int)$v['id'] ?>">
+            <button type="submit" class="btn-favorite <?php echo !empty($v['is_favorita']) ? 'active' : '' ?>" title="<?php echo !empty($v['is_favorita']) ? 'Remover dos favoritos' : 'Favoritar vaga' ?>">
+              <?php echo !empty($v['is_favorita']) ? '★ Favorita' : '☆ Favoritar' ?>
+            </button>
+          </form>
         </div>
         <div class="admin-card-meta">
           <span style="background:#e2e8f0;color:#0f172a;font-weight:700;padding:2px 8px;border-radius:4px;font-size:12px;font-family:monospace">ID: #<?php echo (int)$v['id'] ?></span>
@@ -1410,6 +1520,9 @@ try {
             <span><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
           <?php endif; ?>
           <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
+          <?php if (!empty($v['is_favorita'])): ?>
+            <span class="badge-favorita">⭐ Favorita</span>
+          <?php endif; ?>
           <?php if (!empty($v['is_premium'])): ?>
             <span style="background:linear-gradient(135deg,#7e22ce,#a855f7);color:#fff;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">Premium 🚀</span>
           <?php endif; ?>
@@ -1424,22 +1537,28 @@ try {
           </div>
         <?php endif; ?>
         <div class="admin-card-actions">
-          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
+          <form method="post" style="margin:0">
+            <input type="hidden" name="toggle_favorita_id" value="<?php echo (int)$v['id'] ?>">
+            <button type="submit" class="btn-favorite <?php echo !empty($v['is_favorita']) ? 'active' : '' ?>">
+              <?php echo !empty($v['is_favorita']) ? '★ Favorita' : '☆ Favoritar' ?>
+            </button>
+          </form>
+          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] ?>" class="btn-action-edit">✏️ Editar</a>
           <form method="post" style="margin:0">
             <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
-            <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
+            <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? '🔴 Inativar' : '🟢 Ativar' ?></button>
           </form>
           <?php if (!empty($v['vaga_id_externo'])): 
             $linkNovasPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
           ?>
-            <a href="<?php echo $linkNovasPath ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">
-              <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar Link' ?>
+            <a href="<?php echo $linkNovasPath ?>" target="_blank" class="btn-action-view">
+              👁️ <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar' ?>
             </a>
-            <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkNovasPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:7px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:0.5rem;cursor:pointer;color:#334155">📋 Copiar Link</button>
+            <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkNovasPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" class="btn-action-copy">📋 Copiar Link</button>
           <?php endif; ?>
           <form method="post" style="margin:0" onsubmit="return confirm('Remover esta vaga da lista de novas?')">
             <input type="hidden" name="remover_vaga_id" value="<?php echo (int)$v['id'] ?>">
-            <button type="submit" class="btn-toggle inativar" style="font-size:13px">Remover</button>
+            <button type="submit" class="btn-toggle inativar">Remover</button>
           </form>
         </div>
       </div>
@@ -1867,15 +1986,25 @@ try {
 
   <div class="admin-header">
     <div>
-      <h1>Vagas</h1>
-      <span><?php echo $totalVagas ?> vagas no total</span>
+      <h1><?php echo $tab === 'favoritas' ? '⭐ Vagas Favoritas' : 'Vagas' ?></h1>
+      <span><?php echo $totalVagas ?> vaga(s) encontrada(s)</span>
     </div>
   </div>
 
-  <div class="admin-stats">
-    <div class="stat">Total: <strong><?php echo $totalVagas ?></strong></div>
-    <div class="stat">Ativas: <strong style="color:#1a7d1a"><?php echo $totalAtivas ?></strong></div>
-    <div class="stat">Inativas: <strong style="color:#ba1a1a"><?php echo $totalInativas ?></strong></div>
+  <div class="admin-subfilter-bar">
+    <div class="filter-group">
+      <span class="filter-label">Status:</span>
+      <a class="filter-btn <?php echo ($tab !== 'favoritas' && $statusFilter === '') ? 'active' : '' ?>" href="admin.php?<?php echo $origemParam . $qParam ?>">Todas (<?php echo $totalVagas ?>)</a>
+      <a class="filter-btn <?php echo ($tab !== 'favoritas' && $statusFilter === 'ativa') ? 'active' : '' ?>" href="admin.php?status=ativa<?php echo $origemParam . $qParam ?>">Ativas (<?php echo $totalAtivas ?>)</a>
+      <a class="filter-btn <?php echo ($tab !== 'favoritas' && $statusFilter === 'inativa') ? 'active' : '' ?>" href="admin.php?status=inativa<?php echo $origemParam . $qParam ?>">Inativas (<?php echo $totalInativas ?>)</a>
+      <a class="filter-btn <?php echo ($tab === 'favoritas' || $statusFilter === 'favorita') ? 'active' : '' ?>" href="admin.php?tab=favoritas<?php echo $origemParam . $qParam ?>">⭐ Favoritas (<?php echo $totalFavoritasCount ?>)</a>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Origem:</span>
+      <a class="filter-btn <?php echo $origemFilter === '' ? 'active' : '' ?>" href="admin.php?<?php echo ($tab === 'favoritas' ? 'tab=favoritas' : $statusParam) . $qParam ?>">Todas</a>
+      <a class="filter-btn <?php echo $origemFilter === 'nacional' ? 'active' : '' ?>" href="admin.php?origem=nacional<?php echo ($tab === 'favoritas' ? '&tab=favoritas' : $statusParam) . $qParam ?>">🇧🇷 Brasil</a>
+      <a class="filter-btn <?php echo $origemFilter === 'exterior' ? 'active' : '' ?>" href="admin.php?origem=exterior<?php echo ($tab === 'favoritas' ? '&tab=favoritas' : $statusParam) . $qParam ?>">🌎 Exterior</a>
+    </div>
   </div>
 
   <details class="cat-filter"<?php echo !empty($catFilter) ? ' open' : '' ?>>
@@ -1894,6 +2023,9 @@ try {
         </label>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
+        <?php if ($tab === 'favoritas'): ?>
+          <input type="hidden" name="tab" value="favoritas">
+        <?php endif; ?>
         <?php if ($origemFilter !== ''): ?>
           <input type="hidden" name="origem" value="<?php echo htmlspecialchars($origemFilter, ENT_QUOTES, 'UTF-8') ?>">
         <?php endif; ?>
@@ -1905,13 +2037,16 @@ try {
         <?php endif; ?>
         <button type="submit" class="btn-search">Filtrar</button>
         <?php if (!empty($catFilter)): ?>
-          <a href="admin.php<?php echo $origemParam . $statusParam . $qParam ?>" class="btn-clear">Limpar filtros</a>
+          <a href="admin.php<?php echo ($tab === 'favoritas' ? '?tab=favoritas' : '') . $origemParam . $statusParam . $qParam ?>" class="btn-clear">Limpar filtros</a>
         <?php endif; ?>
       </div>
     </form>
   </details>
 
   <form class="admin-search" method="get">
+    <?php if ($tab === 'favoritas'): ?>
+      <input type="hidden" name="tab" value="favoritas">
+    <?php endif; ?>
     <input type="search" name="q" class="admin-search-input" placeholder="Buscar por ID, título, empresa ou local..." value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" autofocus>
     <?php if ($origemFilter !== ''): ?>
       <input type="hidden" name="origem" value="<?php echo htmlspecialchars($origemFilter, ENT_QUOTES, 'UTF-8') ?>">
@@ -1924,14 +2059,14 @@ try {
     <?php endforeach; ?>
     <button type="submit" class="btn-search">Buscar</button>
     <?php if ($searchQuery !== '' || !empty($catFilter)): ?>
-      <a href="admin.php<?php echo $origemParam . $statusParam ?>" class="btn-clear">Limpar</a>
+      <a href="admin.php<?php echo ($tab === 'favoritas' ? '?tab=favoritas' : '') . $origemParam . $statusParam ?>" class="btn-clear">Limpar</a>
     <?php endif; ?>
   </form>
 
   <div class="batch-bar" id="batch-bar-top"></div>
 
   <?php if (empty($vagas)): ?>
-    <div class="admin-empty">Nenhuma vaga encontrada.</div>
+    <div class="admin-empty"><?php echo $tab === 'favoritas' ? 'Nenhuma vaga favoritada ainda. Clique em "☆ Favoritar" em qualquer vaga para salvá-la aqui.' : 'Nenhuma vaga encontrada.' ?></div>
   <?php else:
     foreach ($vagas as $v): ?>
       <div class="admin-card" style="margin-bottom:12px">
@@ -1943,6 +2078,12 @@ try {
             <div class="admin-card-title"><?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?></div>
             <div class="admin-card-company"><?php echo htmlspecialchars($v['empresa'], ENT_QUOTES, 'UTF-8') ?><?php echo $v['localizacao'] ? ' • ' . htmlspecialchars($v['localizacao'], ENT_QUOTES, 'UTF-8') : '' ?></div>
           </div>
+          <form method="post" style="margin:0">
+            <input type="hidden" name="toggle_favorita_id" value="<?php echo (int)$v['id'] ?>">
+            <button type="submit" class="btn-favorite <?php echo !empty($v['is_favorita']) ? 'active' : '' ?>" title="<?php echo !empty($v['is_favorita']) ? 'Remover dos favoritos' : 'Favoritar vaga' ?>">
+              <?php echo !empty($v['is_favorita']) ? '★ Favorita' : '☆ Favoritar' ?>
+            </button>
+          </form>
         </div>
         <div class="admin-card-meta">
           <span style="background:#e2e8f0;color:#0f172a;font-weight:700;padding:2px 8px;border-radius:4px;font-size:12px;font-family:monospace">ID: #<?php echo (int)$v['id'] ?></span>
@@ -1951,6 +2092,12 @@ try {
             <span class="badge badge-<?php echo htmlspecialchars(strtolower($v['modelo_trabalho']), ENT_QUOTES, 'UTF-8') === 'remote' ? 'remote' : (strtolower($v['modelo_trabalho']) === 'hybrid' ? 'hybrid' : 'onsite') ?>"><?php echo htmlspecialchars($v['modelo_trabalho'], ENT_QUOTES, 'UTF-8') ?></span>
           <?php endif; ?>
           <span class="badge-status <?php echo $v['status'] ?>"><?php echo $v['status'] === 'ativa' ? 'Ativa' : 'Inativa' ?></span>
+          <?php if (!empty($v['is_favorita'])): ?>
+            <span class="badge-favorita">⭐ Favorita</span>
+          <?php endif; ?>
+          <?php if (!empty($v['is_premium'])): ?>
+            <span style="background:linear-gradient(135deg,#7e22ce,#a855f7);color:#fff;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">Premium 🚀</span>
+          <?php endif; ?>
           <?php if (!empty($v['agendado_ativar_em'])): ?>
             <span class="badge-agendado-ativar">🚀 Ativar <?php echo agendarTempoRestante($v['agendado_ativar_em']) ?></span>
           <?php endif; ?>
@@ -1972,10 +2119,16 @@ try {
           <p style="font-size:14px;line-height:20px;color:#45464d;margin-top:12px"><?php echo htmlspecialchars(mb_substr($v['resumo'], 0, 200), ENT_QUOTES, 'UTF-8') ?><?php echo mb_strlen($v['resumo']) > 200 ? '...' : '' ?></p>
         <?php endif; ?>
         <div class="admin-card-actions">
-          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $statusParam . $qParam . $categoriasParam ?>" style="font-size:13px;font-weight:600;padding:7px 18px;border-radius:0.5rem;border:1px solid #4b41e1;color:#4b41e1;background:transparent;text-decoration:none;display:inline-flex;align-items:center">Editar</a>
+          <form method="post" style="margin:0">
+            <input type="hidden" name="toggle_favorita_id" value="<?php echo (int)$v['id'] ?>">
+            <button type="submit" class="btn-favorite <?php echo !empty($v['is_favorita']) ? 'active' : '' ?>">
+              <?php echo !empty($v['is_favorita']) ? '★ Favorita' : '☆ Favoritar' ?>
+            </button>
+          </form>
+          <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $statusParam . $qParam . $categoriasParam ?>" class="btn-action-edit">✏️ Editar</a>
           <form method="post" style="margin:0">
             <input type="hidden" name="toggle_id" value="<?php echo (int)$v['id'] ?>">
-            <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? 'Inativar' : 'Ativar' ?></button>
+            <button type="submit" class="btn-toggle <?php echo $v['status'] === 'ativa' ? 'inativar' : 'ativar' ?>"><?php echo $v['status'] === 'ativa' ? '🔴 Inativar' : '🟢 Ativar' ?></button>
           </form>
           <?php if (!empty($v['agendado_ativar_em']) || !empty($v['agendado_desativar_em'])): ?>
             <form method="post" style="margin:0">
@@ -1986,10 +2139,10 @@ try {
           <?php if (!empty($v['vaga_id_externo'])): 
             $linkListPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
           ?>
-            <a href="<?php echo $linkListPath ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">
-              <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar Link' ?>
+            <a href="<?php echo $linkListPath ?>" target="_blank" class="btn-action-view">
+              👁️ <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar' ?>
             </a>
-            <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkListPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:7px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:0.5rem;cursor:pointer;color:#334155">📋 Copiar Link</button>
+            <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkListPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" class="btn-action-copy">📋 Copiar Link</button>
           <?php endif; ?>
         </div>
       </div>
@@ -2024,6 +2177,9 @@ try {
   <template id="batch-bar-tpl">
     <label class="batch-select-all"><input type="checkbox" class="select-all"> Selecionar todas</label>
     <span class="batch-count">0 selecionadas</span>
+    <button type="button" class="btn-favorite active" onclick="batchToggle('favoritar')" style="padding:6px 12px;font-size:12px">⭐ Favoritar</button>
+    <button type="button" class="btn-favorite" onclick="batchToggle('desfavoritar')" style="padding:6px 12px;font-size:12px">☆ Desfavoritar</button>
+    <span style="border-left:1px solid #ccc;height:24px;margin:0 4px"></span>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
     <button type="button" class="btn-toggle ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('remover')">Remover Selecionadas</button>
@@ -2144,7 +2300,7 @@ try {
       ids.push(cb.value);
     });
     if (!ids.length) return alert('Selecione ao menos uma vaga.');
-    var msgs = { inativar: 'Inativar', ativar: 'Ativar', remover: 'Remover da lista de novas', cancelar_agendamento: 'Cancelar agendamentos de' };
+    var msgs = { inativar: 'Inativar', ativar: 'Ativar', remover: 'Remover da lista de novas', cancelar_agendamento: 'Cancelar agendamentos de', favoritar: 'Favoritar', desfavoritar: 'Desfavoritar' };
     var msg = msgs[action] || action;
     if (!confirm(msg + ' ' + ids.length + ' vaga(s)?')) return;
     document.getElementById('batch-ids').value = ids.join(',');

@@ -16,7 +16,7 @@ class PagBankService
     public function __construct()
     {
         $pagbankConfig = Config::get('pagbank', []);
-        $this->token = $pagbankConfig['token'] ?? '';
+        $this->token = trim($pagbankConfig['token'] ?? '');
         $this->env = $pagbankConfig['env'] ?? 'sandbox';
         $this->precoVaga = (float)($pagbankConfig['preco_vaga_premium'] ?? 49.90);
         $this->validadePixMinutos = (int)($pagbankConfig['validade_pix_minutos'] ?? 30);
