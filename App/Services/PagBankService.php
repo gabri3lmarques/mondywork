@@ -54,11 +54,13 @@ class PagBankService
         $customerName = mb_substr($customerName, 0, 30);
 
         $host = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
-        if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) {
+        $hostOnly = preg_replace('/:\d+$/', '', $host);
+
+        // PagBank EXIGE HTTPS para notification_urls e valida o domínio na whitelist
+        if (strpos($hostOnly, 'localhost') !== false || strpos($hostOnly, '127.0.0.1') !== false || filter_var($hostOnly, FILTER_VALIDATE_IP) || strpos($hostOnly, 'mondywork.com.br') === false) {
             $notificationUrl = "https://mondywork.com.br/api.php?action=pagbank_webhook";
         } else {
-            $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-            $notificationUrl = "{$scheme}://{$host}/api.php?action=pagbank_webhook";
+            $notificationUrl = "https://{$hostOnly}/api.php?action=pagbank_webhook";
         }
 
         $payload = [

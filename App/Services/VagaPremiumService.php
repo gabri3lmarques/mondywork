@@ -42,85 +42,82 @@ class VagaPremiumService
         $magicToken = bin2hex(random_bytes(24));
         $resumo = mb_substr(strip_tags($descricao), 0, 250) . '...';
 
-        // Insert vaga in inativa status until payment is confirmed
-        $stmt = $this->pdo->prepare("INSERT INTO vagas (
-            vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, 
-            url_vaga, descricao, resumo, status, is_premium, 
-            email_recrutador, magic_token, status_pagamento, origem, area, criado_em, criado_via
-        ) VALUES (
-            :vaga_id_externo, :titulo, :empresa, :localizacao, :modelo_trabalho, 
-            :url_vaga, :descricao, :resumo, 'inativa', 1, 
-            :email_recrutador, :magic_token, 'pendente', 'nacional', :area, NOW(), 'form_direto'
-        )");
+        $this->pdo->beginTransaction();
+        try {
+            // Insert vaga em status inativa até que o pagamento Pix seja confirmado
+            $stmt = $this->pdo->prepare("INSERT INTO vagas (
+                vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, 
+                url_vaga, descricao, resumo, status, is_premium, 
+                email_recrutador, magic_token, status_pagamento, origem, area
+            ) VALUES (
+                :vaga_id_externo, :titulo, :empresa, :localizacao, :modelo_trabalho, 
+                :url_vaga, :descricao, :resumo, 'inativa', 1, 
+                :email_recrutador, :magic_token, 'pendente', 'nacional', :area
+            )");
 
-        // Note: verify if criado_em or criado_via columns exist or if using standard columns
-        // Let's use standard table structure matching setupSchema
-        $stmt = $this->pdo->prepare("INSERT INTO vagas (
-            vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, 
-            url_vaga, descricao, resumo, status, is_premium, 
-            email_recrutador, magic_token, status_pagamento, origem, area
-        ) VALUES (
-            :vaga_id_externo, :titulo, :empresa, :localizacao, :modelo_trabalho, 
-            :url_vaga, :descricao, :resumo, 'inativa', 1, 
-            :email_recrutador, :magic_token, 'pendente', 'nacional', :area
-        )");
+            $stmt->execute([
+                ':vaga_id_externo' => $vagaIdExterno,
+                ':titulo'          => $titulo,
+                ':empresa'         => $empresa,
+                ':localizacao'     => $localizacao,
+                ':modelo_trabalho' => $modeloTrabalho,
+                ':url_vaga'        => $urlVaga,
+                ':descricao'       => $descricao,
+                ':resumo'          => $resumo,
+                ':email_recrutador'=> $emailRecrutador,
+                ':magic_token'     => $magicToken,
+                ':area'            => $area
+            ]);
 
-        $stmt->execute([
-            ':vaga_id_externo' => $vagaIdExterno,
-            ':titulo'          => $titulo,
-            ':empresa'         => $empresa,
-            ':localizacao'     => $localizacao,
-            ':modelo_trabalho' => $modeloTrabalho,
-            ':url_vaga'        => $urlVaga,
-            ':descricao'       => $descricao,
-            ':resumo'          => $resumo,
-            ':email_recrutador'=> $emailRecrutador,
-            ':magic_token'     => $magicToken,
-            ':area'            => $area
-        ]);
+            $vagaId  = (int)$this->pdo->lastInsertId();
 
-        $vagaId  = (int)$this->pdo->lastInsertId();
+            $cpfCnpj = trim($dados['cpf_cnpj'] ?? ($dados['tax_id'] ?? ''));
 
-        $cpfCnpj = trim($dados['cpf_cnpj'] ?? ($dados['tax_id'] ?? ''));
+            // Generate Pix payment via PagBank API
+            $pixData = $this->pagBankService->criarCobrancaPix($vagaId, $titulo, $empresa, $emailRecrutador, $cpfCnpj);
 
-        // Generate Pix payment via PagBank API
-        $pixData = $this->pagBankService->criarCobrancaPix($vagaId, $titulo, $empresa, $emailRecrutador, $cpfCnpj);
+            // Update vaga with pagbank_order_id
+            $upStmt = $this->pdo->prepare("UPDATE vagas SET pagbank_order_id = :order_id WHERE id = :id");
+            $upStmt->execute([':order_id' => $pixData['order_id'], ':id' => $vagaId]);
 
+            // Insert into pedidos_pix
+            $pedStmt = $this->pdo->prepare("INSERT INTO pedidos_pix (
+                vaga_id, pagbank_order_id, reference_id, valor, qr_code_text, 
+                qr_code_image, email_recrutador, status, expiration_date
+            ) VALUES (
+                :vaga_id, :order_id, :ref_id, :valor, :qr_text, 
+                :qr_img, :email, 'PENDING', :exp_date
+            )");
 
+            $pedStmt->execute([
+                ':vaga_id'   => $vagaId,
+                ':order_id'  => $pixData['order_id'],
+                ':ref_id'    => $pixData['reference_id'],
+                ':valor'     => $pixData['valor'],
+                ':qr_text'   => $pixData['qr_code_text'],
+                ':qr_img'    => $pixData['qr_code_image'],
+                ':email'     => $emailRecrutador,
+                ':exp_date'  => $pixData['expiration_date']
+            ]);
 
-        // Update vaga with pagbank_order_id
-        $upStmt = $this->pdo->prepare("UPDATE vagas SET pagbank_order_id = :order_id WHERE id = :id");
-        $upStmt->execute([':order_id' => $pixData['order_id'], ':id' => $vagaId]);
+            $this->pdo->commit();
 
-        // Insert into pedidos_pix
-        $pedStmt = $this->pdo->prepare("INSERT INTO pedidos_pix (
-            vaga_id, pagbank_order_id, reference_id, valor, qr_code_text, 
-            qr_code_image, email_recrutador, status, expiration_date
-        ) VALUES (
-            :vaga_id, :order_id, :ref_id, :valor, :qr_text, 
-            :qr_img, :email, 'PENDING', :exp_date
-        )");
+            $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
+            $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+            $scheme = $isHttps ? 'https' : 'http';
+            $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token={$magicToken}";
 
-        $pedStmt->execute([
-            ':vaga_id'   => $vagaId,
-            ':order_id'  => $pixData['order_id'],
-            ':ref_id'    => $pixData['reference_id'],
-            ':valor'     => $pixData['valor'],
-            ':qr_text'   => $pixData['qr_code_text'],
-            ':qr_img'    => $pixData['qr_code_image'],
-            ':email'     => $emailRecrutador,
-            ':exp_date'  => $pixData['expiration_date']
-        ]);
-
-        $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
-        $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-        $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token={$magicToken}";
-
-        return array_merge($pixData, [
-            'vaga_id'     => $vagaId,
-            'magic_token' => $magicToken,
-            'magic_url'   => $magicUrl
-        ]);
+            return array_merge($pixData, [
+                'vaga_id'     => $vagaId,
+                'magic_token' => $magicToken,
+                'magic_url'   => $magicUrl
+            ]);
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
