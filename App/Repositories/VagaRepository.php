@@ -35,7 +35,7 @@ class VagaRepository
 
     public function countActive(string $origem = 'nacional'): int
     {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND origem = :origem");
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM vagas WHERE status = 'ativa' AND is_nao_listada = 0 AND origem = :origem");
         $stmt->execute([':origem' => $origem]);
         return (int)$stmt->fetchColumn();
     }
@@ -44,7 +44,7 @@ class VagaRepository
     {
         $stmt = $this->pdo->prepare("
             SELECT * FROM vagas 
-            WHERE status = 'ativa' AND origem = :origem 
+            WHERE status = 'ativa' AND is_nao_listada = 0 AND origem = :origem 
             ORDER BY publicado_em DESC, id DESC 
             LIMIT :limit OFFSET :offset
         ");

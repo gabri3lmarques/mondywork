@@ -35,9 +35,9 @@ try {
 
     $todasCategorias = $pdo->query("SELECT DISTINCT categoria FROM blog_posts WHERE status='publicado' AND lang='pt' AND categoria IS NOT NULL AND categoria != '' ORDER BY categoria")->fetchAll(PDO::FETCH_COLUMN);
 
-    $totalVagas = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE status='ativa'")->fetchColumn();
+    $totalVagas = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE status='ativa' AND is_nao_listada = 0")->fetchColumn();
     $totalArtigos = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts WHERE status='publicado' AND lang='pt'")->fetchColumn();
-    $empresas = (int)$pdo->query("SELECT COUNT(DISTINCT empresa) FROM vagas WHERE status='ativa'")->fetchColumn();
+    $empresas = (int)$pdo->query("SELECT COUNT(DISTINCT empresa) FROM vagas WHERE status='ativa' AND is_nao_listada = 0")->fetchColumn();
 } catch (Exception $e) {
     $posts = [];
     $total = 0;

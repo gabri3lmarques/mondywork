@@ -91,7 +91,21 @@ class PagBankService
         ];
 
 
-        $response = $this->request('POST', '/orders', $payload);
+        try {
+            $response = $this->request('POST', '/orders', $payload);
+        } catch (Exception $e) {
+            // Se for ambiente Sandbox/Dev e o PagBank retornar erro de whitelist 403,
+            // gera Pix simulado de teste para permitir homologação sem travar
+            if ($this->env !== 'production' && (strpos($e->getMessage(), '403') !== false || strpos($e->getMessage(), 'whitelist') !== false)) {
+                return $this->gerarPixSimuladoDev($vagaId, $emailRecrutador);
+            }
+
+            if (strpos($e->getMessage(), '403') !== false || strpos($e->getMessage(), 'whitelist') !== false) {
+                throw new Exception("A API do PagBank retornou erro 403 (Whitelist/Permissão). Se você está usando uma chave de PRODUÇÃO, altere 'env' => 'production' no config.php. Caso a chave seja de Sandbox, solicite a liberação da API de Pedidos /orders no suporte do PagBank.");
+            }
+
+            throw $e;
+        }
 
         if (!isset($response['id']) || !isset($response['qr_codes'][0])) {
             $errorMsg = 'Erro desconhecido ao gerar Pix no PagBank.';
@@ -153,7 +167,8 @@ class PagBankService
         $headers = [
             'Authorization: Bearer ' . $this->token,
             'Content-Type: application/json',
-            'Accept: application/json'
+            'Accept: application/json',
+            'User-Agent: MondyWork/1.0 (https://mondywork.com.br)'
         ];
 
         $ch = curl_init($url);
@@ -186,7 +201,7 @@ class PagBankService
                     $errs[] = $param ? "{$param}: {$desc}" : $desc;
                 }
             }
-            $msg = !empty($errs) ? implode(' | ', $errs) : "HTTP Code {$httpCode}";
+            $msg = !empty($errs) ? implode(' | ', $errs) : (is_string($responseBody) && trim($responseBody) !== '' ? trim(strip_tags($responseBody)) : "HTTP Code {$httpCode}");
             throw new Exception("Erro PagBank API ({$httpCode}): {$msg}");
         }
 

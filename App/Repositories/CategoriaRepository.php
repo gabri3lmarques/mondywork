@@ -27,7 +27,7 @@ class CategoriaRepository
                 (SELECT COUNT(*) 
                  FROM vaga_categorias vc 
                  JOIN vagas v ON v.id = vc.vaga_id 
-                 WHERE vc.categoria_id = c.id AND v.status = 'ativa') AS total_ativas
+                 WHERE vc.categoria_id = c.id AND v.status = 'ativa' AND v.is_nao_listada = 0) AS total_ativas
             FROM categorias c 
             ORDER BY c.nome_pt ASC
         ";

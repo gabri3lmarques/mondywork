@@ -14,7 +14,7 @@ try {
     require_once __DIR__ . '/../lib/Database.php';
     setupSchema($pdo);
 
-    $where = "WHERE v.status = 'ativa' AND v.origem = 'nacional'";
+    $where = "WHERE v.status = 'ativa' AND v.is_nao_listada = 0 AND v.origem = 'nacional'";
     $params = [];
     if ($filterModelo) {
         $where .= " AND v.modelo_trabalho = :modelo";

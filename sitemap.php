@@ -13,7 +13,7 @@ try {
     $stmtBlog = $pdo->query("SELECT slug, published_at FROM blog_posts WHERE status = 'publicado' ORDER BY published_at DESC");
     $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtVagas = $pdo->query("SELECT vaga_id_externo, publicado_em, origem FROM vagas WHERE status = 'ativa' ORDER BY publicado_em DESC");
+    $stmtVagas = $pdo->query("SELECT vaga_id_externo, publicado_em, origem FROM vagas WHERE status = 'ativa' AND is_nao_listada = 0 ORDER BY publicado_em DESC");
     $vagas = $stmtVagas->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $blogPosts = [];

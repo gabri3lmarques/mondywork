@@ -50,7 +50,7 @@ function corrigirQueryFuzzy($query, $pdo) {
 
     if (count($palavras) <= 1) return [$query, false];
 
-    $stmt = $pdo->query("SELECT DISTINCT titulo FROM vagas WHERE status = 'ativa' AND titulo IS NOT NULL AND titulo != ''");
+    $stmt = $pdo->query("SELECT DISTINCT titulo FROM vagas WHERE status = 'ativa' AND is_nao_listada = 0 AND titulo IS NOT NULL AND titulo != ''");
     $titulos = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     $dicionario = [];
@@ -196,7 +196,7 @@ try {
         }
     }
 
-    $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, descricao, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em, area, is_premium, status_pagamento";
+    $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, descricao, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em, area, is_premium, status_pagamento, is_nao_listada";
 
 
     // --- Vaga individual (sem cache) ---
@@ -246,7 +246,7 @@ try {
     }
 
     $fromBase = "FROM vagas{$extraJoins}";
-    $whereBase = "WHERE vagas.status = 'ativa' AND vagas.origem = :origem{$extraWhere}";
+    $whereBase = "WHERE vagas.status = 'ativa' AND vagas.is_nao_listada = 0 AND vagas.origem = :origem{$extraWhere}";
     $useSubquery = $categoria !== '' || $modelo !== '' || $area !== '';
 
     // Helper: build a subquery that finds matching vagas.id when JOINs are needed

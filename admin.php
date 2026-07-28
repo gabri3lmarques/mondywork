@@ -75,6 +75,12 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             } elseif ($_POST['batch_action'] === 'desfavoritar') {
                 $stmt = $pdo->prepare("UPDATE vagas SET is_favorita = 0 WHERE id IN ($placeholders)");
                 $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'nao_listada') {
+                $stmt = $pdo->prepare("UPDATE vagas SET is_nao_listada = 1 WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'listada') {
+                $stmt = $pdo->prepare("UPDATE vagas SET is_nao_listada = 0 WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
             } elseif ($_POST['batch_action'] === 'cancelar_agendamento') {
                 $stmt = $pdo->prepare("UPDATE vagas SET agendado_ativar_em = NULL, agendado_desativar_em = NULL WHERE id IN ($placeholders)");
                 $stmt->execute($ids);
@@ -110,6 +116,16 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
                 $stmt->execute(array_merge([$targetStatus, $targetStatus], $ids));
             }
         }
+    } catch (Exception $e) {}
+    header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
+    exit;
+}
+
+if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_nao_listada_id'])) {
+    try {
+        $pdo = conectarBanco($config);
+        $stmt = $pdo->prepare("UPDATE vagas SET is_nao_listada = IF(is_nao_listada = 1, 0, 1) WHERE id = :id");
+        $stmt->execute([':id' => (int)$_POST['toggle_nao_listada_id']]);
     } catch (Exception $e) {}
     header('Location: admin.php?page=' . ((int)($_GET['page'] ?? 1)) . $redirectTab . $redirectNs . $redirectMostrar . $origemParam . $statusParam . $qParam);
     exit;
@@ -345,19 +361,22 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar
 
         $primeiraArea = !empty($categoriasSlugs) ? $categoriasSlugs[0] : null;
 
-        $setParts = ['titulo = :titulo', 'empresa = :empresa', 'localizacao = :local', 'modelo_trabalho = :modelo', 'url_vaga = :url', 'descricao = :desc', 'resumo = :resumo', 'origem = :origem', 'area = :area', 'status = :status'];
+        $isNaoListada = !empty($_POST['is_nao_listada']) ? 1 : 0;
+
+        $setParts = ['titulo = :titulo', 'empresa = :empresa', 'localizacao = :local', 'modelo_trabalho = :modelo', 'url_vaga = :url', 'descricao = :desc', 'resumo = :resumo', 'origem = :origem', 'area = :area', 'status = :status', 'is_nao_listada = :is_nao_listada'];
         $params = [
-            ':id'      => $id,
-            ':titulo'  => $titulo,
-            ':empresa' => $empresa,
-            ':local'   => $localizacao ?: null,
-            ':modelo'  => $modeloTrabalho ?: null,
-            ':url'     => $urlVaga ?: null,
-            ':desc'    => $descricao,
-            ':resumo'  => $resumo,
-            ':origem'  => $origem,
-            ':area'    => $primeiraArea,
-            ':status'  => $status,
+            ':id'             => $id,
+            ':titulo'         => $titulo,
+            ':empresa'        => $empresa,
+            ':local'          => $localizacao ?: null,
+            ':modelo'         => $modeloTrabalho ?: null,
+            ':url'            => $urlVaga ?: null,
+            ':desc'           => $descricao,
+            ':resumo'         => $resumo,
+            ':origem'         => $origem,
+            ':area'           => $primeiraArea,
+            ':status'         => $status,
+            ':is_nao_listada' => $isNaoListada,
         ];
 
         if (isset($_POST['is_premium'])) {
@@ -820,7 +839,7 @@ try {
 
     $totalPages = $totalVagas > 0 ? (int)ceil($totalVagas / $limit) : 1;
 
-    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em, vagas.is_premium, vagas.is_favorita, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.area, vagas.publicado_em, vagas.agendado_ativar_em, vagas.agendado_desativar_em, vagas.is_premium, vagas.is_favorita, vagas.is_nao_listada, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id" . $where . " GROUP BY vagas.id ORDER BY vagas.publicado_em DESC, vagas.data_coleta DESC LIMIT :limit OFFSET :offset");
 
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -1229,6 +1248,12 @@ try {
           <textarea name="resumo" class="admin-search-input" style="width:100%;min-height:60px;resize:vertical" placeholder="Breve resumo da vaga..."><?php echo htmlspecialchars($vagaEditar['resumo'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
         </div>
       </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;">
+        <label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#92400e;cursor:pointer;">
+          <input type="checkbox" name="is_nao_listada" value="1" <?php echo !empty($vagaEditar['is_nao_listada']) ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:#d97706;">
+          <span>🔒 Vaga Não Listada (Acessível via link direto, mas Oculta das listas públicas e buscas do site)</span>
+        </label>
+      </div>
 
       <div>
         <label style="display:block;font-size:14px;font-weight:600;margin-bottom:4px;color:#0b1c30">Descrição (HTML)</label>
@@ -1451,7 +1476,7 @@ try {
       $novasWhere .= " AND status = " . $pdo->quote($novasStatusFilter);
   }
 
-  $stmtNovas = $pdo->query("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.publicado_em, vagas.created_at, vagas.is_premium, vagas.is_favorita, DATE_FORMAT(vagas.created_at, '%d/%m/%Y %H:%i') as created_at_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id WHERE {$novasWhere} GROUP BY vagas.id ORDER BY vagas.created_at DESC");
+  $stmtNovas = $pdo->query("SELECT vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.descricao, vagas.resumo, vagas.status, vagas.origem, vagas.publicado_em, vagas.created_at, vagas.is_premium, vagas.is_favorita, vagas.is_nao_listada, DATE_FORMAT(vagas.created_at, '%d/%m/%Y %H:%i') as created_at_fmt, GROUP_CONCAT(DISTINCT c.nome_pt ORDER BY c.nome_pt SEPARATOR ', ') as tags_str FROM vagas LEFT JOIN vaga_categorias vc ON vc.vaga_id = vagas.id LEFT JOIN categorias c ON c.id = vc.categoria_id WHERE {$novasWhere} GROUP BY vagas.id ORDER BY vagas.created_at DESC");
   $novasVagas = $stmtNovas->fetchAll(PDO::FETCH_ASSOC);
 
   $totalNovas = count($novasVagas);
@@ -2095,6 +2120,9 @@ try {
           <?php if (!empty($v['is_favorita'])): ?>
             <span class="badge-favorita">⭐ Favorita</span>
           <?php endif; ?>
+          <?php if (!empty($v['is_nao_listada'])): ?>
+            <span style="background:#fef3c7;color:#92400e;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px;border:1px solid #fde68a;">🔒 Não Listada</span>
+          <?php endif; ?>
           <?php if (!empty($v['is_premium'])): ?>
             <span style="background:linear-gradient(135deg,#7e22ce,#a855f7);color:#fff;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px">Premium 🚀</span>
           <?php endif; ?>
@@ -2123,6 +2151,12 @@ try {
             <input type="hidden" name="toggle_favorita_id" value="<?php echo (int)$v['id'] ?>">
             <button type="submit" class="btn-favorite <?php echo !empty($v['is_favorita']) ? 'active' : '' ?>">
               <?php echo !empty($v['is_favorita']) ? '★ Favorita' : '☆ Favoritar' ?>
+            </button>
+          </form>
+          <form method="post" style="margin:0">
+            <input type="hidden" name="toggle_nao_listada_id" value="<?php echo (int)$v['id'] ?>">
+            <button type="submit" class="btn-toggle" style="<?php echo !empty($v['is_nao_listada']) ? 'background:#d97706;color:#fff;border-color:#b45309;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;' ?>" title="<?php echo !empty($v['is_nao_listada']) ? 'Tornar visível nas listas do site' : 'Ocultar das listas públicas do site' ?>">
+              <?php echo !empty($v['is_nao_listada']) ? '🔒 Não Listada' : '👁️ Listada' ?>
             </button>
           </form>
           <a href="admin.php?tab=editar&id=<?php echo (int)$v['id'] . $origemParam . $statusParam . $qParam . $categoriasParam ?>" class="btn-action-edit">✏️ Editar</a>
@@ -2182,6 +2216,8 @@ try {
     <span style="border-left:1px solid #ccc;height:24px;margin:0 4px"></span>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('inativar')">Inativar Selecionadas</button>
     <button type="button" class="btn-toggle ativar" onclick="batchToggle('ativar')">Ativar Selecionadas</button>
+    <button type="button" class="btn-toggle" onclick="batchToggle('nao_listada')" style="padding:6px 12px;font-size:12px;background:#d97706;color:#fff;border-color:#b45309;">🔒 Marcar Não Listada</button>
+    <button type="button" class="btn-toggle" onclick="batchToggle('listada')" style="padding:6px 12px;font-size:12px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">👁️ Marcar Listada</button>
     <button type="button" class="btn-toggle inativar" onclick="batchToggle('remover')">Remover Selecionadas</button>
     <span style="border-left:1px solid #ccc;height:24px;margin:0 4px"></span>
     <input type="datetime-local" class="batch-schedule-dt" style="font-size:12px;padding:4px 8px;border:1px solid #ccc;border-radius:4px;color:#0b1c30;background:#fff" title="Escolha a data e a hora do agendamento">

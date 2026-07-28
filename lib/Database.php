@@ -78,6 +78,9 @@ function setupSchema(PDO $pdo): void
     if (!in_array('is_favorita', $nomesColunas)) {
         $pdo->exec("ALTER TABLE vagas ADD COLUMN is_favorita TINYINT(1) DEFAULT 0 AFTER is_premium");
     }
+    if (!in_array('is_nao_listada', $nomesColunas)) {
+        $pdo->exec("ALTER TABLE vagas ADD COLUMN is_nao_listada TINYINT(1) DEFAULT 0 AFTER is_favorita");
+    }
     if (!in_array('destaque_ate', $nomesColunas)) {
         $pdo->exec("ALTER TABLE vagas ADD COLUMN destaque_ate DATETIME DEFAULT NULL AFTER is_premium");
     }
