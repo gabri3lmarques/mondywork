@@ -164,6 +164,25 @@ try {
             return;
         }
 
+        if ($action === 'configurar_webhook_efibank') {
+            try {
+                $efibankService = new \App\Services\EfibankService();
+                $host = $_SERVER['HTTP_HOST'] ?? 'mondywork.com';
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                // Para Efibank em produção, obriga HTTPS se não detectado
+                if ($scheme === 'http' && strpos($host, 'localhost') === false && strpos($host, '127.0.0.1') === false) {
+                    $scheme = 'https';
+                }
+                $webhookUrl = "{$scheme}://{$host}/api.php?action=efibank_webhook";
+                $res = $efibankService->configurarWebhook($webhookUrl);
+                echo json_encode(['success' => true, 'webhook_url' => $webhookUrl, 'efibank_response' => $res]);
+            } catch (\Throwable $e) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            }
+            return;
+        }
+
         if ($action === 'efibank_webhook' || $action === 'pagbank_webhook') {
             $rawInput = file_get_contents('php://input');
             $data = json_decode($rawInput, true) ?? [];

@@ -35,7 +35,7 @@ class EfibankService
     }
 
     /**
-     * Obter Token de Acesso OAuth2 da Efibank
+     * Obter Token de Acesso OAuth2 da Efibank (com Cache)
      */
     public function getAccessToken(): string
     {
@@ -45,6 +45,18 @@ class EfibankService
 
         if (!file_exists($this->certificatePath)) {
             throw new Exception("Certificado da Efibank não encontrado em: {$this->certificatePath}");
+        }
+
+        if (!function_exists('cacheGet')) {
+            @include_once __DIR__ . '/../../lib/Cache.php';
+        }
+
+        $cacheKey = 'efibank_token_' . md5($this->clientId . '_' . $this->env);
+        if (function_exists('cacheGet')) {
+            $cachedToken = cacheGet($cacheKey, 3500);
+            if (!empty($cachedToken['access_token']) && isset($cachedToken['expires_at']) && $cachedToken['expires_at'] > time() + 60) {
+                return $cachedToken['access_token'];
+            }
         }
 
         $url = $this->baseUrl . '/oauth/token';
@@ -83,7 +95,17 @@ class EfibankService
             throw new Exception("Erro de Autenticação Efibank ({$httpCode}): {$msg}");
         }
 
-        return $decoded['access_token'];
+        $token = $decoded['access_token'];
+        $expiresIn = (int)($decoded['expires_in'] ?? 3600);
+
+        if (function_exists('cacheSet')) {
+            cacheSet($cacheKey, [
+                'access_token' => $token,
+                'expires_at'   => time() + $expiresIn
+            ]);
+        }
+
+        return $token;
     }
 
     /**
@@ -177,17 +199,40 @@ class EfibankService
     }
 
     /**
+     * Configurar URL de Webhook na Efibank (PUT /v2/webhook/{chave})
+     */
+    public function configurarWebhook(string $webhookUrl): array
+    {
+        if (empty($this->chavePix)) {
+            throw new Exception("Chave Pix da Efibank não configurada.");
+        }
+
+        $token = $this->getAccessToken();
+
+        $endpoint = "/v2/webhook/" . urlencode($this->chavePix);
+        $payload = [
+            'webhookUrl' => $webhookUrl
+        ];
+
+        $headers = [
+            'x-skip-mtls-checking: true'
+        ];
+
+        return $this->request('PUT', $endpoint, $payload, $token, $headers);
+    }
+
+    /**
      * Requisição cURL genérica para a API Pix Efibank com Bearer token e Certificado PEM
      */
-    private function request(string $method, string $endpoint, ?array $payload = null, string $token = ''): array
+    private function request(string $method, string $endpoint, ?array $payload = null, string $token = '', array $extraHeaders = []): array
     {
         $url = $this->baseUrl . $endpoint;
 
-        $headers = [
+        $headers = array_merge([
             'Authorization: Bearer ' . $token,
             'Content-Type: application/json',
             'Accept: application/json'
-        ];
+        ], $extraHeaders);
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -213,7 +258,7 @@ class EfibankService
         $decoded = json_decode($responseBody, true) ?? [];
 
         if ($httpCode >= 400) {
-            $msg = $decoded['mensagem'] ?? ($decoded['nome'] ?? "HTTP Code {$httpCode}");
+            $msg = $decoded['mensagem'] ?? ($decoded['nome'] ?? ($decoded['error_description'] ?? "HTTP Code {$httpCode}"));
             throw new Exception("Erro API Efibank ({$httpCode}): {$msg}");
         }
 

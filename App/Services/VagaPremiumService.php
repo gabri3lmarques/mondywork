@@ -202,7 +202,7 @@ class VagaPremiumService
             try {
                 $cobranca = $this->efibankService->consultarCobranca($vaga['pagbank_order_id']);
                 $status = strtoupper($cobranca['status'] ?? 'ATIVA');
-                $temPix = !empty($cobranca['pix']) && is_array($cobranca['pix']);
+                $temPix = !empty($cobranca['pix']) && is_array($cobranca['pix']) && count($cobranca['pix']) > 0;
                 
                 if ($status === 'CONCLUIDA' || $status === 'PAID' || $status === 'APPROVED' || $temPix) {
                     $this->ativarVagaPagamentoConfirmado((int)$vaga['id'], $vaga['pagbank_order_id']);
@@ -214,7 +214,9 @@ class VagaPremiumService
                     ];
                 }
             } catch (Exception $e) {
-                // Silently return pending if request fails
+                $logDir = __DIR__ . '/../Logs';
+                if (!is_dir($logDir)) { @mkdir($logDir, 0755, true); }
+                @file_put_contents($logDir . '/efibank_error.log', date('Y-m-d H:i:s') . " - Erro ao verificar vaga {$vagaId}: " . $e->getMessage() . PHP_EOL, FILE_APPEND);
             }
         }
 
