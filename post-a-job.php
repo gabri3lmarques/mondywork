@@ -5,7 +5,7 @@ $localConfig = file_exists(__DIR__ . '/config.local.php') ? (require __DIR__ . '
 $config      = array_replace_recursive($prodConfig, $localConfig);
 
 
-$precoVaga = $config['pagbank']['preco_vaga_premium'] ?? 49.90;
+$precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['preco_vaga_premium'] ?? 49.90);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
