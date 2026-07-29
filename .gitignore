@@ -4,6 +4,7 @@ new_template.html
 add_nova_api.txt
 config.php
 env.txt~
+App/Certificates
 uploads/blog/*
 !uploads/blog/.gitkeep
 scripts

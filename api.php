@@ -164,14 +164,24 @@ try {
             return;
         }
 
-        if ($action === 'pagbank_webhook') {
+        if ($action === 'efibank_webhook' || $action === 'pagbank_webhook') {
             $rawInput = file_get_contents('php://input');
             $data = json_decode($rawInput, true) ?? [];
-            $orderId = $data['id'] ?? ($data['reference_id'] ?? '');
-            $chargesStatus = $data['charges'][0]['status'] ?? ($data['status'] ?? '');
-
-            if ($orderId && ($chargesStatus === 'PAID' || $chargesStatus === 'COMPLETED')) {
-                $vagaPremiumService->ativarVagaPagamentoConfirmado(0, $orderId);
+            
+            // Efibank Pix Webhook: {"pix": [ {"txid": "...", "valor": "..."} ]}
+            if (!empty($data['pix']) && is_array($data['pix'])) {
+                foreach ($data['pix'] as $pixItem) {
+                    $txid = $pixItem['txid'] ?? '';
+                    if (!empty($txid)) {
+                        $vagaPremiumService->ativarVagaPagamentoConfirmado(0, $txid);
+                    }
+                }
+            } else {
+                $orderId = $data['id'] ?? ($data['reference_id'] ?? ($data['txid'] ?? ''));
+                $status = $data['charges'][0]['status'] ?? ($data['status'] ?? '');
+                if ($orderId && ($status === 'PAID' || $status === 'COMPLETED' || $status === 'CONCLUIDA')) {
+                    $vagaPremiumService->ativarVagaPagamentoConfirmado(0, $orderId);
+                }
             }
             echo json_encode(['status' => 'ok']);
             return;

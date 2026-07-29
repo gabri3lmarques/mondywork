@@ -8,12 +8,12 @@ use Exception;
 class VagaPremiumService
 {
     private PDO $pdo;
-    private PagBankService $pagBankService;
+    private EfibankService $efibankService;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->pagBankService = new PagBankService();
+        $this->efibankService = new EfibankService();
     }
 
     /**
@@ -73,8 +73,8 @@ class VagaPremiumService
 
             $cpfCnpj = trim($dados['cpf_cnpj'] ?? ($dados['tax_id'] ?? ''));
 
-            // Generate Pix payment via PagBank API
-            $pixData = $this->pagBankService->criarCobrancaPix($vagaId, $titulo, $empresa, $emailRecrutador, $cpfCnpj);
+            // Generate Pix payment via Efibank API
+            $pixData = $this->efibankService->criarCobrancaPix($vagaId, $titulo, $empresa, $emailRecrutador, $cpfCnpj);
 
             // Update vaga with pagbank_order_id
             $upStmt = $this->pdo->prepare("UPDATE vagas SET pagbank_order_id = :order_id WHERE id = :id");
@@ -185,13 +185,13 @@ class VagaPremiumService
             return ['status' => 'PENDING'];
         }
 
-        // Consulta API do PagBank
+        // Consulta API da Efibank
         if (!empty($vaga['pagbank_order_id'])) {
             try {
-                $pedido = $this->pagBankService->consultarPedido($vaga['pagbank_order_id']);
-                $chargesStatus = $pedido['charges'][0]['status'] ?? ($pedido['status'] ?? 'PENDING');
+                $cobranca = $this->efibankService->consultarCobranca($vaga['pagbank_order_id']);
+                $status = $cobranca['status'] ?? 'ATIVA';
                 
-                if ($chargesStatus === 'PAID') {
+                if ($status === 'CONCLUIDA') {
                     $this->ativarVagaPagamentoConfirmado((int)$vaga['id'], $vaga['pagbank_order_id']);
                     $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
                     $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
