@@ -73,7 +73,7 @@ $ch = curl_init();
     );
     if (!empty($todasEmpresas)) {
         $placeholders = implode(',', array_fill(0, count($todasEmpresas), '?'));
-        $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE empresa NOT IN ($placeholders) AND status = 'ativa' AND vaga_id_externo NOT LIKE 'manual-%'");
+        $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE empresa NOT IN ($placeholders) AND status = 'ativa' AND vaga_id_externo NOT LIKE 'manual-%' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
         $stmt->execute($todasEmpresas);
         $afetadas = $stmt->rowCount();
         if ($afetadas > 0) {
@@ -82,7 +82,7 @@ $ch = curl_init();
     }
 
     // ── Inativar vagas ativas com mais de MAX_DIAS_VAGA dias ──
-    $stmtOld = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE status = 'ativa' AND publicado_em IS NOT NULL AND publicado_em < DATE_SUB(NOW(), INTERVAL ? DAY)");
+    $stmtOld = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE status = 'ativa' AND publicado_em IS NOT NULL AND publicado_em < DATE_SUB(NOW(), INTERVAL ? DAY) AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
     $stmtOld->execute([MAX_DIAS_VAGA]);
     $oldAffected = $stmtOld->rowCount();
     if ($oldAffected > 0) {
@@ -201,7 +201,7 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
             $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
             if (!empty($idsParaInativar)) {
                 $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
-                $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa'");
+                $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
                 $stmtInativar->execute(array_values($idsParaInativar));
                 echo " - " . count($idsParaInativar) . " vagas inativadas (encerram no site).\n";
             }
@@ -363,7 +363,7 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
         $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
         if (!empty($idsParaInativar)) {
             $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
-            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa'");
+            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
             $stmtInativar->execute(array_values($idsParaInativar));
             echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
         }
@@ -461,7 +461,7 @@ function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string
 
         if (!empty($idsParaInativar)) {
             $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
-            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa'");
+            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
             $stmtInativar->execute(array_values($idsParaInativar));
             echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
         }
@@ -581,7 +581,7 @@ function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
         $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
         if (!empty($idsParaInativar)) {
             $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
-            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa'");
+            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
             $stmtInativar->execute(array_values($idsParaInativar));
             echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
         }

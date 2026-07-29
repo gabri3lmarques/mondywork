@@ -218,8 +218,8 @@ class VagaPremiumService
     {
         if (empty($email)) return;
 
-        $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
-        $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+        $serverName = 'mondywork.com';
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token={$magicToken}";
 
         $subject = "🚀 Vaga Ativada com Sucesso - Mondy Work (" . $titulo . ")";
@@ -228,9 +228,9 @@ class VagaPremiumService
         <head>
           <title>Vaga Premium Ativada!</title>
         </head>
-        <body style='font-family: Arial, sans-serif; color: #333; line-height: 1.6; background-color: #f9f9f9; padding: 20px;'>
-          <div style='max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 30px; border: 1px solid #eee;'>
-            <h2 style='color: #6b21a8; margin-top: 0;'>Sua vaga está AO VIVO e em Destaque! 🚀</h2>
+        <body style='font-family: sans-serif; color: #333; line-height: 1.6; background-color: #f8fafc; padding: 20px;'>
+          <div style='max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 30px; border: 1px solid #e2e8f0;'>
+            <h2 style='color: #7e22ce; margin-top: 0;'>Sua vaga está AO VIVO e em Destaque! 🚀</h2>
             <p>Olá, representante da <strong>" . htmlspecialchars($empresa) . "</strong>!</p>
             <p>Confirmamos o pagamento da sua vaga <strong>" . htmlspecialchars($titulo) . "</strong> no Mondy Work. O anúncio já está destacado na plataforma pelo período de 30 dias.</p>
             
@@ -238,11 +238,11 @@ class VagaPremiumService
               <p style='margin: 0 0 10px 0; font-weight: bold; color: #581c87;'>🔗 Seu Magic Link de Gerenciamento:</p>
               <p style='margin: 0;'>Guarde este link para editar as informações ou encerrar a vaga quando desejar:</p>
               <p style='margin-top: 15px;'><a href='" . $magicUrl . "' style='background: #7e22ce; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 6px; display: inline-block; font-weight: bold;'>Gerenciar Vaga Agora</a></p>
+              <p style='font-size: 12px; color: #6b21a8; margin-top: 10px; word-break: break-all;'>Link direto: " . $magicUrl . "</p>
             </div>
             
-            <p style='font-size: 12px; color: #777;'>Ou copie o link: " . $magicUrl . "</p>
             <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
-            <p style='font-size: 13px; color: #999;'>Mondy Work - Plataforma de Vagas & Carreiras</p>
+            <p style='font-size: 13px; color: #94a3b8;'>Mondy Work - Plataforma de Vagas & Carreiras Tech</p>
           </div>
         </body>
         </html>
@@ -251,8 +251,14 @@ class VagaPremiumService
         $headers = [];
         $headers[] = 'MIME-Version: 1.0';
         $headers[] = 'Content-type: text/html; charset=utf-8';
-        $headers[] = 'From: Mondy Work <contato@' . $serverName . '>';
+        $headers[] = 'From: Mondy Work <contato@mondywork.com>';
+        $headers[] = 'Reply-To: contato@mondywork.com';
+        $headers[] = 'X-Mailer: PHP/' . phpversion();
 
-        @mail($email, $subject, $message, implode("\r\n", $headers));
+        $sent = @mail($email, $subject, $message, implode("\r\n", $headers), "-fcontato@mondywork.com");
+
+        $logDir = __DIR__ . '/../Logs';
+        if (!is_dir($logDir)) { @mkdir($logDir, 0755, true); }
+        @file_put_contents($logDir . '/email.log', date('Y-m-d H:i:s') . " - Mail to {$email} (" . ($sent ? 'SENT' : 'FAILED') . ")" . PHP_EOL, FILE_APPEND);
     }
 }
