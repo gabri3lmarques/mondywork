@@ -44,15 +44,17 @@ class VagaPremiumService
 
         $this->pdo->beginTransaction();
         try {
-            // Insert vaga em status inativa até que o pagamento Pix seja confirmado
+            // Insert vaga Premium como ativa com destaque inicial
             $stmt = $this->pdo->prepare("INSERT INTO vagas (
                 vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, 
                 url_vaga, descricao, resumo, status, is_premium, 
-                email_recrutador, magic_token, status_pagamento, origem, area
+                email_recrutador, magic_token, status_pagamento, origem, area,
+                is_nao_listada, publicado_em
             ) VALUES (
                 :vaga_id_externo, :titulo, :empresa, :localizacao, :modelo_trabalho, 
-                :url_vaga, :descricao, :resumo, 'inativa', 1, 
-                :email_recrutador, :magic_token, 'pendente', 'nacional', :area
+                :url_vaga, :descricao, :resumo, 'ativa', 1, 
+                :email_recrutador, :magic_token, 'pendente', 'nacional', :area,
+                0, NOW()
             )");
 
             $stmt->execute([
@@ -102,10 +104,13 @@ class VagaPremiumService
 
             $this->pdo->commit();
 
-            $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
+            $serverName = 'mondywork.com';
             $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
             $scheme = $isHttps ? 'https' : 'http';
             $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token={$magicToken}";
+
+            // Dispara e-mail imediato para o recrutador com o Magic Link
+            $this->enviarEmailMagicLink($emailRecrutador, $titulo, $empresa, $magicToken);
 
             return array_merge($pixData, [
                 'vaga_id'     => $vagaId,
