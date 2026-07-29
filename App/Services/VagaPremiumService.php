@@ -137,11 +137,12 @@ class VagaPremiumService
             return true; // já ativada previamente
         }
 
-        // Ativa vaga por 30 dias
+        // Ativa vaga por 30 dias e garante visibilidade na listagem
         $up = $this->pdo->prepare("UPDATE vagas SET 
             status = 'ativa', 
             is_premium = 1, 
             status_pagamento = 'pago', 
+            is_nao_listada = 0,
             publicado_em = NOW(), 
             destaque_ate = DATE_ADD(NOW(), INTERVAL 30 DAY) 
             WHERE id = :id");

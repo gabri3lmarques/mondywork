@@ -142,7 +142,7 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
                     ⏳ Aguardando pagamento em tempo real... <span id="pix-countdown" style="font-weight: 800; color: #7e22ce;">30:00</span>
                 </div>
 
-                <?php if (($config['pagbank']['env'] ?? 'sandbox') !== 'production'): ?>
+                <?php if (($config['efibank']['env'] ?? ($config['pagbank']['env'] ?? 'sandbox')) !== 'production'): ?>
                 <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; justify-content: center; gap: 10px;">
                     <!-- Botão de simular teste em ambiente sandbox/dev -->
                     <button type="button" id="btn-simular-pago" style="background: #f3e8ff; color: #6b21a8; border: 1px dashed #c084fc; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
@@ -327,6 +327,9 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
                     const res = await fetch('/api.php?action=verificar_pagamento&vaga_id=' + vagaId);
                     const data = await res.json();
                     if (data.status === 'PAID') {
+                        if (data.magic_url) {
+                            magicLinkInput.value = data.magic_url;
+                        }
                         showSuccess();
                     }
                 } catch(e) {}
