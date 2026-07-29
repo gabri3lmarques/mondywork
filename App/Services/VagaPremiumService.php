@@ -108,14 +108,16 @@ class VagaPremiumService
             $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
             $scheme = $isHttps ? 'https' : 'http';
             $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token={$magicToken}";
+            $vagaUrl  = "{$scheme}://{$serverName}/vaga/" . urlencode($vagaIdExterno);
 
-            // Dispara e-mail imediato para o recrutador com o Magic Link
-            $this->enviarEmailMagicLink($emailRecrutador, $titulo, $empresa, $magicToken);
+            // Dispara e-mail imediato para o recrutador com o Magic Link e o Link da Vaga
+            $this->enviarEmailMagicLink($emailRecrutador, $titulo, $empresa, $magicToken, $vagaIdExterno);
 
             return array_merge($pixData, [
                 'vaga_id'     => $vagaId,
                 'magic_token' => $magicToken,
-                'magic_url'   => $magicUrl
+                'magic_url'   => $magicUrl,
+                'vaga_url'    => $vagaUrl
             ]);
         } catch (\Throwable $e) {
             if ($this->pdo->inTransaction()) {
@@ -130,7 +132,7 @@ class VagaPremiumService
      */
     public function ativarVagaPagamentoConfirmado(int $vagaId, string $orderId): bool
     {
-        $stmt = $this->pdo->prepare("SELECT id, status_pagamento, email_recrutador, magic_token, titulo, empresa FROM vagas WHERE id = :id OR pagbank_order_id = :order_id LIMIT 1");
+        $stmt = $this->pdo->prepare("SELECT id, vaga_id_externo, status_pagamento, email_recrutador, magic_token, titulo, empresa FROM vagas WHERE id = :id OR pagbank_order_id = :order_id LIMIT 1");
         $stmt->execute([':id' => $vagaId, ':order_id' => $orderId]);
         $vaga = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -157,8 +159,8 @@ class VagaPremiumService
         $upPed = $this->pdo->prepare("UPDATE pedidos_pix SET status = 'PAID' WHERE vaga_id = :id OR pagbank_order_id = :order_id");
         $upPed->execute([':id' => $vaga['id'], ':order_id' => $orderId]);
 
-        // Dispara e-mail com Magic Link
-        $this->enviarEmailMagicLink($vaga['email_recrutador'], $vaga['titulo'], $vaga['empresa'], $vaga['magic_token']);
+        // Dispara e-mail com Magic Link e Link da vaga
+        $this->enviarEmailMagicLink($vaga['email_recrutador'], $vaga['titulo'], $vaga['empresa'], $vaga['magic_token'], $vaga['vaga_id_externo']);
 
         return true;
     }
@@ -168,7 +170,7 @@ class VagaPremiumService
      */
     public function verificarStatusPagamento(int $vagaId): array
     {
-        $stmt = $this->pdo->prepare("SELECT id, status, is_premium, status_pagamento, pagbank_order_id, magic_token FROM vagas WHERE id = :id LIMIT 1");
+        $stmt = $this->pdo->prepare("SELECT id, vaga_id_externo, status, is_premium, status_pagamento, pagbank_order_id, magic_token FROM vagas WHERE id = :id LIMIT 1");
         $stmt->execute([':id' => $vagaId]);
         $vaga = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -176,13 +178,17 @@ class VagaPremiumService
             return ['status' => 'NOT_FOUND'];
         }
 
+        $serverName = 'mondywork.com';
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token=" . $vaga['magic_token'];
+        $vagaUrl  = "{$scheme}://{$serverName}/vaga/" . urlencode($vaga['vaga_id_externo']);
+
         if ($vaga['status_pagamento'] === 'pago') {
-            $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
-            $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
             return [
                 'status'     => 'PAID',
                 'is_premium' => true,
-                'magic_url'  => "{$scheme}://{$serverName}/editar-vaga.php?token=" . $vaga['magic_token']
+                'magic_url'  => $magicUrl,
+                'vaga_url'   => $vagaUrl
             ];
         }
 
@@ -200,12 +206,11 @@ class VagaPremiumService
                 
                 if ($status === 'CONCLUIDA' || $status === 'PAID' || $status === 'APPROVED' || $temPix) {
                     $this->ativarVagaPagamentoConfirmado((int)$vaga['id'], $vaga['pagbank_order_id']);
-                    $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com';
-                    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
                     return [
                         'status'     => 'PAID',
                         'is_premium' => true,
-                        'magic_url'  => "{$scheme}://{$serverName}/editar-vaga.php?token=" . $vaga['magic_token']
+                        'magic_url'  => $magicUrl,
+                        'vaga_url'   => $vagaUrl
                     ];
                 }
             } catch (Exception $e) {
@@ -217,15 +222,15 @@ class VagaPremiumService
     }
 
     /**
-     * Envia e-mail nativo PHP com o Magic Link para a empresa
+     * Envia e-mail nativo PHP com o Magic Link e o Link da Vaga para a empresa
      */
-    private function enviarEmailMagicLink(string $email, string $titulo, string $empresa, string $magicToken): void
+    private function enviarEmailMagicLink(string $email, string $titulo, string $empresa, string $magicToken, string $vagaIdExterno = ''): void
     {
         if (empty($email)) return;
 
         $serverName = 'mondywork.com';
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token={$magicToken}";
+        $magicUrl = "https://{$serverName}/editar-vaga.php?token={$magicToken}";
+        $vagaUrl  = !empty($vagaIdExterno) ? "https://{$serverName}/vaga/" . urlencode($vagaIdExterno) : "https://{$serverName}/";
 
         $subject = "🚀 Vaga Ativada com Sucesso - Mondy Work (" . $titulo . ")";
         $message = "
@@ -238,12 +243,18 @@ class VagaPremiumService
             <h2 style='color: #7e22ce; margin-top: 0;'>Sua vaga está AO VIVO e em Destaque! 🚀</h2>
             <p>Olá, representante da <strong>" . htmlspecialchars($empresa) . "</strong>!</p>
             <p>Confirmamos o pagamento da sua vaga <strong>" . htmlspecialchars($titulo) . "</strong> no Mondy Work. O anúncio já está destacado na plataforma pelo período de 30 dias.</p>
+
+            <div style='background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 18px; border-radius: 8px; margin: 20px 0;'>
+              <p style='margin: 0 0 10px 0; font-weight: bold; color: #166534;'>🚀 Link da sua Vaga Publicada no Site:</p>
+              <p style='margin: 0;'><a href='" . $vagaUrl . "' style='background: #16a34a; color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 6px; display: inline-block; font-weight: bold;'>Ver Vaga Publicada no Site</a></p>
+              <p style='font-size: 12px; color: #15803d; margin-top: 8px; word-break: break-all;'>Link direto: " . $vagaUrl . "</p>
+            </div>
             
-            <div style='background-color: #f3e8ff; border: 1px solid #d8b4fe; padding: 20px; border-radius: 8px; margin: 25px 0;'>
+            <div style='background-color: #f3e8ff; border: 1px solid #d8b4fe; padding: 18px; border-radius: 8px; margin: 20px 0;'>
               <p style='margin: 0 0 10px 0; font-weight: bold; color: #581c87;'>🔗 Seu Magic Link de Gerenciamento:</p>
               <p style='margin: 0;'>Guarde este link para editar as informações ou encerrar a vaga quando desejar:</p>
-              <p style='margin-top: 15px;'><a href='" . $magicUrl . "' style='background: #7e22ce; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 6px; display: inline-block; font-weight: bold;'>Gerenciar Vaga Agora</a></p>
-              <p style='font-size: 12px; color: #6b21a8; margin-top: 10px; word-break: break-all;'>Link direto: " . $magicUrl . "</p>
+              <p style='margin-top: 10px;'><a href='" . $magicUrl . "' style='background: #7e22ce; color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 6px; display: inline-block; font-weight: bold;'>Gerenciar Vaga Agora</a></p>
+              <p style='font-size: 12px; color: #6b21a8; margin-top: 8px; word-break: break-all;'>Link de edição: " . $magicUrl . "</p>
             </div>
             
             <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>

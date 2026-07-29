@@ -248,6 +248,10 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
                 qrImg.src = data.qr_code_image || ('https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(data.qr_code_text));
                 pixCodeBox.textContent = data.qr_code_text;
                 magicLinkInput.value = data.magic_url;
+                if (data.vaga_url) {
+                    const btnVerVaga = document.getElementById('btn-ver-vaga-live');
+                    if (btnVerVaga) btnVerVaga.href = data.vaga_url;
+                }
 
                 // Exibe modal de Pix
                 stepPayment.style.display = 'block';
@@ -303,6 +307,10 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
                     if (data.magic_url) {
                         magicLinkInput.value = data.magic_url;
                     }
+                    if (data.vaga_url) {
+                        const btnVerVaga = document.getElementById('btn-ver-vaga-live');
+                        if (btnVerVaga) btnVerVaga.href = data.vaga_url;
+                    }
                 } catch(e) {}
                 showSuccess();
             });
@@ -351,6 +359,10 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
                     if (data.status === 'PAID') {
                         if (data.magic_url) {
                             magicLinkInput.value = data.magic_url;
+                        }
+                        if (data.vaga_url) {
+                            const btnVerVaga = document.getElementById('btn-ver-vaga-live');
+                            if (btnVerVaga) btnVerVaga.href = data.vaga_url;
                         }
                         showSuccess();
                     }
