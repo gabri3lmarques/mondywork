@@ -142,10 +142,6 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
                     ⏳ Aguardando pagamento em tempo real... <span id="pix-countdown" style="font-weight: 800; color: #7e22ce;">30:00</span>
                 </div>
 
-                <button type="button" id="btn-check-pix-now" style="margin-top: 14px; width: 100%; background: #16a34a; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
-                    ✅ Já Paguei no App do Banco / Confirmar Vaga 🚀
-                </button>
-
                 <?php if (($config['efibank']['env'] ?? ($config['pagbank']['env'] ?? 'sandbox')) !== 'production'): ?>
                 <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; justify-content: center; gap: 10px;">
                     <!-- Botão de simular teste em ambiente sandbox/dev -->
@@ -293,28 +289,6 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
             pixModal.style.display = 'none';
             stopPolling();
         });
-
-        // Botão Verificar Pagamento Agora
-        const btnCheckPixNow = document.getElementById('btn-check-pix-now');
-        if (btnCheckPixNow) {
-            btnCheckPixNow.addEventListener('click', async function() {
-                if (!currentVagaId) return;
-                btnCheckPixNow.disabled = true;
-                btnCheckPixNow.textContent = 'Verificando com o banco... ⏳';
-                try {
-                    const res = await fetch('/api.php?action=verificar_pagamento&vaga_id=' + currentVagaId);
-                    const data = await res.json();
-                    if (data.magic_url) {
-                        magicLinkInput.value = data.magic_url;
-                    }
-                    if (data.vaga_url) {
-                        const btnVerVaga = document.getElementById('btn-ver-vaga-live');
-                        if (btnVerVaga) btnVerVaga.href = data.vaga_url;
-                    }
-                } catch(e) {}
-                showSuccess();
-            });
-        }
 
         // Simular pagamento no Sandbox (caso o botão esteja no DOM)
         if (btnSimular) {
