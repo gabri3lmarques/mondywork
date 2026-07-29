@@ -189,12 +189,13 @@ class VagaPremiumService
         if (!empty($vaga['pagbank_order_id'])) {
             try {
                 $cobranca = $this->efibankService->consultarCobranca($vaga['pagbank_order_id']);
-                $status = $cobranca['status'] ?? 'ATIVA';
+                $status = strtoupper($cobranca['status'] ?? 'ATIVA');
+                $temPix = !empty($cobranca['pix']) && is_array($cobranca['pix']);
                 
-                if ($status === 'CONCLUIDA') {
+                if ($status === 'CONCLUIDA' || $status === 'PAID' || $status === 'APPROVED' || $temPix) {
                     $this->ativarVagaPagamentoConfirmado((int)$vaga['id'], $vaga['pagbank_order_id']);
-                    $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com.br';
-                    $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+                    $serverName = $_SERVER['HTTP_HOST'] ?? 'mondywork.com';
+                    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
                     return [
                         'status'     => 'PAID',
                         'is_premium' => true,

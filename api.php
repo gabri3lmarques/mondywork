@@ -168,6 +168,11 @@ try {
             $rawInput = file_get_contents('php://input');
             $data = json_decode($rawInput, true) ?? [];
             
+            // Log payload para depuração se a pasta de logs existir
+            $logDir = __DIR__ . '/App/Logs';
+            if (!is_dir($logDir)) { @mkdir($logDir, 0755, true); }
+            @file_put_contents($logDir . '/webhook.log', date('Y-m-d H:i:s') . " - " . $rawInput . PHP_EOL, FILE_APPEND);
+
             // Efibank Pix Webhook: {"pix": [ {"txid": "...", "valor": "..."} ]}
             if (!empty($data['pix']) && is_array($data['pix'])) {
                 foreach ($data['pix'] as $pixItem) {
@@ -178,8 +183,8 @@ try {
                 }
             } else {
                 $orderId = $data['id'] ?? ($data['reference_id'] ?? ($data['txid'] ?? ''));
-                $status = $data['charges'][0]['status'] ?? ($data['status'] ?? '');
-                if ($orderId && ($status === 'PAID' || $status === 'COMPLETED' || $status === 'CONCLUIDA')) {
+                $status = strtoupper($data['charges'][0]['status'] ?? ($data['status'] ?? ''));
+                if ($orderId && ($status === 'PAID' || $status === 'COMPLETED' || $status === 'CONCLUIDA' || $status === 'APPROVED')) {
                     $vagaPremiumService->ativarVagaPagamentoConfirmado(0, $orderId);
                 }
             }
