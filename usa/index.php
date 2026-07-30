@@ -364,6 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=1.8.0"></script>
+<script src="/js/app-exterior.js?v=2.2.0"></script>
 </body>
 </html>

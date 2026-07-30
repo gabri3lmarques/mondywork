@@ -220,6 +220,7 @@
     }
 
     function renderCard(v) {
+        var card = document.createElement('article');
         v.titulo = capitalizeTitle(v.titulo);
         const rawModelo = normalizarModelo(v.modelo_trabalho);
         const modelo = rawModelo ? formatModelo(rawModelo) : null;

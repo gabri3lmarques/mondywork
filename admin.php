@@ -69,6 +69,12 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['batch_
             if ($_POST['batch_action'] === 'remover') {
                 $stmt = $pdo->prepare("UPDATE vagas SET revisada_em = NOW() WHERE id IN ($placeholders) AND revisada_em IS NULL");
                 $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'tornar_premium') {
+                $stmt = $pdo->prepare("UPDATE vagas SET is_premium = 1, destaque_ate = DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
+            } elseif ($_POST['batch_action'] === 'remover_premium') {
+                $stmt = $pdo->prepare("UPDATE vagas SET is_premium = 0, destaque_ate = NULL WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
             } elseif ($_POST['batch_action'] === 'favoritar') {
                 $stmt = $pdo->prepare("UPDATE vagas SET is_favorita = 1 WHERE id IN ($placeholders)");
                 $stmt->execute($ids);
