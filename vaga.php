@@ -211,7 +211,7 @@ if ($vaga) {
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/vaga/<?= esc($vaga['vaga_id_externo']) ?>">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/job/<?= esc($vaga['vaga_id_externo']) ?>">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=2.2.0">
+<link rel="stylesheet" href="/css/style.css?v=2.2.1">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -254,13 +254,13 @@ gtag('config', 'G-RPQ9FFFNP1');
 
     <a href="<?= $isExterior ? '/usa/' : '/vagas/' ?>" class="job-card-btn" style="display: inline-flex; margin-bottom: 24px; text-decoration: none;">&larr; <?= $isExterior ? 'Back to jobs' : 'Voltar para vagas' ?></a>
 
-    <article class="vaga-page<?= !empty($vaga['is_premium']) ? ' vaga-page-premium' : '' ?>">
+    <article class="vaga-page">
    
       <header class="vaga-page-header">
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
           <h1 class="vaga-page-title" style="margin: 0;"><?= esc($vaga['titulo']) ?></h1>
           <?php if (!empty($vaga['is_premium'])): ?>
-            <span class="badge-destaque">Premium 🚀</span>
+            <span class="badge-destaque">Destaque 🚀</span>
           <?php endif; ?>
         </div>
         <p class="vaga-page-company" style="margin-top: 8px;"><?= esc($vaga['empresa']) ?></p>

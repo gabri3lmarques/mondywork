@@ -2588,13 +2588,6 @@ input { font-family: inherit; }
   box-shadow: 0 8px 25px rgba(126, 34, 206, 0.24) !important;
 }
 
-.vaga-page-premium {
-  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
-  border: 2px solid #7e22ce !important;
-  box-shadow: 0 6px 22px rgba(126, 34, 206, 0.16) !important;
-  border-radius: 16px;
-  padding: 24px;
-}
 
 .badge-destaque {
   display: inline-flex;
