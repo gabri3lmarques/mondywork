@@ -328,7 +328,10 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
             stopPolling();
             pollInterval = setInterval(async function() {
                 try {
-                    const res = await fetch('/api.php?action=verificar_pagamento&vaga_id=' + vagaId);
+                    const res = await fetch('/api.php?action=verificar_pagamento&vaga_id=' + vagaId + '&_t=' + Date.now(), {
+                        cache: 'no-store',
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
                     const data = await res.json();
                     if (data.status === 'PAID') {
                         if (data.magic_url) {

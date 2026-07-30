@@ -110,9 +110,6 @@ class VagaPremiumService
             $magicUrl = "{$scheme}://{$serverName}/editar-vaga.php?token={$magicToken}";
             $vagaUrl  = "{$scheme}://{$serverName}/vaga/" . urlencode($vagaIdExterno);
 
-            // Dispara e-mail imediato para o recrutador com o Magic Link e o Link da Vaga
-            $this->enviarEmailMagicLink($emailRecrutador, $titulo, $empresa, $magicToken, $vagaIdExterno);
-
             return array_merge($pixData, [
                 'vaga_id'     => $vagaId,
                 'magic_token' => $magicToken,
