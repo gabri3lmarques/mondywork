@@ -233,7 +233,7 @@
         card.setAttribute('data-vaga-id', v.vaga_id_externo);
 
         var destaqueBadge = isPremium
-            ? '<span class="badge-destaque">Destaque 🚀</span>'
+            ? '<span class="badge-destaque">Premium 🚀</span>'
             : '';
 
         var modeloHtml = modelo

@@ -14,7 +14,7 @@ $precoVaga = $config['efibank']['preco_vaga_premium'] ?? ($config['pagbank']['pr
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anunciar Vaga Premium - Mondy Work</title>
     <meta name="description" content="Anuncie sua vaga em destaque no Mondy Work. Destaque por 30 dias com cobrança Pix instantânea.">
-    <link rel="stylesheet" href="/css/style.css?v=2.1.0">
+    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">

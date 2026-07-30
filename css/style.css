@@ -2575,30 +2575,40 @@ input { font-family: inherit; }
 
 /* ===== VAGAS PREMIUM & DESTAQUE ===== */
 .job-card-premium {
-  background: #f8f3ff !important;
-  border: 1.5px solid #d8b4fe !important;
-  box-shadow: 0 4px 15px rgba(147, 51, 234, 0.08) !important;
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+  border: 2px solid #7e22ce !important;
+  box-shadow: 0 4px 18px rgba(126, 34, 206, 0.14) !important;
   position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .job-card-premium:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.15) !important;
+  transform: translateY(-3px);
+  border-color: #6b21a8 !important;
+  box-shadow: 0 8px 25px rgba(126, 34, 206, 0.24) !important;
+}
+
+.vaga-page-premium {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+  border: 2px solid #7e22ce !important;
+  box-shadow: 0 6px 22px rgba(126, 34, 206, 0.16) !important;
+  border-radius: 16px;
+  padding: 24px;
 }
 
 .badge-destaque {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%);
   color: #ffffff !important;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   padding: 4px 10px;
-  border-radius: 9999px;
-  box-shadow: 0 2px 8px rgba(126, 34, 206, 0.25);
-  letter-spacing: 0.3px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(126, 34, 206, 0.3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
