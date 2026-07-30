@@ -207,15 +207,20 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="job-grid">
       <div class="job-list" id="vagas-container">
 <?php foreach ($vagas as $idx => $v):
+    $isPrem = !empty($v['is_premium']);
     $modelo = $v['modelo_trabalho'] ? formatModelo($v['modelo_trabalho']) : null;
     $local = $v['localizacao'] ?: 'Remoto';
     $modeloLower = $modelo ? mb_strtolower($modelo) : '';
     $resumo = 'Vaga de ' . esc($v['titulo']) . ' na empresa ' . esc($v['empresa']) . ($modeloLower ? ', em modelo ' . $modeloLower : '') . '. Clique abaixo para ver os detalhes e se candidatar.';
     $badge = $modelo ? '<span class="' . badgeClass($v['modelo_trabalho']) . '">' . esc($modelo) . '</span>' : '';
+    $premiumBadge = $isPrem ? '<span class="badge-destaque">Premium 🚀</span>' : '';
 ?>
-        <article class="job-card" data-vaga-id="<?= esc($v['vaga_id_externo']) ?>">
+        <article class="job-card<?= $isPrem ? ' job-card-premium' : '' ?>" data-vaga-id="<?= esc($v['vaga_id_externo']) ?>">
           <div>
-            <h3 class="job-card-title"><a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-link"><?= esc($v['titulo']) ?></a></h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <h3 class="job-card-title"><a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-link"><?= esc($v['titulo']) ?></a></h3>
+              <?= $premiumBadge ?>
+            </div>
             <p class="job-card-company"><?= esc($v['empresa']) ?></p>
           </div>
           <div class="job-card-info">
