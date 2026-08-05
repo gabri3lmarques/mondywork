@@ -39,7 +39,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mondywork.com/vagas/</loc>
+    <loc>https://mondywork.com/blog/</loc>
     <lastmod><?= $today ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>

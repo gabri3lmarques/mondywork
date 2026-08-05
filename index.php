@@ -1,77 +1,99 @@
 <?php
-require_once __DIR__ . '/App/Autoloader.php';
 $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
 $config = require $configFile;
 
+$filterModelo = isset($_GET['modelo']) ? trim($_GET['modelo']) : '';
+
 try {
+    $pdo = new PDO(
+        "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4",
+        $config['user'],
+        $config['pass'],
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
     require_once __DIR__ . '/lib/Database.php';
-    $pdo = conectarBanco($config);
     setupSchema($pdo);
-    processarAgendamentosVagas($pdo);
 
-    $categoriaFiltro = isset($_GET['categoria']) ? trim($_GET['categoria']) : '';
-    $page = max(1, (int)($_GET['page'] ?? 1));
-    $limit = 24;
-    $offset = ($page - 1) * $limit;
-
-    $whereBlog = "status='publicado' AND lang='pt'";
-    $paramsBlog = [];
-    if ($categoriaFiltro) {
-        $whereBlog .= " AND categoria = :cat";
-        $paramsBlog[':cat'] = $categoriaFiltro;
+    $where = "WHERE v.status = 'ativa' AND v.is_nao_listada = 0 AND v.origem = 'nacional'";
+    $params = [];
+    if ($filterModelo) {
+        $where .= " AND v.modelo_trabalho = :modelo";
+        $params[':modelo'] = $filterModelo;
     }
 
-    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM blog_posts WHERE $whereBlog");
-    $totalStmt->execute($paramsBlog);
-    $total = (int)$totalStmt->fetchColumn();
-    $totalPages = max(1, (int)ceil($total / $limit));
+    $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM vagas v {$where}");
+    foreach ($params as $k => $v) $stmtCount->bindValue($k, $v, PDO::PARAM_STR);
+    $stmtCount->execute();
+    $total = (int)$stmtCount->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at, created_at FROM blog_posts WHERE $whereBlog ORDER BY published_at DESC LIMIT :lim OFFSET :off");
-    foreach ($paramsBlog as $k => $v) $stmt->bindValue($k, $v);
-    $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
-    $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+    $campos = "v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.url_vaga, v.resumo, v.is_premium, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em";
+    $stmt = $pdo->prepare("SELECT {$campos} FROM vagas v {$where} ORDER BY v.is_premium DESC, v.publicado_em DESC, v.data_coleta DESC LIMIT 20");
+
+    foreach ($params as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
     $stmt->execute();
-    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $todasCategorias = $pdo->query("SELECT DISTINCT categoria FROM blog_posts WHERE status='publicado' AND lang='pt' AND categoria IS NOT NULL AND categoria != '' ORDER BY categoria")->fetchAll(PDO::FETCH_COLUMN);
-
-    $totalVagas = (int)$pdo->query("SELECT COUNT(*) FROM vagas WHERE status='ativa' AND is_nao_listada = 0")->fetchColumn();
-    $totalArtigos = (int)$pdo->query("SELECT COUNT(*) FROM blog_posts WHERE status='publicado' AND lang='pt'")->fetchColumn();
-    $empresas = (int)$pdo->query("SELECT COUNT(DISTINCT empresa) FROM vagas WHERE status='ativa' AND is_nao_listada = 0")->fetchColumn();
+    $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($vagas as &$v) { $v['titulo'] = capitalizeTitle($v['titulo']); }
+    unset($v);
+    $hasMore = $total > 20;
 } catch (Exception $e) {
-    $posts = [];
+    $vagas = [];
     $total = 0;
-    $totalPages = 1;
-    $todasCategorias = [];
-    $totalVagas = 0;
-    $totalArtigos = 0;
-    $empresas = 0;
+    $hasMore = false;
 }
 
-function esc($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+try {
+    $stmtBlog = $pdo->prepare("SELECT slug, title, excerpt, image, categoria, author, published_at FROM blog_posts WHERE status = 'publicado' AND lang = 'pt' ORDER BY published_at DESC LIMIT 9");
+    $stmtBlog->execute();
+    $blogPosts = $stmtBlog->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $blogPosts = [];
+}
+
+function badgeClass($modelo) {
+    if (!$modelo) return '';
+    $m = mb_strtolower($modelo);
+    if ($m === 'remoto' || $m === 'remote') return 'badge badge-remote';
+    if ($m === 'híbrido' || $m === 'hibrido' || $m === 'hybrid') return 'badge badge-hybrid';
+    return 'badge badge-onsite';
+}
+
+function formatModelo($modelo) {
+    $map = ['Remote' => 'Remoto', 'Hybrid' => 'Híbrido', 'On-site' => 'Presencial'];
+    return $map[$modelo] ?? $modelo;
+}
+
+function esc($s) {
+    return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+}
+
 function excerpt($text, $max = 350) {
     if (mb_strlen($text) <= $max) return $text;
     return mb_substr($text, 0, $max) . '...';
 }
+
+function capitalizeTitle($str) {
+    return mb_convert_case($str, MB_CASE_TITLE, 'UTF-8');
+}
+
 ?><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Mondywork | Carreira em Tecnologia, Design, Marketing e mais</title>
-<meta name="description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
-<link rel="canonical" href="https://mondywork.com/">
+<title>Vagas de Tecnologia, Design e Marketing | Mondywork</title>
+<meta name="description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto. Oportunidades atualizadas diariamente em todo o Brasil.">
 <link rel="alternate" hreflang="pt-BR" href="https://mondywork.com/">
 <link rel="alternate" hreflang="en" href="https://mondywork.com/usa/">
+<link rel="canonical" href="https://mondywork.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mondywork.com/">
-<meta property="og:title" content="Mondywork | Carreira em Tecnologia, Design, Marketing e mais">
-<meta property="og:description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
+<meta property="og:title" content="Vagas de Tecnologia, Design e Marketing | Mondywork">
+<meta property="og:description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto em todo o Brasil.">
 <meta property="og:image" content="https://mondywork.com/img/og-image.jpg">
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://mondywork.com/">
-<meta property="twitter:title" content="Mondywork | Carreira em Tecnologia, Design, Marketing e mais">
-<meta property="twitter:description" content="Artigos e guias sobre carreira, entrevistas e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.">
+<meta property="twitter:title" content="Vagas de Tecnologia, Design e Marketing | Mondywork">
+<meta property="twitter:description" content="Encontre as melhores vagas de trabalho remoto e presencial nas áreas de Tecnologia, Design, Marketing e Produto em todo o Brasil.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image.jpg">
 <script type="application/ld+json">
 {
@@ -79,11 +101,11 @@ function excerpt($text, $max = 350) {
   "@type": "WebSite",
   "name": "Mondywork",
   "url": "https://mondywork.com/",
-  "description": "Conteúdo sobre carreira em tecnologia, design, marketing, comunicacao, administracao, financas, dados e produto.",
+  "description": "Portal de vagas de tecnologia, design, marketing e produto.",
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=2.2.1">
+<link rel="stylesheet" href="/css/style.css?v=2.3.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -101,13 +123,12 @@ gtag('config', 'G-RPQ9FFFNP1');
   <div class="nav-inner">
     <a class="nav-logo" href="/">Mondywork</a>
     <div class="nav-links">
-      <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
+      <a class="nav-link active nav-btn" href="/">Vagas</a>
+      <a class="nav-link" href="/blog/">Blog</a>
       <a class="nav-link" href="/sobre.php">Sobre</a>
       <a class="nav-link" href="/contato.php">Contato</a>
       <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
     </div>
-
-
     <div class="nav-icon">
       <a aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -121,11 +142,19 @@ gtag('config', 'G-RPQ9FFFNP1');
     </button>
   </div>
 </nav>
+
 <div class="mobile-menu" id="mobile-menu">
-  <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
-      <a class="nav-link" href="/sobre.php">Sobre</a>
+  <a class="nav-link active nav-btn" href="/">Vagas</a>
+  <a class="nav-link" href="/blog/">Blog</a>
+  <a class="nav-link" href="/sobre.php">Sobre</a>
   <a class="nav-link" href="/contato.php">Contato</a>
   <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
+  <a class="nav-icon-mobile" aria-label="X (Twitter)" href="https://x.com/mondywork" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+  </a>
+  <a class="nav-icon-mobile" aria-label="LinkedIn" href="https://www.linkedin.com/company/mondywork/" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+  </a>
 </div>
 
 <main class="main-content">
@@ -133,386 +162,186 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="hero-decor hero-decor-1"></div>
     <div class="hero-decor hero-decor-2"></div>
     <div class="hero-content">
-      <h1 class="hero-title">Conteúdo para sua carreira</h1>
-      <p class="hero-subtitle">Artigos, guias e dicas sobre carreira, mercado de trabalho e desenvolvimento profissional em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.</p>
+      <h1 class="hero-title">Sua próxima vaga está aqui</h1>
+      <p class="hero-subtitle">Tecnologia, Design, Marketing e Produto. Oportunidades atualizadas diariamente em todo o Brasil.</p>
+      <div class="hero-search">
+        <div class="glass-panel">
+          <div class="search-input-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search" class="search-input" placeholder="Cargo, palavra-chave ou empresa" type="text">
           </div>
-  </section>
-
-  <section class="about-section">
-    <div class="about-content">
-      <p>O <strong>Mondywork</strong> é um portal independente que ajuda profissionais de tecnologia, design, marketing e produto a construírem carreiras de sucesso. Publicamos semanalmente artigos originais sobre planejamento profissional, preparação para entrevistas, desenvolvimento de habilidades, tendências do mercado e estratégias de crescimento.</p>
-      <p>Nosso compromisso é oferecer conteúdo prático e relevante, escrito por profissionais que vivem o dia a dia do mercado. Aqui você encontra desde guias completos sobre cada área de atuação até dicas objetivas para acelerar sua trajetória profissional.</p>
-    </div>
-  </section>
-
-  <section class="section stats-section">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-number"><?= number_format($totalVagas) ?>+</span>
-        <span class="stat-label">Vagas de emprego</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-number"><?= $totalArtigos ?>+</span>
-        <span class="stat-label">Artigos publicados</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-number"><?= number_format($empresas) ?>+</span>
-        <span class="stat-label">Empresas parceiras</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-number">8</span>
-        <span class="stat-label">Guias de carreira</span>
+        </div>
+        <div id="search-loading" class="search-loading hidden">
+          <svg class="loading-icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+          <span>Buscando...</span>
+        </div>
+        <div class="search-modes">
+          <label class="search-mode-label">
+            <input type="radio" name="modo" value="titulo" checked>
+            Buscar por cargo
+          </label>
+          <label class="search-mode-label">
+            <input type="radio" name="modo" value="descricao">
+            Buscar por habilidade
+          </label>
+        </div>
+        <div class="hero-filters" id="hero-filters">
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filter-remoto"<?= $filterModelo === 'Remote' ? ' checked' : '' ?>>
+            <span>Apenas vagas remotas</span>
+          </label>
+        </div>
+        <div id="search-correction" class="search-correction hidden"></div>
+        <div id="vagas-total" class="search-info"><?= $total ?> vagas ativas</div>
       </div>
     </div>
   </section>
 
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Vagas Recentes</h2>
+    </div>
+ 
+    <div id="results-info" class="results-info"></div>
+    <div class="job-grid">
+      <div class="job-list" id="vagas-container">
+<?php foreach ($vagas as $idx => $v):
+    $isPrem = !empty($v['is_premium']);
+    $modelo = $v['modelo_trabalho'] ? formatModelo($v['modelo_trabalho']) : null;
+    $local = $v['localizacao'] ?: 'Remoto';
+    $modeloLower = $modelo ? mb_strtolower($modelo) : '';
+    $resumo = 'Vaga de ' . esc($v['titulo']) . ' na empresa ' . esc($v['empresa']) . ($modeloLower ? ', em modelo ' . $modeloLower : '') . '. Clique abaixo para ver os detalhes e se candidatar.';
+    $badge = $modelo ? '<span class="' . badgeClass($v['modelo_trabalho']) . '">' . esc($modelo) . '</span>' : '';
+    $premiumBadge = $isPrem ? '<span class="badge-destaque">Premium 🚀</span>' : '';
+?>
+        <article class="job-card<?= $isPrem ? ' job-card-premium' : '' ?>" data-vaga-id="<?= esc($v['vaga_id_externo']) ?>">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <h3 class="job-card-title"><a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-link"><?= esc($v['titulo']) ?></a></h3>
+              <?= $premiumBadge ?>
+            </div>
+            <p class="job-card-company"><?= esc($v['empresa']) ?></p>
+          </div>
+          <div class="job-card-info">
+            <?= $badge ?>
+            <span class="job-card-info-text"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg><?= esc($local) ?></span>
+<?php if ($v['publicado_em']): ?>
+            <span class="job-card-info-text job-card-date"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><?= esc($v['publicado_em']) ?></span>
+<?php endif; ?>
+          </div>
+          <p class="job-card-resumo line-clamp-2"><?= $resumo ?></p>
+          <div class="job-card-footer">
+            <a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-btn">Ver Detalhes</a>
+          </div>
+        </article>
+<?php endforeach; ?>
+      </div>
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+          </div>
+          <h3 class="sidebar-title">Receba vagas antes de todo mundo</h3>
+          <p class="sidebar-text">Cadastre seu nome e e-mail para receber as melhores oportunidades diretamente na sua caixa de entrada.</p>
+          <form class="sidebar-form" id="newsletter-form">
+            <input class="sidebar-input" placeholder="Nome" type="text">
+            <input class="sidebar-input" placeholder="E-mail" type="email">
+            <select class="sidebar-select" id="newsletter-area" required>
+              <option value="">Área de interesse</option>
+              <option value="dev">Desenvolvimento / Software</option>
+              <option value="engenharia">Engenharia</option>
+              <option value="dados">Dados / BI</option>
+              <option value="ia">IA / Machine Learning</option>
+              <option value="design">UX / UI / Product Design</option>
+              <option value="marketing">Marketing Digital / Growth</option>
+              <option value="social-media">Social Media / Conteúdo</option>
+              <option value="produto">Produto (PM/PO)</option>
+              <option value="agile">Agilidade / Scrum</option>
+              <option value="gestao">Gestão / Projetos</option>
+              <option value="vendas">Comercial / Vendas</option>
+              <option value="customer-success">Customer Success / CX</option>
+              <option value="suporte">Suporte Técnico / Help Desk</option>
+              <option value="qa">QA / Testes</option>
+              <option value="infra">Infraestrutura / Cloud / DevOps</option>
+            </select>
+            <button class="sidebar-btn" type="submit">Cadastrar Agora</button>
+          </form>
+        </div>
+        <div class="sidebar-card sidebar-ad-card sidebar-ad-card-top">
+          <h3>Publicidade</h3>
+          <script>
+            atOptions = {
+              'key' : '3ef4dcfd491e020af1f92de29081bcc7',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js"></script>
+        </div>
+        <div class="sidebar-card sidebar-ad-card sidebar-ad-card-bottom">
+          <h3>Publicidade</h3>
+            <script>
+            (function(gyz){
+            var d = document,
+                s = d.createElement('script'),
+                l = d.scripts[d.scripts.length - 1];
+            s.settings = gyz || {};
+            s.src = "\/\/fond-appointment.com\/b.X_V\/sudrGnlL0AYdWmcV\/nezma9buzZzUSlUkCPHTEcEycOCDmQcwjNkjQUetJNJzBIA4\/NODeAp2qO_Ql";
+            s.async = true;
+            s.referrerPolicy = 'no-referrer-when-downgrade';
+            l.parentNode.insertBefore(s, l);
+            })({})
+            </script>
+        </div>        
+      </aside>
+    </div>
+    <div id="loading" class="loading hidden">
+      <svg class="loading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+      <span>Carregando...</span>
+    </div>
+    <div id="sentinel" style="height:1px"></div>
+  </section>
+
+  <?php if (!empty($blogPosts)): ?>
   <section class="section">
     <div class="section-header">
       <h2 class="section-title">Artigos Recentes</h2>
     </div>
-    <p class="section-description">Confira os artigos mais recentes do nosso blog. Abordamos carreira, mercado de trabalho, entrevistas, desenvolvimento profissional e tendências em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto.</p>
-
-    <?php if (!empty($todasCategorias)): ?>
-    <div class="cat-filter">
-      <a href="/" class="<?= $categoriaFiltro ? '' : 'active' ?>">Todas</a>
-      <?php foreach ($todasCategorias as $cat): ?>
-        <a href="?categoria=<?= urlencode($cat) ?>" class="<?= $categoriaFiltro === $cat ? 'active' : '' ?>"><?= esc($cat) ?></a>
+    <p class="section-description">Confira nossos artigos sobre carreira, mercado de trabalho e desenvolvimento profissional em Tecnologia, Design, Marketing e Produto.</p>
+    <div class="blog-grid">
+      <?php foreach ($blogPosts as $p):
+        $img = $p['image'] ?: '';
+        $date = $p['published_at'] ? date('d/m/Y', strtotime($p['published_at'])) : '';
+      ?>
+      <article class="blog-card">
+        <a href="/blog/<?= esc($p['slug']) ?>" class="blog-card-link">
+          <?php if ($img): ?>
+            <div class="blog-card-image" style="background-image:url('<?= esc($img) ?>')"></div>
+          <?php else: ?>
+            <div class="blog-card-image blog-card-image--empty"><?= esc(mb_substr($p['title'], 0, 1)) ?></div>
+          <?php endif; ?>
+          <div class="blog-card-body">
+            <?php if (!empty($p['categoria'])): ?>
+              <span class="blog-card-cat"><?= esc($p['categoria']) ?></span>
+            <?php endif; ?>
+            <h3 class="blog-card-title"><?= esc($p['title']) ?></h3>
+            <p class="blog-card-excerpt"><?= esc(excerpt(strip_tags($p['excerpt'] ?: ''))) ?></p>
+            <div class="blog-card-meta">
+              <span><?= esc($p['author']) ?></span>
+              <span><?= $date ?></span>
+            </div>
+          </div>
+        </a>
+      </article>
       <?php endforeach; ?>
     </div>
-    <?php endif; ?>
-
-    <div class="blog-grid">
-      <?php if (empty($posts)): ?>
-        <p style="color:#45464d;text-align:center;padding:48px 0;grid-column:1/-1">Nenhum artigo publicado ainda. Volte em breve!</p>
-      <?php else: ?>
-        <?php foreach ($posts as $p):
-          $img = $p['image'] ?: '';
-          $date = $p['published_at'] ? date('d/m/Y', strtotime($p['published_at'])) : date('d/m/Y', strtotime($p['created_at']));
-        ?>
-        <article class="blog-card">
-          <a href="/blog/<?= esc($p['slug']) ?>" class="blog-card-link">
-            <?php if ($img): ?>
-              <div class="blog-card-image" style="background-image:url('<?= esc($img) ?>')"></div>
-            <?php else: ?>
-              <div class="blog-card-image blog-card-image--empty"><?= esc(mb_substr($p['title'], 0, 1)) ?></div>
-            <?php endif; ?>
-            <div class="blog-card-body">
-              <?php if (!empty($p['categoria'])): ?>
-                <span class="blog-card-cat"><?= esc($p['categoria']) ?></span>
-              <?php endif; ?>
-              <h3 class="blog-card-title"><?= esc($p['title']) ?></h3>
-              <p class="blog-card-excerpt"><?= esc(excerpt(strip_tags($p['excerpt'] ?: ''))) ?></p>
-              <div class="blog-card-meta">
-                <span><?= esc($p['author']) ?></span>
-                <span><?= $date ?></span>
-              </div>
-            </div>
-          </a>
-        </article>
-        <?php endforeach; ?>
-      <?php endif; ?>
-    </div>
-
-    <?php if ($totalPages > 1): ?>
-    <?php $catParam = $categoriaFiltro ? '&categoria=' . urlencode($categoriaFiltro) : ''; ?>
-    <div class="pagination">
-      <?php if ($page > 1): ?>
-        <a href="?page=<?= $page - 1 . $catParam ?>">&laquo; Anterior</a>
-      <?php endif; ?>
-      <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-        <?php if ($i === $page): ?>
-          <span class="current"><?= $i ?></span>
-        <?php else: ?>
-          <a href="?page=<?= $i . $catParam ?>"><?= $i ?></a>
-        <?php endif; ?>
-      <?php endfor; ?>
-      <?php if ($page < $totalPages): ?>
-        <a href="?page=<?= $page + 1 . $catParam ?>">Próximo &raquo;</a>
-      <?php endif; ?>
-    </div>
-    <?php endif; ?>
-  </section>
-
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Como funciona</h2>
-    </div>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-number">1</div>
-        <h3 class="step-title">Busque vagas</h3>
-        <p class="step-text">Pesquise por cargo, palavra-chave ou habilidade. Nossa busca inteligente encontra as melhores oportunidades para você em segundos, com correção ortográfica integrada.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-number">2</div>
-        <h3 class="step-title">Explore conteúdos</h3>
-        <p class="step-text">Leia artigos e guias sobre carreira, entrevistas e desenvolvimento profissional. Conteúdo original escrito por profissionais que entendem do mercado.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-number">3</div>
-        <h3 class="step-title">Candidate-se</h3>
-        <p class="step-text">Sem cadastro, sem burocracia. Clique na vaga e candidate-se diretamente no site da empresa. O Mondywork é 100% gratuito e não exige criação de conta.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-number">4</div>
-        <h3 class="step-title">Receba alertas</h3>
-        <p class="step-text">Cadastre seu e-mail na newsletter e receba as melhores oportunidades diretamente na sua caixa de entrada, filtradas pela sua área de interesse.</p>
-      </div>
+    <div style="text-align:center;margin-top:32px">
+      <a href="/blog/" class="btn-clear" style="display:inline-flex;align-items:center">Ver todos os artigos &rarr;</a>
     </div>
   </section>
-
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Guias de Carreira</h2>
-    </div>
-    <div class="guide-grid">
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-        </div>
-        <h3>Guia de Carreira em Tecnologia</h3>
-        <p>Planejamento, habilidades, entrevistas e crescimento profissional em TI, Ciência de Dados, DevOps e Produto.</p>
-        <p class="guide-card-desc">O guia mais completo para profissionais de tecnologia. Aborda desde a escolha da área de atuação (desenvolvimento, dados, infraestrutura, QA) até a preparação para entrevistas técnicas e planejamento de carreira a longo prazo. Inclui dicas de portfólio, LinkedIn e desenvolvimento de soft skills essenciais para o mercado de tecnologia.</p>
-        <a href="/guia-de-carreira.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </div>
-        <h3>Guia de Carreira em Design</h3>
-        <p>UX/UI, Design Gráfico, Design de Produto. Portfólio, ferramentas, entrevistas e crescimento na área de Design.</p>
-        <p class="guide-card-desc">Um guia completo para profissionais de design que desejam se destacar no mercado. Aborda UX/UI, Design Gráfico, Design de Produto e muito mais. Inclui dicas de construção de portfólio, ferramentas essenciais, preparação para entrevistas de design e estratégias de crescimento profissional na área criativa.</p>
-        <a href="/guia-de-carreira-design.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M12 6v12"/></svg>
-        </div>
-        <h3>Guia de Carreira em Marketing</h3>
-        <p>SEO, Mídia Paga, Growth, Marketing de Conteúdo. Certificações, ferramentas e estratégias para crescer no Marketing Digital.</p>
-        <p class="guide-card-desc">O guia definitivo para profissionais de marketing digital. Cobre desde os fundamentos de SEO e Marketing de Conteúdo até estratégias avançadas de Mídia Paga e Growth. Inclui certificações recomendadas, ferramentas indispensáveis e um plano de carreira para cada etapa da sua jornada no marketing.</p>
-        <a href="/guia-de-carreira-marketing.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-        <h3>Guia de Carreira em Finanças</h3>
-        <p>Mercado financeiro, investimentos, finanças corporativas, certificações e estratégias para crescer na área financeira.</p>
-        <p class="guide-card-desc">Aprenda tudo sobre carreira no mercado financeiro. Do currículo ideal às certificações mais valorizadas (CFA, CPA, ANCORD), passando por dicas de entrevistas em bancos e funds. Aborda finanças corporativas, investimentos, private equity e as tendências do setor financeiro no Brasil.</p>
-        <a href="/guia-de-carreira-financas.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon" style="background:linear-gradient(135deg,#e11d48,#fb7185)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <h3>Guia de Carreira em Comunicacao</h3>
-        <p>Jornalismo, RP, Comunicacao Corporativa, Marketing de Conteudo e Producao Multimidia.</p>
-        <p class="guide-card-desc">Um guia completo para profissionais de comunicacao. Aborda desde Jornalismo e Comunicacao Corporativa ate Marketing de Conteudo e Producao Multimidia. Inclui dicas de portfolio, ferramentas essenciais, preparacao para entrevistas e estrategias de crescimento na area.</p>
-        <a href="/guia-de-carreira-comunicacao.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-        <h3>Guia de Carreira em Administracao</h3>
-        <p>Gestao de Empresas, RH, Logistica, Consultoria, Gestao de Projetos e Empreendedorismo.</p>
-        <p class="guide-card-desc">Aprenda tudo sobre carreira em administracao. Do currículo ideal as certificacoes mais valorizadas (PMP, CPA, Six Sigma), passando por dicas de entrevistas em consultorias e grandes empresas. Aborda gestao de pessoas, financas, operacoes e estrategia.</p>
-        <a href="/guia-de-carreira-administracao.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-        </div>
-        <h3>Guia de Carreira em Dados</h3>
-        <p>Ciencia de Dados, Engenharia de Dados, BI, Machine Learning e IA. Da formacao ao mercado.</p>
-        <p class="guide-card-desc">O guia completo para profissionais de dados. Aborda Ciencia de Dados, Engenharia de Dados, Analise de Dados, Business Intelligence, Machine Learning e Inteligencia Artificial. Inclui roadmap de aprendizagem, ferramentas essenciais (Python, SQL, Spark), portfolios de dados, preparacao para entrevistas tecnicas e plano de carreira na area de dados.</p>
-        <a href="/guia-de-carreira-dados.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-      <div class="guide-card guide-card--primary">
-        <div class="guide-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-        <h3>Guia de Carreira em Produto</h3>
-        <p>Product Management, Product Ownership, Agile, Scrum e OKRs. Da estrategia a execucao.</p>
-        <p class="guide-card-desc">O guia essencial para profissionais de produto. Aborda Product Management, Product Ownership, metodologias Ageis (Scrum, Kanban), OKRs, descoberta de produto, priorizacao, analise de metricas e lideranca de produto. Inclui certificacoes (CSPO, PSPO), ferramentas (Jira, Notion, Amplitude) e plano de carreira de PM a CPO.</p>
-        <a href="/guia-de-carreira-produto.php" class="guide-card-link">Ler guia completo &rarr;</a>
-      </div>
-  </section>
-
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Áreas que cobrimos</h2>
-    </div>
-    <div class="areas-grid">
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#4b41e1,#7c73f0)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-        </div>
-        <h3 class="area-title">Tecnologia</h3>
-        <p class="area-text">Desenvolvimento de software, ciência de dados, inteligência artificial, infraestrutura cloud, DevOps, cibersegurança e engenharia. A área com maior demanda e salários mais competitivos do mercado.</p>
-      </div>
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </div>
-        <h3 class="area-title">Design</h3>
-        <p class="area-text">UX/UI, Product Design, Design Gráfico, Motion Design e Design Thinking. Profissionais criativos que transformam ideias em experiências digitais memoráveis e funcionais.</p>
-      </div>
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M12 6v12"/></svg>
-        </div>
-        <h3 class="area-title">Marketing</h3>
-        <p class="area-text">Marketing Digital, SEO, Mídia Paga, Growth Hacking, Marketing de Conteúdo, Social Media e Branding. Estratégias baseadas em dados para impulsionar resultados e construir marcas.</p>
-      </div>
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-        <h3 class="area-title">Produto</h3>
-        <p class="area-text">Product Management, Product Ownership, Agile, Scrum e OKRs. Profissionais que conectam estratégia de negócios com execução técnica para entregar produtos digitais de alto valor.</p>
-      </div>
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#e11d48,#fb7185)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <h3 class="area-title">Comunicacao</h3>
-        <p class="area-text">Jornalismo, Comunicacao Corporativa, Relacoes Publicas, Marketing de Conteudo, Producao Multimidia e Social Media. Profissionais que dominam a arte de contar historias e construir reputacao em um mundo multicanal.</p>
-      </div>
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-        <h3 class="area-title">Administracao</h3>
-        <p class="area-text">Gestao de Pessoas, Financas, Operacoes, Logistica, Consultoria e Gestao de Projetos. Profissionais que planejam, organizam e lideram recursos para alcancar resultados estrategicos.</p>
-      </div>
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-        <h3 class="area-title">Financas</h3>
-        <p class="area-text">Mercado Financeiro, Investimentos, Financas Corporativas, Contabilidade e Compliance. Profissionais que gerem recursos, analisam riscos e impulsionam a saude financeira das organizacoes.</p>
-      </div>
-      <div class="area-card">
-        <div class="area-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-        </div>
-        <h3 class="area-title">Dados</h3>
-        <p class="area-text">Ciencia de Dados, Engenharia de Dados, Analise de Dados, Business Intelligence, Machine Learning e IA. Profissionais que transformam dados brutos em insights estrategicos que orientam decisoes de negocios.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Quem usa recomenda</h2>
-    </div>
-    <div class="testimonial-grid">
-      <div class="testimonial-card">
-        <img src="/img/testimonials/nery.jpeg" alt="Nery Neto" class="testimonial-avatar">
-        <div class="testimonial-body">
-          <p class="testimonial-text">"Sem dúvidas é um dos melhores sites de vaga que já acessei. Não pede cadastro e ainda é 100% gratuito."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-author-row"><strong>Nery Neto</strong>
-            <a href="https://www.linkedin.com/in/nery-marques/" target="_blank" class="testimonial-linkedin" aria-label="LinkedIn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            </a></div>
-            <span class="testimonial-role">Engenheiro de Visão Computacional</span>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <img src="/img/testimonials/barbara.jpeg" alt="Barbara Abrita" class="testimonial-avatar">
-        <div class="testimonial-body">
-          <p class="testimonial-text">"Tem excelentes oportunidades nas áreas de inteligência de dados e finanças."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-author-row"><strong>Barbara Abrita</strong>
-            <a href="https://www.linkedin.com/in/b%C3%A1rbara-abrita-4672201b4/" target="_blank" class="testimonial-linkedin" aria-label="LinkedIn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            </a></div>
-            <span class="testimonial-role">Analista de Dados em Finanças</span>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <img src="/img/testimonials/gabriel.jpeg" alt="Gabriel Marques" class="testimonial-avatar">
-        <div class="testimonial-body">
-          <p class="testimonial-text">"Mondywork foi feito pensando em facilitar a vida de quem está buscando uma nova oportunidade e sua agilidade mostra isso."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-author-row"><strong>Gabriel Marques</strong>
-            <a href="https://www.linkedin.com/in/gabri3lmarques/" target="_blank" class="testimonial-linkedin" aria-label="LinkedIn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            </a></div>
-            <span class="testimonial-role">Desenvolvedor Web</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Perguntas Frequentes</h2>
-    </div>
-    <div class="faq-list">
-      <details class="faq-item">
-        <summary class="faq-question">O que é o Mondywork?</summary>
-        <div class="faq-answer">
-          <p>É um portal que conecta profissionais às melhores oportunidades de trabalho em Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados e Produto. Combinamos um blog com conteúdo original sobre carreira com uma plataforma de vagas que reúne diariamente centenas de oportunidades em todo o Brasil.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">Precisa criar conta ou cadastrar currículo?</summary>
-        <div class="faq-answer">
-          <p>Não. O Mondywork é 100% gratuito e não exige cadastro. Você pode buscar vagas, ler o blog e acessar todos os conteúdos sem criar conta alguma.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">De onde vêm as vagas?</summary>
-        <div class="faq-answer">
-          <p>Coletamos vagas de centenas de empresas através de parcerias com as principais plataformas de recrutamento do mercado (InHire, Ashby e Greenhouse). Isso nos permite oferecer uma experiência unificada de busca de emprego.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">Como as vagas são categorizadas?</summary>
-        <div class="faq-answer">
-          <p>Classificamos automaticamente as oportunidades por área de atuação (Tecnologia, Design, Marketing, Comunicacao, Administracao, Financas, Dados, Produto) para facilitar sua busca. Você também pode pesquisar por cargo, palavra-chave ou habilidade.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">Com que frequência as vagas são atualizadas?</summary>
-        <div class="faq-answer">
-          <p>Diariamente. Novas oportunidades são adicionadas todos os dias, e vagas que não estão mais disponíveis são removidas automaticamente.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">Sou empresa. Como divulgar minhas vagas?</summary>
-        <div class="faq-answer">
-          <p>Entre em contato conosco através da página de <a href="/contato.php">Contato</a>. Estamos abertos a novas parcerias para conectar talentos às melhores oportunidades.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">O conteúdo do blog é gratuito?</summary>
-        <div class="faq-answer">
-          <p>Sim! Todo o conteúdo do blog Mondywork é 100% gratuito. Acreditamos que informação de qualidade sobre carreira e mercado de trabalho deve ser acessível a todos os profissionais.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">Como recebo notificações de novas vagas?</summary>
-        <div class="faq-answer">
-          <p>Cadastre seu nome, e-mail e área de interesse no formulário de newsletter disponível na página de vagas. Passaremos a enviar as melhores oportunidades diretamente para sua caixa de entrada.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-question">Posso contribuir com o blog?</summary>
-        <div class="faq-answer">
-          <p>Sim! Aceitamos contribuições de profissionais que desejam compartilhar conhecimento sobre carreira, mercado de trabalho e desenvolvimento profissional. Entre em contato pela página de Contato para saber mais.</p>
-        </div>
-      </details>
-    </div>
-  </section>
-
+  <?php endif; ?>
 </main>
 
 <footer class="footer">
@@ -526,6 +355,8 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="footer-link" href="/guia-de-carreira-marketing.php">Guia de Marketing</a>
       <a class="footer-link" href="/guia-de-carreira-comunicacao.php">Guia de Comunicacao</a>
       <a class="footer-link" href="/guia-de-carreira-administracao.php">Guia de Administracao</a>
+      <a class="footer-link" href="/guia-de-carreira-dados.php">Guia de Dados</a>
+      <a class="footer-link" href="/guia-de-carreira-produto.php">Guia de Produto</a>
       <a class="footer-link" href="/guia-de-carreira-financas.php">Guia de Finanças</a>
       <a class="footer-link" href="/privacidade.php">Privacidade</a>
       <a class="footer-link" href="/termos-de-uso.php">Termos</a>
@@ -534,23 +365,54 @@ gtag('config', 'G-RPQ9FFFNP1');
   </div>
 </footer>
 
+<button id="back-to-top" class="back-to-top hidden" aria-label="Voltar ao topo">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal-content" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div>
+        <h2 id="modal-title" class="modal-title"></h2>
+        <p id="modal-subtitle" class="modal-subtitle"></p>
+      </div>
+      <button id="modal-close" class="modal-close" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="modal-body" class="modal-body"></div>
+    <div class="modal-footer" id="modal-footer">
+      <a id="modal-apply" href="#" target="_blank" class="modal-btn">Aplicar na Vaga</a>
+    </div>
+  </div>
+</div>
+
+<div id="cookie-banner" class="cookie-banner">
+  <p class="cookie-text">Utilizamos cookies para melhorar sua experiência e analisar o tráfego do site. Ao continuar navegando, você concorda com nossa <a href="/privacidade.php">Política de Privacidade</a>.</p>
+  <button id="cookie-accept" class="cookie-btn">Aceitar</button>
+</div>
+
+<script id="vagas-data" type="application/json"><?= json_encode([
+    'vagas' => $vagas,
+    'total' => $total,
+    'has_more' => $hasMore,
+    'query' => '',
+    'modo' => 'titulo',
+    'modelo' => $filterModelo,
+], JSON_UNESCAPED_UNICODE) ?></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  var navToggle = document.getElementById('nav-toggle');
-  var mobileMenu = document.getElementById('mobile-menu');
-  if (navToggle && mobileMenu) {
-    navToggle.addEventListener('click', function() {
-      navToggle.classList.toggle('active');
-      mobileMenu.classList.toggle('open');
-    });
-    mobileMenu.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        navToggle.classList.remove('active');
-        mobileMenu.classList.remove('open');
-      });
-    });
+  if (!localStorage.getItem('cookie_consent')) {
+    document.getElementById('cookie-banner').classList.add('visible');
   }
+  document.getElementById('cookie-accept').addEventListener('click', function() {
+    localStorage.setItem('cookie_consent', 'true');
+    document.getElementById('cookie-banner').classList.remove('visible');
+  });
 });
 </script>
+
+<script src="/js/app.js?v=2.3.0"></script>
 </body>
 </html>

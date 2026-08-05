@@ -1419,6 +1419,34 @@ input { font-family: inherit; }
   gap: 16px;
 }
 
+/* ===== CARDS DE PUBLICIDADE ===== */
+.sidebar-ad-card {
+  margin-top: 24px;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.sidebar-ad-card h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-ad-card-top {
+    position: sticky;
+    top: 104px;
+  }
+  .sidebar-ad-card-bottom {
+    position: sticky;
+    top: 487px;
+  }
+}
+
 
 
 .sidebar-icon {
@@ -1806,6 +1834,15 @@ input { font-family: inherit; }
     position: static;
     box-shadow: none;
     padding: 24px;
+  }
+  .sidebar-ad-card,
+  .sidebar-ad-card-top,
+  .sidebar-ad-card-bottom {
+    position: static;
+    top: auto;
+    width: 100%;
+    align-items: center;
+    text-align: center;
   }
   .sidebar-title {
     font-size: 20px;

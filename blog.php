@@ -3,7 +3,10 @@ $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.lo
 $config = require $configFile;
 
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
-if (!$slug) { header('Location: /'); exit; }
+if (!$slug || $slug === 'index.php') {
+    require_once __DIR__ . '/blog/index.php';
+    exit;
+}
 
 try {
     $pdo = new PDO(
@@ -22,10 +25,14 @@ try {
     $post = null;
 }
 
-function esc($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
-function tempoLeitura($texto) {
-    $palavras = str_word_count(strip_tags($texto), 0, 'àáâãéêíóôõúçÀÁÂÃÉÊÍÓÔÕÚÇ');
-    return max(1, (int)ceil($palavras / 200));
+if (!function_exists('esc')) {
+    function esc($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+}
+if (!function_exists('tempoLeitura')) {
+    function tempoLeitura($texto) {
+        $palavras = str_word_count(strip_tags($texto), 0, 'àáâãéêíóôõúçÀÁÂÃÉÊÍÓÔÕÚÇ');
+        return max(1, (int)ceil($palavras / 200));
+    }
 }
 
 $title = $post ? $post['title'] : 'Post não encontrado';
@@ -101,7 +108,7 @@ if ($post && $pdo) {
 <title>Post não encontrado | Mondywork</title>
 <meta name="robots" content="noindex">
 <?php endif; ?>
-<link rel="stylesheet" href="/css/style.css?v=1.8.0">
+<link rel="stylesheet" href="/css/style.css?v=2.3.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -126,8 +133,8 @@ gtag('config', 'G-RPQ9FFFNP1');
         <a class="nav-link" href="/usa/contact.php">Contact</a>
         <a class="nav-link" href="/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
       <?php else: ?>
-        <a class="nav-link active" href="/">Blog</a>
-        <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
+        <a class="nav-link nav-btn" href="/">Vagas</a>
+        <a class="nav-link active" href="/blog/">Blog</a>
         <a class="nav-link" href="/sobre.php">Sobre</a>
         <a class="nav-link" href="/contato.php">Contato</a>
         <a class="nav-link" href="/usa/"><svg width="18" height="12" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:4px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA & worldwide</a>
@@ -138,6 +145,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     </button>
   </div>
 </nav>
+
 <div class="mobile-menu" id="mobile-menu">
   <?php if ($post && ($post['lang'] ?? 'pt') === 'en'): ?>
     <a class="nav-link active" href="/usa/">Jobs</a>
@@ -145,8 +153,8 @@ gtag('config', 'G-RPQ9FFFNP1');
     <a class="nav-link" href="/usa/contact.php">Contact</a>
     <a class="nav-link" href="/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#009739"/><polygon points="9,2 15,6 9,10 3,6" fill="#FEDD00"/><circle cx="9" cy="6" r="2.5" fill="#002776"/></svg>Jobs in Brazil</a>
   <?php else: ?>
-    <a class="nav-link active" href="/">Blog</a>
-    <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
+    <a class="nav-link nav-btn" href="/">Vagas</a>
+    <a class="nav-link active" href="/blog/">Blog</a>
     <a class="nav-link" href="/sobre.php">Sobre</a>
     <a class="nav-link" href="/contato.php">Contato</a>
     <a class="nav-link" href="/usa/"><svg width="20" height="14" viewBox="0 0 18 12" style="vertical-align:middle;margin-right:6px"><rect width="18" height="12" rx="1.5" fill="#fff"/><rect y="0" width="18" height="1.09" fill="#b22234"/><rect y="2.18" width="18" height="1.09" fill="#b22234"/><rect y="4.36" width="18" height="1.09" fill="#b22234"/><rect y="6.55" width="18" height="1.09" fill="#b22234"/><rect y="8.73" width="18" height="1.09" fill="#b22234"/><rect y="10.91" width="18" height="1.09" fill="#b22234"/><rect width="7.2" height="6.55" fill="#3c3b6e"/></svg>Jobs in USA and worldwide</a>
@@ -158,7 +166,7 @@ gtag('config', 'G-RPQ9FFFNP1');
 
 <?php if ($post): ?>
 
-    <a href="<?= ($post['lang'] ?? 'pt') === 'en' ? '/usa/' : '/' ?>" class="job-card-btn" style="display:inline-flex;margin-bottom:24px;text-decoration:none">&larr; <?= ($post['lang'] ?? 'pt') === 'en' ? 'Back' : 'Voltar' ?></a>
+    <a href="<?= ($post['lang'] ?? 'pt') === 'en' ? '/usa/' : '/blog/' ?>" class="job-card-btn" style="display:inline-flex;margin-bottom:24px;text-decoration:none">&larr; <?= ($post['lang'] ?? 'pt') === 'en' ? 'Back' : 'Voltar' ?></a>
 
     <article class="vaga-page">
       <?php if ($image): ?>
