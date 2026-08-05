@@ -720,6 +720,13 @@ if ($isLoggedIn && $tab === 'emails' && isset($_GET['export']) && $_GET['export'
   display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;
 }
 .btn-action-copy:hover { border-color: #94a3b8; color: #0f172a; background: #f8fafc; }
+.btn-action-export {
+  font-size: 12px; font-weight: 600; padding: 7px 14px; background: #f5f3ff;
+  border: 1px solid #ddd6fe; border-radius: 0.5rem; cursor: pointer; color: #6b21a8;
+  display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;
+}
+.btn-action-export:hover { background: #ede9fe; border-color: #c4b5fd; color: #581c87; }
+.btn-action-export.copied { background: #dcfce7 !important; border-color: #86efac !important; color: #166534 !important; }
 
 .admin-pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 32px; flex-wrap: wrap; }
 .admin-pagination a, .admin-pagination span { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 14px; font-weight: 500; color: #0b1c30; background: #fff; transition: all 0.2s; text-decoration: none; }
@@ -1581,11 +1588,16 @@ try {
           </form>
           <?php if (!empty($v['vaga_id_externo'])): 
             $linkNovasPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
+            $rawExpTextNovas = !empty($v['resumo']) ? $v['resumo'] : (!empty($v['descricao']) ? $v['descricao'] : '');
+            $cleanExpTextNovas = trim(preg_replace('/\s+/', ' ', strip_tags($rawExpTextNovas)));
+            $excerpt200Novas = mb_substr($cleanExpTextNovas, 0, 200);
+            if (mb_strlen($cleanExpTextNovas) > 200) { $excerpt200Novas .= '...'; }
           ?>
             <a href="<?php echo $linkNovasPath ?>" target="_blank" class="btn-action-view">
               👁️ <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar' ?>
             </a>
             <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkNovasPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" class="btn-action-copy">📋 Copiar Link</button>
+            <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200Novas, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkNovasPath, ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
           <?php endif; ?>
           <form method="post" style="margin:0" onsubmit="return confirm('Remover esta vaga da lista de novas?')">
             <input type="hidden" name="remover_vaga_id" value="<?php echo (int)$v['id'] ?>">
@@ -1897,11 +1909,16 @@ try {
             </form>
             <?php if (!empty($v['vaga_id_externo'])): 
               $linkCatPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
+              $rawExpTextCat = !empty($v['resumo']) ? $v['resumo'] : (!empty($v['descricao']) ? $v['descricao'] : '');
+              $cleanExpTextCat = trim(preg_replace('/\s+/', ' ', strip_tags($rawExpTextCat)));
+              $excerpt200Cat = mb_substr($cleanExpTextCat, 0, 200);
+              if (mb_strlen($cleanExpTextCat) > 200) { $excerpt200Cat .= '...'; }
             ?>
               <a href="<?php echo $linkCatPath ?>" target="_blank" style="font-size:13px;font-weight:500;color:#4b41e1;padding:7px 18px;border:1px solid #4b41e1;border-radius:0.5rem;text-decoration:none;display:inline-flex;align-items:center">
                 <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar Link' ?>
               </a>
               <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkCatPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:7px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:0.5rem;cursor:pointer;color:#334155">📋 Copiar Link</button>
+              <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200Cat, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkCatPath, ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
             <?php endif; ?>
           </div>
         </div>
@@ -2178,11 +2195,16 @@ try {
           <?php endif; ?>
           <?php if (!empty($v['vaga_id_externo'])): 
             $linkListPath = ($v['origem'] === 'exterior' ? '/job/' : '/vaga/') . urlencode($v['vaga_id_externo']);
+            $rawExpTextList = !empty($v['resumo']) ? $v['resumo'] : (!empty($v['descricao']) ? $v['descricao'] : '');
+            $cleanExpTextList = trim(preg_replace('/\s+/', ' ', strip_tags($rawExpTextList)));
+            $excerpt200List = mb_substr($cleanExpTextList, 0, 200);
+            if (mb_strlen($cleanExpTextList) > 200) { $excerpt200List .= '...'; }
           ?>
             <a href="<?php echo $linkListPath ?>" target="_blank" class="btn-action-view">
               👁️ <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar' ?>
             </a>
             <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkListPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" class="btn-action-copy">📋 Copiar Link</button>
+            <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200List, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkListPath, ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
           <?php endif; ?>
         </div>
       </div>
@@ -2408,6 +2430,34 @@ try {
     document.getElementById('batch-cats').value = '';
     document.getElementById('batch-remove-cats').value = cats.join(',');
     document.getElementById('batch-form').submit();
+  };
+
+  window.exportarVaga = function(btn) {
+    var titulo = btn.getAttribute('data-titulo') || '';
+    var modelo = btn.getAttribute('data-modelo') || 'Não especificado';
+    var local = btn.getAttribute('data-local') || 'Não especificado';
+    var resumo = btn.getAttribute('data-resumo') || '';
+    var path = btn.getAttribute('data-path') || '';
+    var fullUrl = window.location.origin + path;
+
+    var text = '👔 ' + titulo + '\n' +
+               '🌐 ' + modelo + '\n' +
+               '🌎 ' + local + '\n\n' +
+               '"' + resumo + '"\n\n' +
+               'Descrição completa e form de aplicação\n' +
+               '🔗 ' + fullUrl;
+
+    navigator.clipboard.writeText(text).then(function() {
+      var originalText = btn.innerHTML;
+      btn.innerHTML = '📤 Copiado!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.innerHTML = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(function(err) {
+      alert('Erro ao copiar conteúdo da vaga: ' + err);
+    });
   };
 })();
 </script>
