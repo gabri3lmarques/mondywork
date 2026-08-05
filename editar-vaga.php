@@ -95,7 +95,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Vaga Premium - Mondy Work</title>
-    <link rel="stylesheet" href="/css/style.css?v=2.2.0">
+    <link rel="stylesheet" href="/css/style.css?v=2.3.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body style="background-color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif;">

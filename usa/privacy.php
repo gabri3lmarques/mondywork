@@ -26,7 +26,7 @@ try {
 <meta property="twitter:title" content="Privacy Policy | Mondywork">
 <meta property="twitter:description" content="Mondywork Privacy Policy. Learn how we collect, use, and protect your information.">
 <meta property="twitter:image" content="https://mondywork.com/img/og-image-usa.jpg">
-<link rel="stylesheet" href="/css/style.css?v=1.8.0">
+<link rel="stylesheet" href="/css/style.css?v=2.3.0">
 <link rel="icon" href="../img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="../img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../img/favicon/apple-touch-icon.png">
@@ -179,6 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app-exterior.js?v=2.2.0"></script>
+<script src="/js/app-exterior.js?v=2.3.0"></script>
 </body>
 </html>
