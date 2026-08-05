@@ -1597,7 +1597,7 @@ try {
               👁️ <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar' ?>
             </a>
             <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkNovasPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" class="btn-action-copy">📋 Copiar Link</button>
-            <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200Novas, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkNovasPath, ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
+            <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200Novas, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkNovasPath, ENT_QUOTES, 'UTF-8') ?>" data-origem="<?php echo htmlspecialchars($v['origem'] ?? '', ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
           <?php endif; ?>
           <form method="post" style="margin:0" onsubmit="return confirm('Remover esta vaga da lista de novas?')">
             <input type="hidden" name="remover_vaga_id" value="<?php echo (int)$v['id'] ?>">
@@ -1918,7 +1918,7 @@ try {
                 <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar Link' ?>
               </a>
               <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkCatPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" style="font-size:12px;padding:7px 12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:0.5rem;cursor:pointer;color:#334155">📋 Copiar Link</button>
-              <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200Cat, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkCatPath, ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
+              <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200Cat, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkCatPath, ENT_QUOTES, 'UTF-8') ?>" data-origem="<?php echo htmlspecialchars($v['origem'] ?? '', ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
             <?php endif; ?>
           </div>
         </div>
@@ -2204,7 +2204,7 @@ try {
               👁️ <?php echo ($v['status'] === 'ativa') ? 'Ver no site' : 'Pré-visualizar' ?>
             </a>
             <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '<?php echo $linkListPath ?>'); this.innerText='Copiado!'; setTimeout(() => this.innerText='📋 Copiar Link', 2000)" class="btn-action-copy">📋 Copiar Link</button>
-            <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200List, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkListPath, ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
+            <button type="button" class="btn-action-export" data-titulo="<?php echo htmlspecialchars($v['titulo'], ENT_QUOTES, 'UTF-8') ?>" data-modelo="<?php echo htmlspecialchars($v['modelo_trabalho'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-local="<?php echo htmlspecialchars($v['localizacao'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-resumo="<?php echo htmlspecialchars($excerpt200List, ENT_QUOTES, 'UTF-8') ?>" data-path="<?php echo htmlspecialchars($linkListPath, ENT_QUOTES, 'UTF-8') ?>" data-origem="<?php echo htmlspecialchars($v['origem'] ?? '', ENT_QUOTES, 'UTF-8') ?>" onclick="exportarVaga(this)">📤 Exportar Vaga</button>
           <?php endif; ?>
         </div>
       </div>
@@ -2438,11 +2438,14 @@ try {
     var local = btn.getAttribute('data-local') || 'Não especificado';
     var resumo = btn.getAttribute('data-resumo') || '';
     var path = btn.getAttribute('data-path') || '';
+    var origem = btn.getAttribute('data-origem') || '';
     var fullUrl = window.location.origin + path;
+
+    var localLinha = (origem === 'exterior') ? '🇺🇸 USA Only' : ('🌎 ' + local);
 
     var text = '👔 ' + titulo + '\n' +
                '🌐 ' + modelo + '\n' +
-               '🌎 ' + local + '\n\n' +
+               localLinha + '\n\n' +
                '"' + resumo + '"\n\n' +
                'Descrição completa e form de aplicação\n' +
                '🔗 ' + fullUrl;
