@@ -256,7 +256,34 @@ gtag('config', 'G-RPQ9FFFNP1');
             <button class="sidebar-btn" type="submit">Subscribe Now</button>
           </form>
         </div>
-
+        <div class="sidebar-card sidebar-ad-card sidebar-ad-card-top">
+          <h3>Publicidade</h3>
+          <script>
+            atOptions = {
+              'key' : '3ef4dcfd491e020af1f92de29081bcc7',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js"></script>
+        </div>
+        <div class="sidebar-card sidebar-ad-card sidebar-ad-card-bottom">
+          <h3>Publicidade</h3>
+            <script>
+            (function(gyz){
+            var d = document,
+                s = d.createElement('script'),
+                l = d.scripts[d.scripts.length - 1];
+            s.settings = gyz || {};
+            s.src = "\/\/fond-appointment.com\/b.X_V\/sudrGnlL0AYdWmcV\/nezma9buzZzUSlUkCPHTEcEycOCDmQcwjNkjQUetJNJzBIA4\/NODeAp2qO_Ql";
+            s.async = true;
+            s.referrerPolicy = 'no-referrer-when-downgrade';
+            l.parentNode.insertBefore(s, l);
+            })({})
+            </script>
+        </div>
       </aside>
     </div>
     <div id="loading" class="loading hidden">
