@@ -109,12 +109,20 @@ function capitalizeTitle($str) {
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-RPQ9FFFNP1"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-RPQ9FFFNP1');
+</script>
+<script>
+  // Só executa se a tela for maior que 768 pixels
+  if (window.innerWidth > 768) {
+    (function(s){
+      s.dataset.zone='11277187';
+      s.src='https://nap5k.com/tag.min.js';
+    })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+  }
 </script>
 </head>
 <body>
@@ -269,6 +277,36 @@ gtag('config', 'G-RPQ9FFFNP1');
           </form>
         </div>
 
+        <div class="sidebar-card" style="margin-top:20px;display:flex;justify-content-center">
+          <h3>Publicidade</h3>
+          <script>
+          (function(fdmh){
+          var d = document,
+              s = d.createElement('script'),
+              l = d.scripts[d.scripts.length - 1];
+          s.settings = fdmh || {};
+          s.src = "\/\/fond-appointment.com\/bqXJV.srd\/Gol_0NYwW\/cB\/geOmD9yurZSUXlckSPdTGczyPO_DcQ\/w\/NEj\/UBt_Npz\/Ii4YNkDhAW2JOaQE";
+          s.async = true;
+          s.referrerPolicy = 'no-referrer-when-downgrade';
+          l.parentNode.insertBefore(s, l);
+          })({})
+          </script>          
+        </div>
+
+        <div class="sidebar-card" style="margin-top:20px;display:flex;justify-content-center">
+          <h3>Publicidade</h3>
+          <script>
+            atOptions = {
+              'key' : '3ef4dcfd491e020af1f92de29081bcc7',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js"></script>
+
+        </div>
       </aside>
     </div>
     <div id="loading" class="loading hidden">
