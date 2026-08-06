@@ -400,5 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script src="/js/app.js?v=2.3.0"></script>
+<!-- adsterra -->
+<script src="https://pl30129256.effectivecpmnetwork.com/27/f2/2b/27f22b516c56da410f3e1460792e476c.js"></script>
 </body>
 </html>

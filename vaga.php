@@ -667,6 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </footer>
 
+<script src="https://pl30129256.effectivecpmnetwork.com/27/f2/2b/27f22b516c56da410f3e1460792e476c.js"></script>
 
 </body>
 </html>
