@@ -20,7 +20,7 @@ try {
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
-<link rel="stylesheet" href="/css/style.css?v=2.3.0">
+<link rel="stylesheet" href="/css/style.css?v=2.4.0">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://mondywork.com/usa/career-guide-administration.php">
 <meta property="og:title" content="Administration Career Guide | Mondywork">

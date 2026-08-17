@@ -113,7 +113,7 @@ function capitalizeTitle($str) {
   "inLanguage": "pt-BR"
 }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=2.3.0">
+<link rel="stylesheet" href="/css/style.css?v=2.4.0">
 <link rel="icon" href="/img/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/favicon/apple-touch-icon.png">
@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/js/app.js?v=2.3.0"></script>
+<script src="/js/app.js?v=2.4.0"></script>
 
 <!-- Modal de Autenticação (Login / Cadastro) -->
 <div class="auth-modal-overlay" id="auth-modal">
@@ -524,6 +524,6 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
-<script src="/js/auth-interactions.js"></script>
+<script src="/js/auth-interactions.js?v=2.4.0"></script>
 </body>
 </html>
