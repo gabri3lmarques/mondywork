@@ -10,3 +10,8 @@ uploads/blog/*
 scripts
 refatorar.md
 logs
+.env
+.env.deploy
+node_modules/
+deploy.config.json
+deploy.js

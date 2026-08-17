@@ -19,9 +19,9 @@ jobs:
     - name: 📂 Sincronizar via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
+        server: ftp://82.29.199.235
+        username: u894432128.mondywork.com
+        password: /wXPO3A7ch1R*M8y
         port: 21
         local-dir: ./
         server-dir: ./

@@ -232,7 +232,7 @@ try {
         }
     }
 
-    $campos = "vaga_id_externo, titulo, empresa, localizacao, modelo_trabalho, url_vaga, resumo, descricao, DATE_FORMAT(publicado_em, '%d/%m/%Y') as publicado_em, area, is_premium, status_pagamento, is_nao_listada";
+    $campos = "vagas.id, vagas.vaga_id_externo, vagas.titulo, vagas.empresa, vagas.localizacao, vagas.modelo_trabalho, vagas.url_vaga, vagas.resumo, vagas.descricao, DATE_FORMAT(vagas.publicado_em, '%d/%m/%Y') as publicado_em, vagas.area, vagas.is_premium, vagas.status_pagamento, vagas.is_nao_listada";
 
 
     // --- Vaga individual (sem cache) ---

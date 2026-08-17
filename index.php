@@ -1,4 +1,12 @@
 <?php
+require_once __DIR__ . '/App/Autoloader.php';
+
+use App\Services\AuthService;
+use App\Services\AvatarService;
+
+AuthService::startSession();
+$currentUser = AuthService::getLoggedUser();
+
 $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
 $config = require $configFile;
 
@@ -26,7 +34,7 @@ try {
     $stmtCount->execute();
     $total = (int)$stmtCount->fetchColumn();
 
-    $campos = "v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.url_vaga, v.resumo, v.is_premium, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em";
+    $campos = "v.id, v.vaga_id_externo, v.titulo, v.empresa, v.localizacao, v.modelo_trabalho, v.url_vaga, v.resumo, v.is_premium, DATE_FORMAT(v.publicado_em, '%d/%m/%Y') as publicado_em";
     $stmt = $pdo->prepare("SELECT {$campos} FROM vagas v {$where} ORDER BY v.is_premium DESC, v.publicado_em DESC, v.data_coleta DESC LIMIT 20");
 
     foreach ($params as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
@@ -137,6 +145,35 @@ gtag('config', 'G-RPQ9FFFNP1');
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
       </a>
     </div>
+    <div class="nav-auth-section">
+      <div id="nav-auth-logged-out" <?= $currentUser ? 'style="display:none;"' : '' ?>>
+        <button type="button" class="nav-auth-login-btn open-auth-modal" data-tab="login">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Entrar</span>
+        </button>
+      </div>
+      <div id="nav-user-dropdown" class="nav-user-dropdown-container" <?= !$currentUser ? 'style="display:none;"' : '' ?>>
+        <button type="button" class="nav-user-trigger" id="nav-user-trigger" aria-label="Menu do usuário">
+          <span id="nav-user-avatar-slot">
+            <?= $currentUser ? AvatarService::renderAvatar($currentUser, 30) : '' ?>
+          </span>
+          <span class="nav-user-name" id="nav-user-name">
+            <?= $currentUser ? htmlspecialchars(explode(' ', trim($currentUser['nome']))[0], ENT_QUOTES, 'UTF-8') : '' ?>
+          </span>
+          <svg class="nav-user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="nav-user-menu" id="nav-user-menu">
+          <div class="nav-user-info-card">
+            <div class="nav-user-info-name" id="nav-menu-user-name"><?= $currentUser ? htmlspecialchars($currentUser['nome'], ENT_QUOTES, 'UTF-8') : '' ?></div>
+            <div class="nav-user-info-email" id="nav-menu-user-email"><?= $currentUser ? htmlspecialchars($currentUser['email'], ENT_QUOTES, 'UTF-8') : '' ?></div>
+          </div>
+          <button type="button" class="nav-user-item logout" id="nav-user-logout">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sair da conta
+          </button>
+        </div>
+      </div>
+    </div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -232,6 +269,26 @@ gtag('config', 'G-RPQ9FFFNP1');
           <p class="job-card-resumo line-clamp-2"><?= $resumo ?></p>
           <div class="job-card-footer">
             <a href="/vaga/<?= esc($v['vaga_id_externo']) ?>" class="job-card-btn">Ver Detalhes</a>
+          </div>
+          <div class="job-card-interactions" data-vaga-id="<?= (int)$v['id'] ?>">
+            <div class="job-card-reactions">
+              <button type="button" class="card-reaction-btn" data-tipo="like" data-vaga-id="<?= (int)$v['id'] ?>" title="Gostei"><span class="card-reaction-emoji">👍</span><span class="card-reaction-count"></span></button>
+              <button type="button" class="card-reaction-btn" data-tipo="dislike" data-vaga-id="<?= (int)$v['id'] ?>" title="Não gostei"><span class="card-reaction-emoji">👎</span><span class="card-reaction-count"></span></button>
+              <button type="button" class="card-reaction-btn" data-tipo="love" data-vaga-id="<?= (int)$v['id'] ?>" title="Amei"><span class="card-reaction-emoji">❤️</span><span class="card-reaction-count"></span></button>
+              <button type="button" class="card-reaction-btn" data-tipo="angry" data-vaga-id="<?= (int)$v['id'] ?>" title="Bravo"><span class="card-reaction-emoji">😡</span><span class="card-reaction-count"></span></button>
+            </div>
+            <button type="button" class="card-comments-toggle-btn" data-vaga-id="<?= (int)$v['id'] ?>" aria-expanded="false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>Comentários</span>
+              <span class="card-comments-count-pill">0</span>
+              <svg class="card-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="job-card-comments-accordion" id="card-comments-<?= (int)$v['id'] ?>" style="display:none;" data-vaga-id="<?= (int)$v['id'] ?>">
+            <div class="card-comment-form-slot"></div>
+            <div class="card-comments-list" id="card-comments-list-<?= (int)$v['id'] ?>">
+              <div class="card-comments-empty-notice">Carregando comentários...</div>
+            </div>
           </div>
         </article>
 <?php endforeach; ?>
@@ -400,7 +457,73 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script src="/js/app.js?v=2.3.0"></script>
-<!-- adsterra -->
-<script src="https://pl30129256.effectivecpmnetwork.com/27/f2/2b/27f22b516c56da410f3e1460792e476c.js"></script>
+
+<!-- Modal de Autenticação (Login / Cadastro) -->
+<div class="auth-modal-overlay" id="auth-modal">
+  <div class="auth-modal-card">
+    <button type="button" class="auth-modal-close" id="auth-modal-close" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="auth-modal-header">
+      <h2 class="auth-modal-title">Mondywork</h2>
+      <p class="auth-modal-subtitle">Acesse sua conta para reagir e comentar nas vagas</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab-btn active" data-tab="login" id="tab-login-btn">Entrar</button>
+      <button type="button" class="auth-tab-btn" data-tab="register" id="tab-register-btn">Criar Conta</button>
+    </div>
+
+    <div id="auth-alert-box" class="auth-alert-box"></div>
+
+    <!-- Formulário de Login -->
+    <form id="auth-form-login">
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="login-email">E-mail</label>
+        <input type="email" id="login-email" class="auth-form-input" placeholder="seu.email@exemplo.com" required autocomplete="email">
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="login-senha">Senha</label>
+        <input type="password" id="login-senha" class="auth-form-input" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="auth-submit-btn">Entrar na conta</button>
+    </form>
+
+    <!-- Formulário de Cadastro -->
+    <form id="auth-form-register" style="display: none;" enctype="multipart/form-data">
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="reg-nome">Nome Completo *</label>
+        <input type="text" id="reg-nome" class="auth-form-input" placeholder="Ex: Maria Silva" required autocomplete="name">
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="reg-email">E-mail *</label>
+        <input type="email" id="reg-email" class="auth-form-input" placeholder="seu.email@exemplo.com" required autocomplete="email">
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="reg-senha">Senha * (mínimo 6 caracteres)</label>
+        <input type="password" id="reg-senha" class="auth-form-input" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+      </div>
+
+      <!-- Upload de Foto (Opcional) -->
+      <div class="auth-avatar-section">
+        <div class="auth-avatar-preview">
+          <img id="reg-avatar-img-preview" src="" alt="Preview" style="display:none;">
+          <span id="reg-avatar-text-preview" style="font-size:20px;color:#94a3b8;">📷</span>
+        </div>
+        <div class="auth-avatar-info">
+          <div class="auth-avatar-title">Foto de Perfil <span style="font-weight:400;color:#64748b;">(opcional)</span></div>
+          <div class="auth-avatar-hint">Crop quadrado e compressão automática (máx. 128KB). Sem foto, usaremos sua inicial.</div>
+          <label for="reg-avatar-input" class="auth-avatar-upload-btn">Escolher foto...</label>
+          <input type="file" id="reg-avatar-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+        </div>
+      </div>
+
+      <button type="submit" class="auth-submit-btn">Criar minha conta</button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/auth-interactions.js"></script>
 </body>
 </html>

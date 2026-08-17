@@ -113,6 +113,40 @@ function setupSchema(PDO $pdo): void
         FOREIGN KEY (vaga_id) REFERENCES vagas(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS usuarios (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(100) NOT NULL,
+        email VARCHAR(191) NOT NULL UNIQUE,
+        senha VARCHAR(255) NOT NULL,
+        foto VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS vaga_reacoes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        vaga_id INT NOT NULL,
+        usuario_id INT NOT NULL,
+        tipo VARCHAR(20) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_vaga_usuario (vaga_id, usuario_id),
+        INDEX idx_reacoes_vaga (vaga_id),
+        INDEX idx_reacoes_tipo (vaga_id, tipo),
+        FOREIGN KEY (vaga_id) REFERENCES vagas(id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS vaga_comentarios (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        vaga_id INT NOT NULL,
+        usuario_id INT NOT NULL,
+        comentario TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_comentarios_vaga (vaga_id),
+        FOREIGN KEY (vaga_id) REFERENCES vagas(id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 
     $indexExists = $pdo->query("SHOW INDEX FROM vagas WHERE Key_name = 'idx_busca'")->fetchAll();
     if (empty($indexExists)) {

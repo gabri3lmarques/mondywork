@@ -1,7 +1,11 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/App/Autoloader.php';
+
+use App\Services\AuthService;
+use App\Services\AvatarService;
+
+AuthService::startSession();
+$currentUser = AuthService::getLoggedUser();
 $isAdmin = !empty($_SESSION['admin_logged_in']);
 
 $configFile = file_exists(__DIR__ . '/config.local.php') ? __DIR__ . '/config.local.php' : __DIR__ . '/config.php';
@@ -241,8 +245,35 @@ gtag('config', 'G-RPQ9FFFNP1');
       <a class="nav-link nav-btn" href="/vagas/">Vagas</a>
       <a class="nav-link" href="/sobre.php"><?= $isExterior ? 'About' : 'Sobre' ?></a>
       <a class="nav-link" href="/contato.php"><?= $isExterior ? 'Contact' : 'Contato' ?></a>
-<?php if (!$isExterior): ?>
-<?php endif; ?>
+    </div>
+    <div class="nav-auth-section">
+      <div id="nav-auth-logged-out" <?= $currentUser ? 'style="display:none;"' : '' ?>>
+        <button type="button" class="nav-auth-login-btn open-auth-modal" data-tab="login">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span><?= $isExterior ? 'Sign In' : 'Entrar' ?></span>
+        </button>
+      </div>
+      <div id="nav-user-dropdown" class="nav-user-dropdown-container" <?= !$currentUser ? 'style="display:none;"' : '' ?>>
+        <button type="button" class="nav-user-trigger" id="nav-user-trigger" aria-label="Menu do usuário">
+          <span id="nav-user-avatar-slot">
+            <?= $currentUser ? AvatarService::renderAvatar($currentUser, 30) : '' ?>
+          </span>
+          <span class="nav-user-name" id="nav-user-name">
+            <?= $currentUser ? htmlspecialchars(explode(' ', trim($currentUser['nome']))[0], ENT_QUOTES, 'UTF-8') : '' ?>
+          </span>
+          <svg class="nav-user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="nav-user-menu" id="nav-user-menu">
+          <div class="nav-user-info-card">
+            <div class="nav-user-info-name" id="nav-menu-user-name"><?= $currentUser ? htmlspecialchars($currentUser['nome'], ENT_QUOTES, 'UTF-8') : '' ?></div>
+            <div class="nav-user-info-email" id="nav-menu-user-email"><?= $currentUser ? htmlspecialchars($currentUser['email'], ENT_QUOTES, 'UTF-8') : '' ?></div>
+          </div>
+          <button type="button" class="nav-user-item logout" id="nav-user-logout">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <?= $isExterior ? 'Sign Out' : 'Sair da conta' ?>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -257,7 +288,7 @@ gtag('config', 'G-RPQ9FFFNP1');
     <div class="job-grid">
       <div>
 
-    <article class="vaga-page">
+    <article class="vaga-page" data-vaga-id="<?= (int)$vaga['id'] ?>">
    
       <header class="vaga-page-header">
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
@@ -339,6 +370,82 @@ $score = min($score, 100);
 
       <div class="vaga-page-footer">
         <a href="<?= esc($vaga['url_vaga']) ?>" target="_blank" rel="noopener noreferrer" class="modal-btn"><?= $isExterior ? 'Apply Now' : 'Aplicar na Vaga' ?></a>
+      </div>
+
+      <!-- Bloco de Reações (Like, Dislike, Apaixonado, Bravo) -->
+      <div class="vaga-reactions-section">
+        <div class="vaga-reactions-header">
+          <div class="vaga-reactions-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            <span><?= $isExterior ? 'What did you think of this job?' : 'O que você achou desta vaga?' ?></span>
+          </div>
+          <div class="vaga-reactions-total" id="reactions-total-count"></div>
+        </div>
+        <div class="vaga-reactions-grid">
+          <button type="button" class="reaction-btn" data-tipo="like" title="<?= $isExterior ? 'Like' : 'Gostei' ?>">
+            <span class="reaction-emoji">👍</span>
+            <span><?= $isExterior ? 'Like' : 'Gostei' ?></span>
+            <span class="reaction-count"></span>
+          </button>
+          <button type="button" class="reaction-btn" data-tipo="dislike" title="<?= $isExterior ? 'Dislike' : 'Não gostei' ?>">
+            <span class="reaction-emoji">👎</span>
+            <span><?= $isExterior ? 'Dislike' : 'Não gostei' ?></span>
+            <span class="reaction-count"></span>
+          </button>
+          <button type="button" class="reaction-btn" data-tipo="love" title="<?= $isExterior ? 'Loved it' : 'Apaixonado' ?>">
+            <span class="reaction-emoji">❤️</span>
+            <span><?= $isExterior ? 'Loved it' : 'Amei' ?></span>
+            <span class="reaction-count"></span>
+          </button>
+          <button type="button" class="reaction-btn" data-tipo="angry" title="<?= $isExterior ? 'Angry' : 'Bravo' ?>">
+            <span class="reaction-emoji">😡</span>
+            <span><?= $isExterior ? 'Angry' : 'Bravo' ?></span>
+            <span class="reaction-count"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bloco de Comentários -->
+      <div class="vaga-comments-section">
+        <div class="comments-section-header">
+          <h3 class="comments-section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span><?= $isExterior ? 'Comments' : 'Comentários' ?></span>
+            <span class="comments-badge" id="comments-count-badge">0</span>
+          </h3>
+        </div>
+
+        <!-- Formulário de Comentário -->
+        <div class="comment-form-container">
+          <div id="comment-auth-banner" class="comments-auth-banner" <?= $currentUser ? 'style="display:none;"' : '' ?>>
+            <div class="comments-auth-banner-text">
+              <strong><?= $isExterior ? 'Want to leave a comment?' : 'Quer comentar sobre esta vaga?' ?></strong><br>
+              <span><?= $isExterior ? 'Sign in or create your account in seconds to join the discussion.' : 'Faça login ou crie sua conta em segundos para participar da conversa.' ?></span>
+            </div>
+            <button type="button" class="comments-auth-banner-btn open-auth-modal" data-tab="login">
+              <?= $isExterior ? 'Sign In / Register' : 'Entrar / Cadastrar' ?>
+            </button>
+          </div>
+
+          <div id="comment-form-wrapper" class="comment-form-wrapper" <?= !$currentUser ? 'style="display:none;"' : '' ?>>
+            <div id="comment-user-avatar" class="comment-avatar-slot">
+              <?= $currentUser ? AvatarService::renderAvatar($currentUser, 40) : '' ?>
+            </div>
+            <form id="vaga-comment-form" class="comment-input-box">
+              <textarea id="comment-text-input" class="comment-textarea" placeholder="<?= $isExterior ? 'Write your comment, question or feedback about this job...' : 'Escreva seu comentário, dúvida ou feedback sobre esta vaga...' ?>" required maxlength="1000"></textarea>
+              <div class="comment-form-footer">
+                <button type="submit" class="comment-submit-btn"><?= $isExterior ? 'Post Comment' : 'Publicar Comentário' ?></button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Lista de comentários -->
+        <div class="comments-list" id="vaga-comments-list">
+          <div class="comments-empty-state" id="comments-empty-msg">
+            <?= $isExterior ? 'Loading comments...' : 'Carregando comentários...' ?>
+          </div>
+        </div>
       </div>
 
 
@@ -667,7 +774,72 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </footer>
 
-<script src="https://pl30129256.effectivecpmnetwork.com/27/f2/2b/27f22b516c56da410f3e1460792e476c.js"></script>
+<!-- Modal de Autenticação (Login / Cadastro) -->
+<div class="auth-modal-overlay" id="auth-modal">
+  <div class="auth-modal-card">
+    <button type="button" class="auth-modal-close" id="auth-modal-close" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
 
+    <div class="auth-modal-header">
+      <h2 class="auth-modal-title">Mondywork</h2>
+      <p class="auth-modal-subtitle"><?= $isExterior ? 'Access your account to react and comment on jobs' : 'Acesse sua conta para reagir e comentar nas vagas' ?></p>
+    </div>
+
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab-btn active" data-tab="login" id="tab-login-btn"><?= $isExterior ? 'Sign In' : 'Entrar' ?></button>
+      <button type="button" class="auth-tab-btn" data-tab="register" id="tab-register-btn"><?= $isExterior ? 'Create Account' : 'Criar Conta' ?></button>
+    </div>
+
+    <div id="auth-alert-box" class="auth-alert-box"></div>
+
+    <!-- Formulário de Login -->
+    <form id="auth-form-login">
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="login-email">E-mail</label>
+        <input type="email" id="login-email" class="auth-form-input" placeholder="seu.email@exemplo.com" required autocomplete="email">
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="login-senha"><?= $isExterior ? 'Password' : 'Senha' ?></label>
+        <input type="password" id="login-senha" class="auth-form-input" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="auth-submit-btn"><?= $isExterior ? 'Sign In' : 'Entrar na conta' ?></button>
+    </form>
+
+    <!-- Formulário de Cadastro -->
+    <form id="auth-form-register" style="display: none;" enctype="multipart/form-data">
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="reg-nome"><?= $isExterior ? 'Full Name *' : 'Nome Completo *' ?></label>
+        <input type="text" id="reg-nome" class="auth-form-input" placeholder="<?= $isExterior ? 'e.g. John Doe' : 'Ex: Maria Silva' ?>" required autocomplete="name">
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="reg-email">E-mail *</label>
+        <input type="email" id="reg-email" class="auth-form-input" placeholder="seu.email@exemplo.com" required autocomplete="email">
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-form-label" for="reg-senha"><?= $isExterior ? 'Password * (min. 6 characters)' : 'Senha * (mínimo 6 caracteres)' ?></label>
+        <input type="password" id="reg-senha" class="auth-form-input" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+      </div>
+
+      <!-- Upload de Foto (Opcional) -->
+      <div class="auth-avatar-section">
+        <div class="auth-avatar-preview">
+          <img id="reg-avatar-img-preview" src="" alt="Preview" style="display:none;">
+          <span id="reg-avatar-text-preview" style="font-size:20px;color:#94a3b8;">📷</span>
+        </div>
+        <div class="auth-avatar-info">
+          <div class="auth-avatar-title"><?= $isExterior ? 'Profile Photo' : 'Foto de Perfil' ?> <span style="font-weight:400;color:#64748b;"><?= $isExterior ? '(optional)' : '(opcional)' ?></span></div>
+          <div class="auth-avatar-hint"><?= $isExterior ? 'Square crop & automatic compression (max. 128KB). Fallback uses name initial.' : 'Crop quadrado e compressão automática (máx. 128KB). Sem foto, usaremos sua inicial.' ?></div>
+          <label for="reg-avatar-input" class="auth-avatar-upload-btn"><?= $isExterior ? 'Choose photo...' : 'Escolher foto...' ?></label>
+          <input type="file" id="reg-avatar-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+        </div>
+      </div>
+
+      <button type="submit" class="auth-submit-btn"><?= $isExterior ? 'Create Account' : 'Criar minha conta' ?></button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/auth-interactions.js"></script>
 </body>
 </html>

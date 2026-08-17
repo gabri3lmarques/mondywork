@@ -248,9 +248,10 @@
             ? '<span class="job-card-info-text job-card-date">' + calSvg + escapeHtml(v.publicado_em) + '</span>'
             : '';
 
+        var vagaId = v.id || v.vaga_id_externo;
         card.innerHTML =
             '<div>' +
-                '<div style="display:flex; justify-between; align-items:center; gap:8px;">' +
+                '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
                     '<h3 class="job-card-title"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-link">' + escapeHtml(v.titulo) + '</a></h3>' +
                     destaqueBadge +
                 '</div>' +
@@ -262,8 +263,27 @@
                 dateHtml +
             '</div>' +
             '<p class="job-card-resumo line-clamp-2">' + escapeHtml(resumo) + '</p>' +
-            '<div class="job-card-footer"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">Ver Detalhes</a></div>';
-
+            '<div class="job-card-footer"><a href="/vaga/' + encodeURIComponent(v.vaga_id_externo) + '" class="job-card-btn">Ver Detalhes</a></div>' +
+            '<div class="job-card-interactions" data-vaga-id="' + vagaId + '">' +
+                '<div class="job-card-reactions">' +
+                    '<button type="button" class="card-reaction-btn" data-tipo="like" data-vaga-id="' + vagaId + '" title="Gostei"><span class="card-reaction-emoji">👍</span><span class="card-reaction-count"></span></button>' +
+                    '<button type="button" class="card-reaction-btn" data-tipo="dislike" data-vaga-id="' + vagaId + '" title="Não gostei"><span class="card-reaction-emoji">👎</span><span class="card-reaction-count"></span></button>' +
+                    '<button type="button" class="card-reaction-btn" data-tipo="love" data-vaga-id="' + vagaId + '" title="Amei"><span class="card-reaction-emoji">❤️</span><span class="card-reaction-count"></span></button>' +
+                    '<button type="button" class="card-reaction-btn" data-tipo="angry" data-vaga-id="' + vagaId + '" title="Bravo"><span class="card-reaction-emoji">😡</span><span class="card-reaction-count"></span></button>' +
+                '</div>' +
+                '<button type="button" class="card-comments-toggle-btn" data-vaga-id="' + vagaId + '" aria-expanded="false">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+                    '<span>Comentários</span>' +
+                    '<span class="card-comments-count-pill">0</span>' +
+                    '<svg class="card-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="job-card-comments-accordion" id="card-comments-' + vagaId + '" style="display:none;" data-vaga-id="' + vagaId + '">' +
+                '<div class="card-comment-form-slot"></div>' +
+                '<div class="card-comments-list" id="card-comments-list-' + vagaId + '">' +
+                    '<div class="card-comments-empty-notice">Carregando comentários...</div>' +
+                '</div>' +
+            '</div>';
 
         container.appendChild(card);
         cardsRendered++;
@@ -322,6 +342,7 @@
                     return;
                 }
                 json.data.forEach(function(v) { renderCard(v); });
+                if (window.MondyAuth && window.MondyAuth.refreshCards) window.MondyAuth.refreshCards();
                 hasMore = json.has_more;
 
                 if (page === 1) {
