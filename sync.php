@@ -212,10 +212,30 @@ try {
     curl_close($ch);
     echo "\n[" . date('Y-m-d H:i:s') . "] Sincronizacao finalizada.\n";
     logMsg("Sync finalizado" . $filtrosStr);
+    salvarCheckpoint($targetProvider, $targetOrigem, 1, 1, '', 'finished');
 
 } catch (Exception $e) {
     echo "\n[ERRO FATAL] " . $e->getMessage() . "\n";
     logError("Sync falhou", ['error' => $e->getMessage()]);
+}
+
+function salvarCheckpoint(string $provider, string $origem, int $lote, int $totalLotes, string $empresa = '', string $status = 'running'): void
+{
+    $cacheDir = __DIR__ . '/cache';
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0777, true);
+    }
+    $file = $cacheDir . '/sync_checkpoint.json';
+    $data = [
+        'provider'    => $provider,
+        'origem'      => $origem,
+        'lote'        => $lote,
+        'total_lotes' => $totalLotes,
+        'empresa'     => $empresa,
+        'status'      => $status,
+        'updated_at'  => date('Y-m-d H:i:s')
+    ];
+    @file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
 // ─────────────────────────────────────────────
@@ -246,6 +266,7 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
         }
 
         echo "\n--- InHire (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
+        salvarCheckpoint('inhire', $origem, $loteNum, $totalChunks, '', 'running');
         manterConexao($pdo, $dbConfig);
 
         foreach ($chunk as $slug => $nomeReal) {
@@ -439,6 +460,7 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
         }
 
         echo "\n--- Ashby (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
+        salvarCheckpoint('ashby', $origem, $loteNum, $totalChunks, '', 'running');
         manterConexao($pdo, $dbConfig);
 
         foreach ($chunk as $slug => $nomeReal) {
@@ -567,6 +589,7 @@ function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string
         }
 
         echo "\n--- Greenhouse (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
+        salvarCheckpoint('greenhouse', $origem, $loteNum, $totalChunks, '', 'running');
         manterConexao($pdo, $dbConfig);
 
         foreach ($chunk as $boardToken => $nomeReal) {
@@ -688,6 +711,7 @@ function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
         }
 
         echo "\n--- Senior (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
+        salvarCheckpoint('senior', $origem, $loteNum, $totalChunks, '', 'running');
         manterConexao($pdo, $dbConfig);
 
         foreach ($chunk as $tenant => $nomeReal) {

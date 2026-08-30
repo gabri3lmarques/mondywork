@@ -47,6 +47,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 
 $isLoggedIn = !empty($_SESSION['admin_logged_in']);
 
+// ── Interromper Sincronização Manualmente ──
+if ($isLoggedIn && isset($_GET['action']) && $_GET['action'] === 'kill_sync') {
+    header('Content-Type: application/json; charset=utf-8');
+    if (function_exists('exec')) {
+        @exec('pkill -f "sync.php"');
+    }
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+// ── Obter Último Checkpoint do Sync ──
+if ($isLoggedIn && isset($_GET['action']) && $_GET['action'] === 'get_checkpoint') {
+    header('Content-Type: application/json; charset=utf-8');
+    $file = __DIR__ . '/cache/sync_checkpoint.json';
+    if (file_exists($file)) {
+        $json = @file_get_contents($file);
+        $data = json_decode($json, true);
+        if ($data) {
+            echo json_encode(['success' => true, 'checkpoint' => $data]);
+            exit;
+        }
+    }
+    echo json_encode(['success' => true, 'checkpoint' => null]);
+    exit;
+}
+
 // ── Realtime Sync Stream Worker ──
 if ($isLoggedIn && isset($_GET['action']) && $_GET['action'] === 'stream_sync') {
     // Libera imediatamente a trava da sessão para que outras abas e páginas do site funcionem em paralelo
@@ -54,6 +80,7 @@ if ($isLoggedIn && isset($_GET['action']) && $_GET['action'] === 'stream_sync') 
 
     @set_time_limit(0);
     @ini_set('max_execution_time', '0');
+    @ignore_user_abort(false);
 
     if (function_exists('apache_setenv')) {
         @apache_setenv('no-gzip', '1');
@@ -125,9 +152,16 @@ if ($isLoggedIn && isset($_GET['action']) && $_GET['action'] === 'stream_sync') 
         stream_set_blocking($pipes[1], true);
 
         while (!feof($pipes[1])) {
+            if (connection_aborted()) {
+                proc_terminate($process, 9);
+                break;
+            }
             $line = fgets($pipes[1]);
             if ($line !== false) {
                 echo "data: " . json_encode(['text' => $line]) . "\n\n";
+                if (ob_get_level() > 0) {
+                    @ob_flush();
+                }
                 flush();
             }
         }
@@ -135,6 +169,11 @@ if ($isLoggedIn && isset($_GET['action']) && $_GET['action'] === 'stream_sync') 
         fclose($pipes[1]);
         if (isset($pipes[2]) && is_resource($pipes[2])) {
             fclose($pipes[2]);
+        }
+
+        $procStatus = proc_get_status($process);
+        if (!empty($procStatus['running'])) {
+            proc_terminate($process, 9);
         }
 
         $exitCode = proc_close($process);
@@ -2897,6 +2936,21 @@ try {
         <input type="text" id="sync-opt-empresa" class="sync-input" placeholder="Ex: cobli, contabilizei...">
       </div>
     </div>
+
+    <!-- Banner de Retomada Inteligente de Ponto de Parada -->
+    <div id="sync-resume-banner" style="display:none; background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:10px 14px; margin:0 16px 12px 16px; font-size:13px; color:#0369a1; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:16px;">🔄</span>
+        <div>
+          <strong>Último ponto de parada registrado:</strong>
+          <div id="sync-resume-desc" style="font-size:12px; color:#0284c7; margin-top:2px;">Carregando informações...</div>
+        </div>
+      </div>
+      <button type="button" id="btn-banner-resume" style="background:#0284c7; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:600; cursor:pointer; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Retomar deste Ponto
+      </button>
+    </div>
     
     <div class="sync-terminal-body" id="sync-terminal-container">
       <pre id="sync-terminal-output" class="sync-terminal-pre">Aguardando início da sincronização...
@@ -2909,9 +2963,13 @@ Configure os filtros acima se desejar (ou deixe padrão) e clique em "Iniciar Si
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           Iniciar Sincronização
         </button>
+        <button type="button" class="btn-sync-action resume" id="btn-resume-sync" style="display:none; background:#0284c7; color:#fff; border:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          <span id="btn-resume-text">Retomar Último Sync</span>
+        </button>
         <button type="button" class="btn-sync-action stop" id="btn-stop-sync" style="display:none;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
-          Interromper Conexão
+          Interromper Sincronização
         </button>
         <button type="button" class="btn-sync-action clear" id="btn-clear-sync-logs">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
@@ -2950,15 +3008,57 @@ Configure os filtros acima se desejar (ou deixe padrão) e clique em "Iniciar Si
   var optLote = document.getElementById('sync-opt-lote');
   var optEmpresa = document.getElementById('sync-opt-empresa');
 
+  var btnResume = document.getElementById('btn-resume-sync');
+  var btnBannerResume = document.getElementById('btn-banner-resume');
+  var resumeBanner = document.getElementById('sync-resume-banner');
+  var resumeDesc = document.getElementById('sync-resume-desc');
+
   var evtSource = null;
   var timerInterval = null;
   var startTime = 0;
   var isRunning = false;
+  var lastCheckpointData = null;
+
+  function checkLastCheckpoint() {
+    fetch('admin.php?action=get_checkpoint')
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!resumeBanner || !resumeDesc) return;
+        if (res.success && res.checkpoint && res.checkpoint.lote) {
+          var cp = res.checkpoint;
+          lastCheckpointData = cp;
+          var prov = (cp.provider || 'all').toUpperCase();
+          var orig = (cp.origem || 'all').toUpperCase();
+          var info = 'Fonte: ' + prov + ' (' + orig + ') — Lote ' + cp.lote + ' de ' + cp.total_lotes + ' (Registrado em ' + cp.updated_at + ')';
+          resumeDesc.textContent = info;
+          resumeBanner.style.display = 'flex';
+          if (btnResume) {
+            btnResume.style.display = 'inline-flex';
+            var btnText = document.getElementById('btn-resume-text');
+            if (btnText) btnText.textContent = 'Retomar Lote ' + cp.lote + ' (' + prov + ')';
+          }
+        } else {
+          resumeBanner.style.display = 'none';
+          if (btnResume) btnResume.style.display = 'none';
+        }
+      })
+      .catch(function() {});
+  }
+
+  function resumeFromCheckpoint() {
+    if (!lastCheckpointData) return;
+    if (optProvider) optProvider.value = lastCheckpointData.provider || 'all';
+    if (optOrigem) optOrigem.value = lastCheckpointData.origem || 'all';
+    if (optLote) optLote.value = lastCheckpointData.lote || 1;
+    if (optEmpresa) optEmpresa.value = '';
+    startSync();
+  }
 
   function openModal() {
     if (!overlay) return;
     overlay.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    checkLastCheckpoint();
   }
 
   function closeModal() {
@@ -3122,13 +3222,17 @@ Configure os filtros acima se desejar (ou deixe padrão) e clique em "Iniciar Si
   if (btnClose) btnClose.addEventListener('click', closeModal);
   if (btnDismiss) btnDismiss.addEventListener('click', closeModal);
   if (btnStart) btnStart.addEventListener('click', startSync);
+  if (btnResume) btnResume.addEventListener('click', resumeFromCheckpoint);
+  if (btnBannerResume) btnBannerResume.addEventListener('click', resumeFromCheckpoint);
   if (btnStop) btnStop.addEventListener('click', function() {
-    if (confirm('Deseja desconectar a visualização do log em tempo real?')) {
+    if (confirm('Deseja interromper imediatamente o processo de sincronização?')) {
+      fetch('admin.php?action=kill_sync').catch(function(){});
       stopListening();
       if (badge) {
         badge.className = 'sync-badge idle';
-        badge.textContent = '⚪ Desconectado';
+        badge.textContent = '⏹️ Interrompido';
       }
+      appendLog('\n[SINCRONIZAÇÃO INTERROMPIDA PELO USUÁRIO]\n');
     }
   });
   if (btnClear) btnClear.addEventListener('click', function() {
