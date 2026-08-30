@@ -316,19 +316,33 @@ gtag('config', 'G-RPQ9FFFNP1');
 
         <div class="sidebar-card sidebar-ad-card sidebar-ad-card-top">
           <h3>Advertising</h3>
-          <div style="min-height:250px;display:flex;align-items:center;justify-content:center;">
-            <iframe
-              srcdoc="&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#039;utf-8&#039;&gt;&lt;style&gt;body{margin:0;padding:0;overflow:hidden;display:flex;justify-content:center;align-items:center;background:transparent;}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;script&gt;atOptions={&#039;key&#039;:&#039;3ef4dcfd491e020af1f92de29081bcc7&#039;,&#039;format&#039;:&#039;iframe&#039;,&#039;height&#039;:250,&#039;width&#039;:300,&#039;params&#039;:{}};&lt;/script&gt;&lt;script src=&#039;https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js&#039;&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"
-              width="300"
-              height="250"
-              frameborder="0"
-              scrolling="no"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-              style="border:none;overflow:hidden;max-width:100%;display:block;margin:0 auto;"
-              title="Advertising">
-            </iframe>
-          </div>
+          <script>
+            atOptions = {
+              'key' : '3ef4dcfd491e020af1f92de29081bcc7',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/3ef4dcfd491e020af1f92de29081bcc7/invoke.js"></script>
         </div>
+
+              <!-- hilltop ads  -->
+      <div class="sidebar-card sidebar-ad-card sidebar-ad-card-bottom">
+        <script>
+        (function(njuid){
+        var d = document,
+            s = d.createElement('script'),
+            l = d.scripts[d.scripts.length - 1];
+        s.settings = njuid || {};
+        s.src = "\/\/fond-appointment.com\/bbX.VOsadhGzlK0hY\/Wpcr\/HeXmC9-ubZ\/UZlLk\/PJTPcSy\/OaD_QOwMNOjIU\/tmNKzLIR4KNJDGAL2_O\/QH";
+        s.async = true;
+        s.referrerPolicy = 'no-referrer-when-downgrade';
+        l.parentNode.insertBefore(s, l);
+        })({})
+        </script>        
+      </div>
 
       </aside>
     </div>

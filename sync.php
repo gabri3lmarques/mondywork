@@ -43,50 +43,95 @@ $ignorarSeniorExterior = $ignorar_todas;
 
 $empresasIgnorar          = require __DIR__ . '/config/empresas_ignorar.php';
 
+// ── Leitura de parâmetros via CLI / GET ──
+$options = getopt("p:l:o:e:h", [
+    "provider:",
+    "lote:",
+    "start-lote:",
+    "origem:",
+    "empresa:",
+    "help"
+]);
+
+if (isset($options['h']) || isset($options['help'])) {
+    echo "=== Worker de Sincronizacao Mondywork ===\n";
+    echo "Uso: php sync.php [opcoes]\n\n";
+    echo "Opcoes:\n";
+    echo "  -p, --provider <nome>    Filtra a fonte (all, inhire, ashby, greenhouse, senior). Padrao: all\n";
+    echo "  -o, --origem <tipo>      Filtra a origem (all, nacional, exterior). Padrao: all\n";
+    echo "  -l, --start-lote <num>   Define a partir de qual lote iniciar a execucao (ex: 18). Padrao: 1\n";
+    echo "  -e, --empresa <nome>     Filtra uma empresa especifica por nome ou slug.\n";
+    echo "  -h, --help               Exibe esta mensagem de ajuda.\n\n";
+    echo "Exemplos:\n";
+    echo "  php sync.php --start-lote=18\n";
+    echo "  php sync.php --provider=inhire --start-lote=18\n";
+    echo "  php sync.php --provider=ashby --origem=nacional\n";
+    exit(0);
+}
+
+$targetProvider = strtolower(trim((string)($options['provider'] ?? ($options['p'] ?? 'all'))));
+$targetOrigem   = strtolower(trim((string)($options['origem'] ?? ($options['o'] ?? 'all'))));
+$startLote      = max(1, (int)($options['start-lote'] ?? ($options['lote'] ?? ($options['l'] ?? 1))));
+$filterEmpresa  = trim((string)($options['empresa'] ?? ($options['e'] ?? '')));
+
 try {
     $pdo = conectarBanco($dbConfig);
     setupSchema($pdo);
 
     define('MAX_DIAS_VAGA', 45);
 
-$ch = curl_init();
+    $ch = curl_init();
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_TIMEOUT => 15,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_CONNECTTIMEOUT => 8,
     ]);
 
-    echo "[" . date('Y-m-d H:i:s') . "] Iniciando sincronizacao...\n";
-    logMsg("Sync iniciado");
+    $infoFiltros = [];
+    if ($targetProvider !== 'all') $infoFiltros[] = "Provider: " . strtoupper($targetProvider);
+    if ($targetOrigem !== 'all')   $infoFiltros[] = "Origem: " . strtoupper($targetOrigem);
+    if ($startLote > 1)            $infoFiltros[] = "Iniciar no Lote: $startLote";
+    if ($filterEmpresa !== '')     $infoFiltros[] = "Empresa: '$filterEmpresa'";
+    $filtrosStr = !empty($infoFiltros) ? ' [' . implode(' | ', $infoFiltros) . ']' : '';
 
-    // ── Orphan cleanup ──
-    $todasEmpresas = array_merge(
-        array_values($empresasInhireNacional),
-        array_values($empresasInhireExterior),
-        array_values($empresasAshbyNacional),
-        array_values($empresasAshbyExterior),
-        array_values($empresasGreenhouseNacional),
-        array_values($empresasGreenhouseExterior),
-        array_values($empresasSeniorNacional),
-        array_values($empresasSeniorExterior),
-        array_values($empresasIgnorar)
-    );
-    if (!empty($todasEmpresas)) {
-        $placeholders = implode(',', array_fill(0, count($todasEmpresas), '?'));
-        $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE empresa NOT IN ($placeholders) AND status = 'ativa' AND vaga_id_externo NOT LIKE 'manual-%' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
-        $stmt->execute($todasEmpresas);
-        $afetadas = $stmt->rowCount();
-        if ($afetadas > 0) {
-            echo "[ORFAOS] $afetadas vagas inativadas (empresa fora do escopo).\n";
+    echo "[" . date('Y-m-d H:i:s') . "] Iniciando sincronizacao{$filtrosStr}...\n";
+    logMsg("Sync iniciado" . $filtrosStr);
+
+    $isPartialRun = ($targetProvider !== 'all' || $targetOrigem !== 'all' || $startLote > 1 || $filterEmpresa !== '');
+
+    if (!$isPartialRun) {
+        // ── Orphan cleanup ──
+        $todasEmpresas = array_merge(
+            array_values($empresasInhireNacional),
+            array_values($empresasInhireExterior),
+            array_values($empresasAshbyNacional),
+            array_values($empresasAshbyExterior),
+            array_values($empresasGreenhouseNacional),
+            array_values($empresasGreenhouseExterior),
+            array_values($empresasSeniorNacional),
+            array_values($empresasSeniorExterior),
+            array_values($empresasIgnorar)
+        );
+        if (!empty($todasEmpresas)) {
+            $placeholders = implode(',', array_fill(0, count($todasEmpresas), '?'));
+            $stmt = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE empresa NOT IN ($placeholders) AND status = 'ativa' AND vaga_id_externo NOT LIKE 'manual-%' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
+            $stmt->execute($todasEmpresas);
+            $afetadas = $stmt->rowCount();
+            if ($afetadas > 0) {
+                echo "[ORFAOS] $afetadas vagas inativadas (empresa fora do escopo).\n";
+            }
         }
-    }
 
-    // ── Inativar vagas ativas com mais de MAX_DIAS_VAGA dias ──
-    $stmtOld = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE status = 'ativa' AND publicado_em IS NOT NULL AND publicado_em < DATE_SUB(NOW(), INTERVAL ? DAY) AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
-    $stmtOld->execute([MAX_DIAS_VAGA]);
-    $oldAffected = $stmtOld->rowCount();
-    if ($oldAffected > 0) {
-        echo "[ANTIGAS] $oldAffected vagas inativadas (mais de " . MAX_DIAS_VAGA . " dias).\n";
+        // ── Inativar vagas ativas com mais de MAX_DIAS_VAGA dias ──
+        $stmtOld = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE status = 'ativa' AND publicado_em IS NOT NULL AND publicado_em < DATE_SUB(NOW(), INTERVAL ? DAY) AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
+        $stmtOld->execute([MAX_DIAS_VAGA]);
+        $oldAffected = $stmtOld->rowCount();
+        if ($oldAffected > 0) {
+            echo "[ANTIGAS] $oldAffected vagas inativadas (mais de " . MAX_DIAS_VAGA . " dias).\n";
+        }
+    } else {
+        echo "[MODO PARCIAL] Limpeza global de orfaos ignorada para proteger outras fontes.\n";
     }
 
     // ── Remove empresas ignoradas ──
@@ -110,48 +155,63 @@ $ch = curl_init();
     if ($ignorarSeniorExterior)       { $empresasSeniorExterior = [];       echo "[CONFIG] Senior Exterior ignorado.\n"; }
 
     // ── InHire Nacional ──
-    if (!empty($empresasInhireNacional)) {
-        sincronizarInHire($pdo, $ch, $empresasInhireNacional, $dbConfig, 'nacional');
+    $runInhireNac = ($targetProvider === 'all' || $targetProvider === 'inhire') && ($targetOrigem === 'all' || $targetOrigem === 'nacional');
+    if ($runInhireNac && !empty($empresasInhireNacional)) {
+        sincronizarInHire($pdo, $ch, $empresasInhireNacional, $dbConfig, 'nacional', $startLote, $filterEmpresa);
+        if ($targetProvider === 'all') $startLote = 1;
     }
 
     // ── InHire Exterior ──
-    if (!empty($empresasInhireExterior)) {
-        sincronizarInHire($pdo, $ch, $empresasInhireExterior, $dbConfig, 'exterior');
+    $runInhireExt = ($targetProvider === 'all' || $targetProvider === 'inhire') && ($targetOrigem === 'all' || $targetOrigem === 'exterior');
+    if ($runInhireExt && !empty($empresasInhireExterior)) {
+        sincronizarInHire($pdo, $ch, $empresasInhireExterior, $dbConfig, 'exterior', ($targetProvider === 'inhire' && $targetOrigem === 'exterior') ? $startLote : 1, $filterEmpresa);
+        if ($targetProvider === 'all') $startLote = 1;
     }
 
     // ── Ashby Nacional ──
-    if (!empty($empresasAshbyNacional)) {
-        sincronizarAshby($pdo, $ch, $empresasAshbyNacional, $dbConfig, 'nacional');
+    $runAshbyNac = ($targetProvider === 'all' || $targetProvider === 'ashby') && ($targetOrigem === 'all' || $targetOrigem === 'nacional');
+    if ($runAshbyNac && !empty($empresasAshbyNacional)) {
+        sincronizarAshby($pdo, $ch, $empresasAshbyNacional, $dbConfig, 'nacional', ($targetProvider === 'ashby' && $targetOrigem === 'nacional') ? $startLote : 1, $filterEmpresa);
+        if ($targetProvider === 'all') $startLote = 1;
     }
 
     // ── Ashby Exterior ──
-    if (!empty($empresasAshbyExterior)) {
-        sincronizarAshby($pdo, $ch, $empresasAshbyExterior, $dbConfig, 'exterior');
+    $runAshbyExt = ($targetProvider === 'all' || $targetProvider === 'ashby') && ($targetOrigem === 'all' || $targetOrigem === 'exterior');
+    if ($runAshbyExt && !empty($empresasAshbyExterior)) {
+        sincronizarAshby($pdo, $ch, $empresasAshbyExterior, $dbConfig, 'exterior', ($targetProvider === 'ashby' && $targetOrigem === 'exterior') ? $startLote : 1, $filterEmpresa);
+        if ($targetProvider === 'all') $startLote = 1;
     }
 
     // ── Greenhouse Nacional ──
-    if (!empty($empresasGreenhouseNacional)) {
-        sincronizarGreenhouse($pdo, $ch, $empresasGreenhouseNacional, $dbConfig, 'nacional');
+    $runGreenhouseNac = ($targetProvider === 'all' || $targetProvider === 'greenhouse') && ($targetOrigem === 'all' || $targetOrigem === 'nacional');
+    if ($runGreenhouseNac && !empty($empresasGreenhouseNacional)) {
+        sincronizarGreenhouse($pdo, $ch, $empresasGreenhouseNacional, $dbConfig, 'nacional', ($targetProvider === 'greenhouse' && $targetOrigem === 'nacional') ? $startLote : 1, $filterEmpresa);
+        if ($targetProvider === 'all') $startLote = 1;
     }
 
     // ── Greenhouse Exterior ──
-    if (!empty($empresasGreenhouseExterior)) {
-        sincronizarGreenhouse($pdo, $ch, $empresasGreenhouseExterior, $dbConfig, 'exterior');
+    $runGreenhouseExt = ($targetProvider === 'all' || $targetProvider === 'greenhouse') && ($targetOrigem === 'all' || $targetOrigem === 'exterior');
+    if ($runGreenhouseExt && !empty($empresasGreenhouseExterior)) {
+        sincronizarGreenhouse($pdo, $ch, $empresasGreenhouseExterior, $dbConfig, 'exterior', ($targetProvider === 'greenhouse' && $targetOrigem === 'exterior') ? $startLote : 1, $filterEmpresa);
+        if ($targetProvider === 'all') $startLote = 1;
     }
 
     // ── Senior Nacional ──
-    if (!empty($empresasSeniorNacional)) {
-        sincronizarSenior($pdo, $ch, $empresasSeniorNacional, $dbConfig, 'nacional');
+    $runSeniorNac = ($targetProvider === 'all' || $targetProvider === 'senior') && ($targetOrigem === 'all' || $targetOrigem === 'nacional');
+    if ($runSeniorNac && !empty($empresasSeniorNacional)) {
+        sincronizarSenior($pdo, $ch, $empresasSeniorNacional, $dbConfig, 'nacional', ($targetProvider === 'senior' && $targetOrigem === 'nacional') ? $startLote : 1, $filterEmpresa);
+        if ($targetProvider === 'all') $startLote = 1;
     }
 
     // ── Senior Exterior ──
-    if (!empty($empresasSeniorExterior)) {
-        sincronizarSenior($pdo, $ch, $empresasSeniorExterior, $dbConfig, 'exterior');
+    $runSeniorExt = ($targetProvider === 'all' || $targetProvider === 'senior') && ($targetOrigem === 'all' || $targetOrigem === 'exterior');
+    if ($runSeniorExt && !empty($empresasSeniorExterior)) {
+        sincronizarSenior($pdo, $ch, $empresasSeniorExterior, $dbConfig, 'exterior', ($targetProvider === 'senior' && $targetOrigem === 'exterior') ? $startLote : 1, $filterEmpresa);
     }
 
     curl_close($ch);
     echo "\n[" . date('Y-m-d H:i:s') . "] Sincronizacao finalizada.\n";
-    logMsg("Sync finalizado");
+    logMsg("Sync finalizado" . $filtrosStr);
 
 } catch (Exception $e) {
     echo "\n[ERRO FATAL] " . $e->getMessage() . "\n";
@@ -162,14 +222,30 @@ $ch = curl_init();
 // InHire
 // ─────────────────────────────────────────────
 
-function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'nacional'): void
+function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'nacional', int $startChunk = 1, string $filterEmpresa = ''): void
 {
+    if ($filterEmpresa !== '') {
+        $empresas = array_filter($empresas, function($nome, $slug) use ($filterEmpresa) {
+            return stripos($nome, $filterEmpresa) !== false || stripos($slug, $filterEmpresa) !== false;
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
     $tamanhoLote = 2;
     $chunks = array_chunk($empresas, $tamanhoLote, true);
     $totalChunks = count($chunks);
 
+    if ($totalChunks === 0) {
+        echo "Nenhuma empresa InHire (" . strtoupper($origem) . ") encontrada com os filtros.\n";
+        return;
+    }
+
     foreach ($chunks as $chunkIndex => $chunk) {
-        echo "\n--- InHire Lote " . ($chunkIndex + 1) . " de $totalChunks ---\n";
+        $loteNum = $chunkIndex + 1;
+        if ($loteNum < $startChunk) {
+            continue;
+        }
+
+        echo "\n--- InHire (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
         manterConexao($pdo, $dbConfig);
 
         foreach ($chunk as $slug => $nomeReal) {
@@ -185,6 +261,8 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                 CURLOPT_HTTPHEADER => ["Accept: application/json", "x-tenant: $slug"],
                 CURLOPT_URL => "$urlBase?company=$slug",
                 CURLOPT_POST => false,
+                CURLOPT_TIMEOUT => 20,
+                CURLOPT_CONNECTTIMEOUT => 8,
             ]);
 
             $resLista = curl_exec($ch);
@@ -226,7 +304,11 @@ function sincronizarInHire(PDO $pdo, $ch, array $empresas, $dbConfig, string $or
                     continue;
                 }
 
-                curl_setopt($ch, CURLOPT_URL, "$urlBase/$jobId?company=$slug");
+                curl_setopt_array($ch, [
+                    CURLOPT_URL => "$urlBase/$jobId?company=$slug",
+                    CURLOPT_TIMEOUT => 20,
+                    CURLOPT_CONNECTTIMEOUT => 8,
+                ]);
                 $resDet = curl_exec($ch);
 
                 $httpCodeDet = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -295,6 +377,8 @@ function fetchAshbyGraphQL($ch, string $operationName, array $variables, string 
             'variables'     => $variables,
             'query'         => $query,
         ]),
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_CONNECTTIMEOUT => 8,
     ]);
 
     $res = curl_exec($ch);
@@ -314,8 +398,23 @@ function fetchAshbyGraphQL($ch, string $operationName, array $variables, string 
     return $decoded;
 }
 
-function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'nacional'): void
+function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'nacional', int $startChunk = 1, string $filterEmpresa = ''): void
 {
+    if ($filterEmpresa !== '') {
+        $empresas = array_filter($empresas, function($nome, $slug) use ($filterEmpresa) {
+            return stripos($nome, $filterEmpresa) !== false || stripos($slug, $filterEmpresa) !== false;
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    $tamanhoLote = 5;
+    $chunks = array_chunk($empresas, $tamanhoLote, true);
+    $totalChunks = count($chunks);
+
+    if ($totalChunks === 0) {
+        echo "Nenhuma empresa Ashby (" . strtoupper($origem) . ") encontrada com os filtros.\n";
+        return;
+    }
+
     $listQuery = '
         query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
             jobBoard: jobBoardWithTeams(organizationHostedJobsPageName: $organizationHostedJobsPageName) {
@@ -333,93 +432,109 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
         }
     ';
 
-    foreach ($empresas as $slug => $nomeReal) {
-        echo "\n[Ashby] Buscando: $nomeReal...\n";
-
-        // IDs existentes no banco para essa empresa (prefixo ashby-)
-        $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
-        $stmtCheck->execute([':empresa' => $nomeReal]);
-        $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
-
-        // Lista de vagas da API
-        $listRes = fetchAshbyGraphQL(
-            $ch,
-            'ApiJobBoardWithTeams',
-            ['organizationHostedJobsPageName' => $slug],
-            $listQuery
-        );
-
-        if (!$listRes || !isset($listRes['data']['jobBoard']['jobPostings'])) {
-            echo " - Nenhuma vaga encontrada ou empresa inexistente.\n";
+    foreach ($chunks as $chunkIndex => $chunk) {
+        $loteNum = $chunkIndex + 1;
+        if ($loteNum < $startChunk) {
             continue;
         }
 
-        $vagas = $listRes['data']['jobBoard']['jobPostings'];
+        echo "\n--- Ashby (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
+        manterConexao($pdo, $dbConfig);
 
-        // IDs da API com prefixo
-        $idsNaAPI = array_map(fn($v) => "ashby-{$v['id']}", $vagas);
+        foreach ($chunk as $slug => $nomeReal) {
+            echo "\n[Ashby] Buscando: $nomeReal...\n";
+            manterConexao($pdo, $dbConfig);
 
-        // Inativar vagas que sumiram da API
-        $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
-        if (!empty($idsParaInativar)) {
-            $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
-            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
-            $stmtInativar->execute(array_values($idsParaInativar));
-            echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
-        }
+            // IDs existentes no banco para essa empresa (prefixo ashby-)
+            $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
+            $stmtCheck->execute([':empresa' => $nomeReal]);
+            $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
 
-        foreach ($vagas as $vaga) {
-            $jobIdPrefixed = "ashby-{$vaga['id']}";
-            $titulo = $vaga['title'];
-
-            if (in_array($jobIdPrefixed, $idsNoBanco)) {
-                echo " - [MANTIDA] $titulo\n";
-                continue;
-            }
-
-            $detailRes = fetchAshbyGraphQL(
+            // Lista de vagas da API
+            $listRes = fetchAshbyGraphQL(
                 $ch,
-                'ApiJobPosting',
-                [
-                    'organizationHostedJobsPageName' => $slug,
-                    'jobPostingId'                  => $vaga['id'],
-                ],
-                $detailQuery
+                'ApiJobBoardWithTeams',
+                ['organizationHostedJobsPageName' => $slug],
+                $listQuery
             );
 
-            if (!$detailRes || !isset($detailRes['data']['jobPosting'])) {
-                echo " - [ERRO] Falha ao buscar detalhes de '$titulo'. Pulando...\n";
+            if (!$listRes || !isset($listRes['data']['jobBoard']['jobPostings'])) {
+                echo " - Nenhuma vaga encontrada ou empresa inexistente.\n";
                 continue;
             }
 
-            $detalhe = $detailRes['data']['jobPosting'];
-            $descricao = $detalhe['descriptionHtml'] ?? 'Descricao nao fornecida.';
-            $resumo = extrairResumo($descricao);
+            $vagas = $listRes['data']['jobBoard']['jobPostings'];
 
-            $publicadoEm = isset($detalhe['publishedDate'])
-                ? date('Y-m-d H:i:s', strtotime($detalhe['publishedDate']))
-                : null;
+            // IDs da API com prefixo
+            $idsNaAPI = array_map(fn($v) => "ashby-{$v['id']}", $vagas);
 
-            if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
-                echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
-                continue;
+            // Inativar vagas que sumiram da API
+            $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
+            if (!empty($idsParaInativar)) {
+                $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
+                $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
+                $stmtInativar->execute(array_values($idsParaInativar));
+                echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
             }
 
-            upsertVaga($pdo, [
-                'vaga_id_externo' => $jobIdPrefixed,
-                'titulo'          => $titulo,
-                'empresa'         => $nomeReal,
-                'localizacao'     => $vaga['locationName'] ?? null,
-                'modelo_trabalho' => $vaga['workplaceType'] ?? null,
-                'url_vaga'        => "https://jobs.ashbyhq.com/{$slug}/{$vaga['id']}",
-                'descricao'       => $descricao,
-                'resumo'          => $resumo,
-                'publicado_em'    => $publicadoEm,
-                'origem'          => $origem,
-            ]);
+            foreach ($vagas as $vaga) {
+                $jobIdPrefixed = "ashby-{$vaga['id']}";
+                $titulo = $vaga['title'];
 
-            echo " - [NOVA] $titulo\n";
-            usleep(500000);
+                if (in_array($jobIdPrefixed, $idsNoBanco)) {
+                    echo " - [MANTIDA] $titulo\n";
+                    continue;
+                }
+
+                $detailRes = fetchAshbyGraphQL(
+                    $ch,
+                    'ApiJobPosting',
+                    [
+                        'organizationHostedJobsPageName' => $slug,
+                        'jobPostingId'                  => $vaga['id'],
+                    ],
+                    $detailQuery
+                );
+
+                if (!$detailRes || !isset($detailRes['data']['jobPosting'])) {
+                    echo " - [ERRO] Falha ao buscar detalhes de '$titulo'. Pulando...\n";
+                    continue;
+                }
+
+                $detalhe = $detailRes['data']['jobPosting'];
+                $descricao = $detalhe['descriptionHtml'] ?? 'Descricao nao fornecida.';
+                $resumo = extrairResumo($descricao);
+
+                $publicadoEm = isset($detalhe['publishedDate'])
+                    ? date('Y-m-d H:i:s', strtotime($detalhe['publishedDate']))
+                    : null;
+
+                if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                    echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
+                    continue;
+                }
+
+                upsertVaga($pdo, [
+                    'vaga_id_externo' => $jobIdPrefixed,
+                    'titulo'          => $titulo,
+                    'empresa'         => $nomeReal,
+                    'localizacao'     => $vaga['locationName'] ?? null,
+                    'modelo_trabalho' => $vaga['workplaceType'] ?? null,
+                    'url_vaga'        => "https://jobs.ashbyhq.com/{$slug}/{$vaga['id']}",
+                    'descricao'       => $descricao,
+                    'resumo'          => $resumo,
+                    'publicado_em'    => $publicadoEm,
+                    'origem'          => $origem,
+                ]);
+
+                echo " - [NOVA] $titulo\n";
+                usleep(500000);
+            }
+        }
+
+        if ($chunkIndex < $totalChunks - 1) {
+            echo "\n--- Aguardando 2 segundos antes do proximo lote... ---\n";
+            sleep(2);
         }
     }
 }
@@ -428,85 +543,117 @@ function sincronizarAshby(PDO $pdo, $ch, array $empresas, $dbConfig, string $ori
 // Greenhouse (REST)
 // ─────────────────────────────────────────────
 
-function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'exterior'): void
+function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'exterior', int $startChunk = 1, string $filterEmpresa = ''): void
 {
-    foreach ($empresas as $boardToken => $nomeReal) {
-        echo "\n[Greenhouse] Buscando: $nomeReal...\n";
+    if ($filterEmpresa !== '') {
+        $empresas = array_filter($empresas, function($nome, $slug) use ($filterEmpresa) {
+            return stripos($nome, $filterEmpresa) !== false || stripos($slug, $filterEmpresa) !== false;
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    $tamanhoLote = 5;
+    $chunks = array_chunk($empresas, $tamanhoLote, true);
+    $totalChunks = count($chunks);
+
+    if ($totalChunks === 0) {
+        echo "Nenhuma empresa Greenhouse (" . strtoupper($origem) . ") encontrada com os filtros.\n";
+        return;
+    }
+
+    foreach ($chunks as $chunkIndex => $chunk) {
+        $loteNum = $chunkIndex + 1;
+        if ($loteNum < $startChunk) {
+            continue;
+        }
+
+        echo "\n--- Greenhouse (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
         manterConexao($pdo, $dbConfig);
 
-        $url = "https://boards-api.greenhouse.io/v1/boards/{$boardToken}/jobs?content=true";
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => ['Accept: application/json'],
-            CURLOPT_POST => false,
-        ]);
+        foreach ($chunk as $boardToken => $nomeReal) {
+            echo "\n[Greenhouse] Buscando: $nomeReal...\n";
+            manterConexao($pdo, $dbConfig);
 
-        $res = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        if ($httpCode !== 200) {
-            echo " - [ERRO HTTP $httpCode] Falha ao acessar vagas. Pulando...\n";
-            continue;
-        }
-
-        $dados = json_decode($res, true);
-        $vagasNaAPI = $dados['jobs'] ?? [];
-
-        $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
-        $stmtCheck->execute([':empresa' => $nomeReal]);
-        $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
-
-        $idsNaAPI = array_map(fn($v) => "greenhouse-{$v['id']}", $vagasNaAPI);
-        $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
-
-        if (!empty($idsParaInativar)) {
-            $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
-            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
-            $stmtInativar->execute(array_values($idsParaInativar));
-            echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
-        }
-
-        if (empty($vagasNaAPI)) {
-            echo " - Nenhuma vaga ativa encontrada.\n";
-            continue;
-        }
-
-        foreach ($vagasNaAPI as $vaga) {
-            $jobIdPrefixed = "greenhouse-{$vaga['id']}";
-            $titulo = $vaga['title'];
-
-            if (in_array($jobIdPrefixed, $idsNoBanco)) {
-                echo " - [MANTIDA] $titulo\n";
-                continue;
-            }
-
-            $publicadoEm = isset($vaga['first_published'])
-                ? date('Y-m-d H:i:s', strtotime($vaga['first_published']))
-                : null;
-
-            if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
-                echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
-                continue;
-            }
-
-            $descricao = html_entity_decode($vaga['content'] ?? 'Descricao nao fornecida.', ENT_QUOTES, 'UTF-8');
-            $resumo = extrairResumo($descricao);
-
-            upsertVaga($pdo, [
-                'vaga_id_externo' => $jobIdPrefixed,
-                'titulo'          => $titulo,
-                'empresa'         => $nomeReal,
-                'localizacao'     => $vaga['location']['name'] ?? null,
-                'modelo_trabalho' => null,
-                'url_vaga'        => $vaga['absolute_url'] ?? "https://job-boards.greenhouse.io/{$boardToken}/jobs/{$vaga['id']}",
-                'descricao'       => $descricao,
-                'resumo'          => $resumo,
-                'publicado_em'    => $publicadoEm,
-                'origem'          => $origem,
+            $url = "https://boards-api.greenhouse.io/v1/boards/{$boardToken}/jobs?content=true";
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_HTTPHEADER => ['Accept: application/json'],
+                CURLOPT_POST => false,
+                CURLOPT_TIMEOUT => 20,
+                CURLOPT_CONNECTTIMEOUT => 8,
             ]);
 
-            echo " - [NOVA] $titulo\n";
-            usleep(200000);
+            $res = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if ($httpCode !== 200) {
+                echo " - [ERRO HTTP $httpCode] Falha ao acessar vagas. Pulando...\n";
+                continue;
+            }
+
+            $dados = json_decode($res, true);
+            $vagasNaAPI = $dados['jobs'] ?? [];
+
+            $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
+            $stmtCheck->execute([':empresa' => $nomeReal]);
+            $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
+
+            $idsNaAPI = array_map(fn($v) => "greenhouse-{$v['id']}", $vagasNaAPI);
+            $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
+
+            if (!empty($idsParaInativar)) {
+                $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
+                $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
+                $stmtInativar->execute(array_values($idsParaInativar));
+                echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
+            }
+
+            if (empty($vagasNaAPI)) {
+                echo " - Nenhuma vaga ativa encontrada.\n";
+                continue;
+            }
+
+            foreach ($vagasNaAPI as $vaga) {
+                $jobIdPrefixed = "greenhouse-{$vaga['id']}";
+                $titulo = $vaga['title'];
+
+                if (in_array($jobIdPrefixed, $idsNoBanco)) {
+                    echo " - [MANTIDA] $titulo\n";
+                    continue;
+                }
+
+                $publicadoEm = isset($vaga['first_published'])
+                    ? date('Y-m-d H:i:s', strtotime($vaga['first_published']))
+                    : null;
+
+                if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                    echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
+                    continue;
+                }
+
+                $descricao = html_entity_decode($vaga['content'] ?? 'Descricao nao fornecida.', ENT_QUOTES, 'UTF-8');
+                $resumo = extrairResumo($descricao);
+
+                upsertVaga($pdo, [
+                    'vaga_id_externo' => $jobIdPrefixed,
+                    'titulo'          => $titulo,
+                    'empresa'         => $nomeReal,
+                    'localizacao'     => $vaga['location']['name'] ?? null,
+                    'modelo_trabalho' => null,
+                    'url_vaga'        => $vaga['absolute_url'] ?? "https://job-boards.greenhouse.io/{$boardToken}/jobs/{$vaga['id']}",
+                    'descricao'       => $descricao,
+                    'resumo'          => $resumo,
+                    'publicado_em'    => $publicadoEm,
+                    'origem'          => $origem,
+                ]);
+
+                echo " - [NOVA] $titulo\n";
+                usleep(200000);
+            }
+        }
+
+        if ($chunkIndex < $totalChunks - 1) {
+            echo "\n--- Aguardando 2 segundos antes do proximo lote... ---\n";
+            sleep(2);
         }
     }
 }
@@ -515,153 +662,187 @@ function sincronizarGreenhouse(PDO $pdo, $ch, array $empresas, $dbConfig, string
 // Senior (Portal de Talentos)
 // ─────────────────────────────────────────────
 
-function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'nacional'): void
+function sincronizarSenior(PDO $pdo, $ch, array $empresas, $dbConfig, string $origem = 'nacional', int $startChunk = 1, string $filterEmpresa = ''): void
 {
+    if ($filterEmpresa !== '') {
+        $empresas = array_filter($empresas, function($nome, $slug) use ($filterEmpresa) {
+            return stripos($nome, $filterEmpresa) !== false || stripos($slug, $filterEmpresa) !== false;
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    $tamanhoLote = 2;
+    $chunks = array_chunk($empresas, $tamanhoLote, true);
+    $totalChunks = count($chunks);
+
+    if ($totalChunks === 0) {
+        echo "Nenhuma empresa Senior (" . strtoupper($origem) . ") encontrada com os filtros.\n";
+        return;
+    }
+
     $urlApi = "https://platform.senior.com.br/t/senior.com.br/bridge/1.0/anonymous/rest/hcm/careersmanagercandidate";
 
-    foreach ($empresas as $tenant => $nomeReal) {
-        echo "\n[Senior] Buscando: $nomeReal...\n";
-        manterConexao($pdo, $dbConfig);
-
-        $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
-        $stmtCheck->execute([':empresa' => $nomeReal]);
-        $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
-
-        $page = 0;
-        $size = 50;
-        $vagasDaEmpresa = [];
-
-        do {
-            $payload = json_encode([
-                'page' => $page,
-                'size' => $size,
-                'filter' => (object)[],
-                'match' => ['localizations' => [], 'companies' => []],
-            ]);
-
-            curl_setopt_array($ch, [
-                CURLOPT_URL => "$urlApi/queries/searchVacancies",
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                ],
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $payload,
-            ]);
-
-            $res = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            if ($httpCode !== 200) {
-                echo " - [ERRO HTTP $httpCode] Falha ao buscar vagas. Pulando...\n";
-                break;
-            }
-
-            $dados = json_decode($res, true);
-            $totalPages = $dados['totalPages'] ?? 0;
-            $conteudo = $dados['contents'] ?? [];
-
-            foreach ($conteudo as $item) {
-                if (strcasecmp($item['company']['name'] ?? '', $nomeReal) === 0) {
-                    $vagasDaEmpresa[] = $item;
-                }
-            }
-
-            $page++;
-            usleep(300000);
-
-        } while ($page < $totalPages);
-
-        $idsNaAPI = [];
-        foreach ($vagasDaEmpresa as $vaga) {
-            $vagaId = 'senior-' . $vaga['vacancy']['id'];
-            $idsNaAPI[] = $vagaId;
-        }
-
-        $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
-        if (!empty($idsParaInativar)) {
-            $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
-            $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
-            $stmtInativar->execute(array_values($idsParaInativar));
-            echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
-        }
-
-        if (empty($vagasDaEmpresa)) {
-            echo " - Nenhuma vaga ativa encontrada para $nomeReal.\n";
+    foreach ($chunks as $chunkIndex => $chunk) {
+        $loteNum = $chunkIndex + 1;
+        if ($loteNum < $startChunk) {
             continue;
         }
 
-        foreach ($vagasDaEmpresa as $vaga) {
-            $vagaId = 'senior-' . $vaga['vacancy']['id'];
-            $titulo = $vaga['vacancy']['title'];
+        echo "\n--- Senior (" . strtoupper($origem) . ") Lote {$loteNum} de {$totalChunks} ---\n";
+        manterConexao($pdo, $dbConfig);
 
-            if (in_array($vagaId, $idsNoBanco)) {
-                echo " - [MANTIDA] $titulo\n";
+        foreach ($chunk as $tenant => $nomeReal) {
+            echo "\n[Senior] Buscando: $nomeReal...\n";
+            manterConexao($pdo, $dbConfig);
+
+            $stmtCheck = $pdo->prepare("SELECT vaga_id_externo FROM vagas WHERE empresa = :empresa");
+            $stmtCheck->execute([':empresa' => $nomeReal]);
+            $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
+
+            $page = 0;
+            $size = 50;
+            $vagasDaEmpresa = [];
+
+            do {
+                $payload = json_encode([
+                    'page' => $page,
+                    'size' => $size,
+                    'filter' => (object)[],
+                    'match' => ['localizations' => [], 'companies' => []],
+                ]);
+
+                curl_setopt_array($ch, [
+                    CURLOPT_URL => "$urlApi/queries/searchVacancies",
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/json',
+                        'Accept: application/json',
+                    ],
+                    CURLOPT_POST => true,
+                    CURLOPT_POSTFIELDS => $payload,
+                    CURLOPT_TIMEOUT => 20,
+                    CURLOPT_CONNECTTIMEOUT => 8,
+                ]);
+
+                $res = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                if ($httpCode !== 200) {
+                    echo " - [ERRO HTTP $httpCode] Falha ao buscar vagas. Pulando...\n";
+                    break;
+                }
+
+                $dados = json_decode($res, true);
+                $totalPages = $dados['totalPages'] ?? 0;
+                $conteudo = $dados['contents'] ?? [];
+
+                foreach ($conteudo as $item) {
+                    if (strcasecmp($item['company']['name'] ?? '', $nomeReal) === 0) {
+                        $vagasDaEmpresa[] = $item;
+                    }
+                }
+
+                $page++;
+                usleep(300000);
+
+            } while ($page < $totalPages);
+
+            $idsNaAPI = [];
+            foreach ($vagasDaEmpresa as $vaga) {
+                $vagaId = 'senior-' . $vaga['vacancy']['id'];
+                $idsNaAPI[] = $vagaId;
+            }
+
+            $idsParaInativar = array_diff($idsNoBanco, $idsNaAPI);
+            if (!empty($idsParaInativar)) {
+                $placeholders = implode(',', array_fill(0, count($idsParaInativar), '?'));
+                $stmtInativar = $pdo->prepare("UPDATE vagas SET status = 'inativa' WHERE vaga_id_externo IN ($placeholders) AND status = 'ativa' AND is_premium = 0 AND vaga_id_externo NOT LIKE 'mw_prem_%'");
+                $stmtInativar->execute(array_values($idsParaInativar));
+                echo " - " . count($idsParaInativar) . " vagas inativadas (removidas do site).\n";
+            }
+
+            if (empty($vagasDaEmpresa)) {
+                echo " - Nenhuma vaga ativa encontrada para $nomeReal.\n";
                 continue;
             }
 
-            // Buscar detalhes completos
-            $payloadDet = json_encode(['id' => $vaga['vacancy']['id']]);
-            curl_setopt_array($ch, [
-                CURLOPT_URL => "$urlApi/queries/findVacancyById",
-                CURLOPT_POSTFIELDS => $payloadDet,
-            ]);
+            foreach ($vagasDaEmpresa as $vaga) {
+                $vagaId = 'senior-' . $vaga['vacancy']['id'];
+                $titulo = $vaga['vacancy']['title'];
 
-            $resDet = curl_exec($ch);
-            $httpCodeDet = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                if (in_array($vagaId, $idsNoBanco)) {
+                    echo " - [MANTIDA] $titulo\n";
+                    continue;
+                }
 
-            $descricao = 'Descricao nao fornecida.';
-            if ($httpCodeDet === 200) {
-                $detalhe = json_decode($resDet, true);
-                $descricao = $detalhe['vacancy']['about']['description']
-                    ?? $detalhe['vacancy']['duties']['description']
-                    ?? 'Descricao nao fornecida.';
-                $descricao = html_entity_decode($descricao, ENT_QUOTES, 'UTF-8');
+                // Buscar detalhes completos
+                $payloadDet = json_encode(['id' => $vaga['vacancy']['id']]);
+                curl_setopt_array($ch, [
+                    CURLOPT_URL => "$urlApi/queries/findVacancyById",
+                    CURLOPT_POSTFIELDS => $payloadDet,
+                    CURLOPT_TIMEOUT => 20,
+                    CURLOPT_CONNECTTIMEOUT => 8,
+                ]);
+
+                $resDet = curl_exec($ch);
+                $httpCodeDet = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                $descricao = 'Descricao nao fornecida.';
+                if ($httpCodeDet === 200) {
+                    $detalhe = json_decode($resDet, true);
+                    $descricao = $detalhe['vacancy']['about']['description']
+                        ?? $detalhe['vacancy']['duties']['description']
+                        ?? 'Descricao nao fornecida.';
+                    $descricao = html_entity_decode($descricao, ENT_QUOTES, 'UTF-8');
+                }
+
+                $resumo = extrairResumo($descricao);
+                $local = $vaga['vacancy']['localization'] ?? [];
+                $localizacao = '';
+                $partes = array_filter([$local['city'] ?? '', $local['province'] ?? '', $local['country'] ?? '']);
+                if (!empty($partes)) {
+                    $localizacao = implode(', ', $partes);
+                }
+
+                $publicacao = $vaga['vacancy']['publication'] ?? [];
+                $publicadoEm = isset($publicacao['startDate'])
+                    ? date('Y-m-d H:i:s', strtotime($publicacao['startDate']))
+                    : null;
+
+                if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
+                    echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
+                    continue;
+                }
+
+                $modelos = $vaga['vacancy']['jobModel'] ?? [];
+                $modeloTrabalho = null;
+                if (!empty($modelos)) {
+                    $mapa = ['REMOTE' => 'remoto', 'HYBRID' => 'hibrido', 'IN_PERSON' => 'presencial'];
+                    $modeloTrabalho = $mapa[$modelos[0]] ?? $modelos[0];
+                }
+
+                $subdomain = !empty($vaga['company']['tenant']) ? strtolower($vaga['company']['tenant']) : strtolower($tenant);
+                $urlVaga = "https://{$subdomain}.portaldetalentos.senior.com.br/vacancy/" . $vaga['vacancy']['id'];
+
+                upsertVaga($pdo, [
+                    'vaga_id_externo' => $vagaId,
+                    'titulo'          => $titulo,
+                    'empresa'         => $nomeReal,
+                    'localizacao'     => $localizacao,
+                    'modelo_trabalho' => $modeloTrabalho,
+                    'url_vaga'        => $urlVaga,
+                    'descricao'       => $descricao,
+                    'resumo'          => $resumo,
+                    'publicado_em'    => $publicadoEm,
+                    'origem'          => $origem,
+                ]);
+
+                echo " - [NOVA] $titulo\n";
+                usleep(200000);
             }
+        }
 
-            $resumo = extrairResumo($descricao);
-            $local = $vaga['vacancy']['localization'] ?? [];
-            $localizacao = '';
-            $partes = array_filter([$local['city'] ?? '', $local['province'] ?? '', $local['country'] ?? '']);
-            if (!empty($partes)) {
-                $localizacao = implode(', ', $partes);
-            }
-
-            $publicacao = $vaga['vacancy']['publication'] ?? [];
-            $publicadoEm = isset($publicacao['startDate'])
-                ? date('Y-m-d H:i:s', strtotime($publicacao['startDate']))
-                : null;
-
-            if ($publicadoEm !== null && strtotime($publicadoEm) < strtotime('-'.MAX_DIAS_VAGA.' days')) {
-                echo " - [IGNORADA] $titulo (mais de " . MAX_DIAS_VAGA . " dias)\n";
-                continue;
-            }
-
-            $modelos = $vaga['vacancy']['jobModel'] ?? [];
-            $modeloTrabalho = null;
-            if (!empty($modelos)) {
-                $mapa = ['REMOTE' => 'remoto', 'HYBRID' => 'hibrido', 'IN_PERSON' => 'presencial'];
-                $modeloTrabalho = $mapa[$modelos[0]] ?? $modelos[0];
-            }
-
-            $subdomain = !empty($vaga['company']['tenant']) ? strtolower($vaga['company']['tenant']) : strtolower($tenant);
-            $urlVaga = "https://{$subdomain}.portaldetalentos.senior.com.br/vacancy/" . $vaga['vacancy']['id'];
-
-            upsertVaga($pdo, [
-                'vaga_id_externo' => $vagaId,
-                'titulo'          => $titulo,
-                'empresa'         => $nomeReal,
-                'localizacao'     => $localizacao,
-                'modelo_trabalho' => $modeloTrabalho,
-                'url_vaga'        => $urlVaga,
-                'descricao'       => $descricao,
-                'resumo'          => $resumo,
-                'publicado_em'    => $publicadoEm,
-                'origem'          => $origem,
-            ]);
-
-            echo " - [NOVA] $titulo\n";
-            usleep(200000);
+        if ($chunkIndex < $totalChunks - 1) {
+            echo "\n--- Aguardando 2 segundos antes do proximo lote... ---\n";
+            sleep(2);
         }
     }
 }

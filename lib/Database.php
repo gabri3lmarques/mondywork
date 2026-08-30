@@ -18,8 +18,27 @@ function conectarBanco(array $dbConfig): PDO
     return $pdo;
 }
 
-function setupSchema(PDO $pdo): void
+function setupSchema(PDO $pdo, bool $force = false): void
 {
+    static $alreadyRun = false;
+    if ($alreadyRun && !$force) {
+        return;
+    }
+    $alreadyRun = true;
+
+    // Se as tabelas principais já existem, apenas processa agendamentos e retorna instantaneamente
+    if (!$force) {
+        try {
+            $check = $pdo->query("SELECT 1 FROM vagas LIMIT 1");
+            if ($check !== false) {
+                processarAgendamentosVagas($pdo);
+                return;
+            }
+        } catch (Exception $e) {
+            // Tabela ainda não existe, prossegue com a criação do schema
+        }
+    }
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS vagas (
         id INT AUTO_INCREMENT PRIMARY KEY,
         vaga_id_externo VARCHAR(255) NOT NULL UNIQUE,

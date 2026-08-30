@@ -3,6 +3,11 @@ config.local.php
 new_template.html
 add_nova_api.txt
 config.php
+config.local.php
+config.example.php
+cache
+ads
+App/Logs
 env.txt~
 App/Certificates
 uploads/blog/*
@@ -10,6 +15,7 @@ uploads/blog/*
 scripts
 refatorar.md
 logs
+uploads
 .env
 .env.deploy
 node_modules/
